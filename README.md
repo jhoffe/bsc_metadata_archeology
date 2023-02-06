@@ -1,7 +1,9 @@
-bsc_metadata_archaelogy
+_Exploring the Extensions and Limitations of Metadata Archaeology via Probe Dynamics_
 ==============================
+ Bachelor Thesis
 
-eh
+ Created by Joachim Schrøder Andersson (s204096) and Jonas Hoffmann (s204071)
+
 
 Project Organization
 ------------
