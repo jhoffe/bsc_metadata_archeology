@@ -10,3 +10,9 @@ click
 Sphinx
 coverage
 python-dotenv>=0.5.1
+torch
+torchvision
+torchmetrics
+pytorch-lightning
+numpy
+matplotlib
