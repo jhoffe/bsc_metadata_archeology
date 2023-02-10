@@ -38,6 +38,23 @@ def main(input_filepath: str, output_filepath: str, dataset: str):
         ]
     )
 
+    imagenet_train_transform = transforms.Compose(
+        [   
+            transforms.RandomResizedCrop(224),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor()
+        ]
+    )
+    
+    imagenet_test_transform = transforms.Compose(
+        [
+            transforms.Resize(256),
+            transforms.CenterCrop(224),
+            transforms.ToTensor()
+        ]
+    )
+    
+
     Dataset = CIFAR100 if dataset == "cifar100" else CIFAR10 if dataset == "cifar10" else None
     assert Dataset is not None
 
