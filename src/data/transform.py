@@ -7,6 +7,9 @@ import torch
 from torchvision import transforms
 import os
 
+def dataset_transform(input_filepath: str, output_filepath: str, dataset: str) -> None:
+    
+
 @click.command()
 @click.argument("input_filepath", type=click.Path(exists=True))
 @click.argument("output_filepath", type=click.Path())

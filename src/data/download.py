@@ -5,18 +5,21 @@ from pathlib import Path
 from dotenv import find_dotenv, load_dotenv
 from torchvision.datasets import CIFAR10, CIFAR100
 
+def download_dataset(input_filepath: str, dataset: str) -> None:
+    Dataset = CIFAR100 if dataset == "cifar100" else CIFAR10 if dataset == "cifar10" else None
+    assert Dataset is not None
+    Dataset(input_filepath, download=True)
 
 @click.command()
 @click.argument('input_filepath', type=click.Path(exists=True))
-@click.argument('output_filepath', type=click.Path())
-def main(input_filepath, output_filepath):
+@click.argument('dataset', type=str)
+def main(input_filepath: str, dataset: str) -> None:
     """ Runs data processing scripts to turn raw data from (../raw) into
         cleaned data ready to be analyzed (saved in ../processed).
     """
     logger = logging.getLogger(__name__)
     logger.info('Downloading dataset')
-    CIFAR10(input_filepath, download=True)
-    CIFAR100(input_filepath, download=True)
+    download_dataset(input_filepath, dataset)
 
 
 if __name__ == '__main__':
