@@ -29,6 +29,13 @@ requirements: test_environment
 data: 
 	$(PYTHON_INTERPRETER) src/data/make_dataset.py data/raw data/processed
 
+## Make transforms
+transforms_cifar10:
+	$(PYTHON_INTERPRETER) src/data/transforms.py data/raw data/processed cifar10
+
+transforms_cifar100:
+	$(PYTHON_INTERPRETER) src/data/transforms.py data/raw data/processed cifar100
+
 ## Delete all compiled Python files
 clean:
 	find . -type f -name "*.py[co]" -delete
