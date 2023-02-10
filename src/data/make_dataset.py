@@ -3,20 +3,26 @@ import click
 import logging
 from pathlib import Path
 from dotenv import find_dotenv, load_dotenv
-from torchvision.datasets import CIFAR10, CIFAR100
+from src.data.download import download_dataset
+from src.data.transform import dataset_transform
 
 
 @click.command()
 @click.argument('input_filepath', type=click.Path(exists=True))
 @click.argument('output_filepath', type=click.Path())
-def main(input_filepath, output_filepath):
+@click.argument('dataset', type=str)
+def main(input_filepath: str, output_filepath: str, dataset: str) -> None:
     """ Runs data processing scripts to turn raw data from (../raw) into
         cleaned data ready to be analyzed (saved in ../processed).
     """
     logger = logging.getLogger(__name__)
-    logger.info('making final data set from raw data')
-    CIFAR10(input_filepath, download=True)
-    CIFAR100(input_filepath, download=True)
+    logger.info('Making final data set from raw data')
+
+    logger.info(f'Step 1: Downloading the {dataset} dataset')
+    download_dataset(input_filepath, dataset)
+
+    logger.info(f'Step 2: Transforming the {dataset} dataset')
+    dataset_transform(input_filepath, output_filepath, dataset)
 
 
 if __name__ == '__main__':

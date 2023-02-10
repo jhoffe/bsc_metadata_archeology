@@ -20,7 +20,6 @@ def cifar_transform(input_filepath: str, output_filepath: str, dataset: str) -> 
 
     Dataset = CIFAR100 if dataset == "cifar100" else CIFAR10 if dataset == "cifar10" else None
     assert Dataset is not None
-
     
     train_data = Dataset(
         root=input_filepath, train=True, download=False, transform=transform_train
