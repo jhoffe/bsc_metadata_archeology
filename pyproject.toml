@@ -30,6 +30,7 @@ pytorch-lightning = "^1.9.1"
 numpy = "^1.24.2"
 matplotlib = "^3.6.3"
 dtuhpc = "^2.0.0"
+tqdm = "^4.64.1"
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "^6.0.0"

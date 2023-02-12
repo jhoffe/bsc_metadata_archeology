@@ -72,6 +72,7 @@ class CIFAR10DataModule(pl.LightningDataModule):
             self.cifar10_test, batch_size=self.batch_size, num_workers=self.num_workers
         )
 
+
 class CIFAR100DataModule(pl.LightningDataModule):
     """Data module for loading the CIFAR10 dataset.
 

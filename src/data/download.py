@@ -1,30 +1,35 @@
 # -*- coding: utf-8 -*-
-import click
 import logging
 from pathlib import Path
+
+import click
 from dotenv import find_dotenv, load_dotenv
 from torchvision.datasets import CIFAR10, CIFAR100
 
+
 def download_dataset(input_filepath: str, dataset: str) -> None:
     """Downloads the dataset to the chosen filepath."""
-    Dataset = CIFAR100 if dataset == "cifar100" else CIFAR10 if dataset == "cifar10" else None
+    Dataset = (
+        CIFAR100 if dataset == "cifar100" else CIFAR10 if dataset == "cifar10" else None
+    )
     assert Dataset is not None
     Dataset(input_filepath, download=True)
 
+
 @click.command()
-@click.argument('input_filepath', type=click.Path(exists=True))
-@click.argument('dataset', type=str)
+@click.argument("input_filepath", type=click.Path(exists=True))
+@click.argument("dataset", type=str)
 def main(input_filepath: str, dataset: str) -> None:
-    """ Runs data processing scripts to turn raw data from (../raw) into
-        cleaned data ready to be analyzed (saved in ../processed).
+    """Runs data processing scripts to turn raw data from (../raw) into
+    cleaned data ready to be analyzed (saved in ../processed).
     """
     logger = logging.getLogger(__name__)
-    logger.info('Downloading dataset')
+    logger.info("Downloading dataset")
     download_dataset(input_filepath, dataset)
 
 
-if __name__ == '__main__':
-    log_fmt = '%(asctime)s - %(levelname)s - %(message)s'
+if __name__ == "__main__":
+    log_fmt = "%(asctime)s - %(levelname)s - %(message)s"
     logging.basicConfig(level=logging.INFO, format=log_fmt)
 
     # not used in this stub but often useful for finding various files

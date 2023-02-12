@@ -1,10 +1,14 @@
-# -*- coding: utf-8 -*-
 import logging
 from pathlib import Path
 
 import click
 from dotenv import find_dotenv, load_dotenv
-from torchvision.datasets import CIFAR10, CIFAR100
+
+from src.data.download import download_dataset
+
+
+def transform_dataset(input_filepath, output_filepath, param):
+    pass
 
 
 @click.command()
@@ -16,8 +20,12 @@ def main(input_filepath, output_filepath):
     """
     logger = logging.getLogger(__name__)
     logger.info("making final data set from raw data")
-    CIFAR10(input_filepath, download=True)
-    CIFAR100(input_filepath, download=True)
+    download_dataset(input_filepath, "cifar10")
+    download_dataset(input_filepath, "cifar100")
+
+    transform_dataset(input_filepath, output_filepath, "cifar10")
+    transform_dataset(input_filepath, output_filepath, "cifar100")
+    transform_dataset(input_filepath, output_filepath, "imagenet")
 
 
 if __name__ == "__main__":

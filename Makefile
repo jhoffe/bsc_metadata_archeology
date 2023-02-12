@@ -36,6 +36,9 @@ transforms_cifar10:
 transforms_cifar100:
 	$(PYTHON_INTERPRETER) src/data/transforms.py data/raw data/processed cifar100
 
+transforms_imagenet:
+	$(PYTHON_INTERPRETER) src/data/transform.py data/raw data/processed imagenet
+
 ## Delete all compiled Python files
 clean:
 	find . -type f -name "*.py[co]" -delete

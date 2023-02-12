@@ -1,22 +1,24 @@
-import click
 import logging
 from pathlib import Path
+
+import click
 from dotenv import find_dotenv, load_dotenv
-from torchvision.datasets import CIFAR10, CIFAR100
-import torch
-from torchvision import transforms
-import os
+
 from src.data.utils.cifar_transform import cifar_transform
+from src.data.utils.imagenet_transform import imagenet_transform
+
 
 def dataset_transform(input_filepath: str, output_filepath: str, dataset: str) -> None:
     if "cifar" in dataset:
         cifar_transform(input_filepath, output_filepath, dataset)
+    elif "imagenet" in dataset:
+        imagenet_transform(input_filepath, output_filepath, dataset)
+
 
 @click.command()
 @click.argument("input_filepath", type=click.Path(exists=True))
 @click.argument("output_filepath", type=click.Path())
 @click.argument("dataset", type=str)
-
 def main(input_filepath: str, output_filepath: str, dataset: str) -> None:
     """Runs data processing scripts to turn raw data from (../raw) into
     cleaned data ready to be analyzed (saved in ../processed).
@@ -27,7 +29,7 @@ def main(input_filepath: str, output_filepath: str, dataset: str) -> None:
     """
 
     logger = logging.getLogger(__name__)
-    logger.info(f"Transforming the {dataset} dataset")    
+    logger.info(f"Transforming the {dataset} dataset")
 
     dataset_transform(input_filepath, output_filepath, dataset)
 

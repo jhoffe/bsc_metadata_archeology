@@ -1,7 +1,9 @@
-from torchvision.datasets import CIFAR10, CIFAR100
+import os
+
 import torch
 from torchvision import transforms
-import os
+from torchvision.datasets import CIFAR10, CIFAR100
+
 
 def cifar_transform(input_filepath: str, output_filepath: str, dataset: str) -> None:
     transform_train = transforms.Compose(
@@ -18,9 +20,11 @@ def cifar_transform(input_filepath: str, output_filepath: str, dataset: str) -> 
         ]
     )
 
-    Dataset = CIFAR100 if dataset == "cifar100" else CIFAR10 if dataset == "cifar10" else None
+    Dataset = (
+        CIFAR100 if dataset == "cifar100" else CIFAR10 if dataset == "cifar10" else None
+    )
     assert Dataset is not None
-    
+
     train_data = Dataset(
         root=input_filepath, train=True, download=False, transform=transform_train
     )
