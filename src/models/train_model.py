@@ -43,6 +43,7 @@ def train(config):
         num_nodes=hparams["num_nodes"],
         logger=logger
     )
+    print(trainer.world_size, trainer.local_rank, trainer.global_rank, trainer.node_rank)
     trainer.fit(imagenet_module, datamodule=datamodule)
 
 
