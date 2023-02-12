@@ -5,10 +5,7 @@ import click
 from dotenv import find_dotenv, load_dotenv
 
 from src.data.download import download_dataset
-
-
-def transform_dataset(input_filepath, output_filepath, param):
-    pass
+from src.data.transform import dataset_transform
 
 
 @click.command()
@@ -20,12 +17,17 @@ def main(input_filepath, output_filepath):
     """
     logger = logging.getLogger(__name__)
     logger.info("making final data set from raw data")
+
+    logger.info("Downloading the CIFAR10 and CIFAR100 datasets")
     download_dataset(input_filepath, "cifar10")
     download_dataset(input_filepath, "cifar100")
 
-    transform_dataset(input_filepath, output_filepath, "cifar10")
-    transform_dataset(input_filepath, output_filepath, "cifar100")
-    transform_dataset(input_filepath, output_filepath, "imagenet")
+    logger.info("Transforming the CIFAR10 dataset")
+    dataset_transform(input_filepath, output_filepath, "cifar10")
+    logger.info("Transforming the CIFAR100 dataset")
+    dataset_transform(input_filepath, output_filepath, "cifar100")
+    logger.info("Transforming the ImageNet dataset")
+    dataset_transform(input_filepath, output_filepath, "imagenet")
 
 
 if __name__ == "__main__":

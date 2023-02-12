@@ -1,4 +1,5 @@
 import os
+from os import path
 
 import torch
 from torchvision import transforms
@@ -20,16 +21,22 @@ def cifar_transform(input_filepath: str, output_filepath: str, dataset: str) -> 
         ]
     )
 
-    Dataset = (
+    data = (
         CIFAR100 if dataset == "cifar100" else CIFAR10 if dataset == "cifar10" else None
     )
-    assert Dataset is not None
+    assert data is not None
 
-    train_data = Dataset(
-        root=input_filepath, train=True, download=False, transform=transform_train
+    train_data = data(
+        root=path.join(input_filepath, dataset),
+        train=True,
+        download=False,
+        transform=transform_train,
     )
-    test_data = Dataset(
-        root=input_filepath, train=False, download=False, transform=transform_test
+    test_data = data(
+        root=path.join(input_filepath, dataset),
+        train=False,
+        download=False,
+        transform=transform_test,
     )
 
     output_dir = os.path.join(output_filepath, dataset)
