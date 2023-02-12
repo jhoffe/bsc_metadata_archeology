@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
 import logging
+from os import makedirs, path
 from pathlib import Path
 
 import click
@@ -9,11 +9,12 @@ from torchvision.datasets import CIFAR10, CIFAR100
 
 def download_dataset(input_filepath: str, dataset: str) -> None:
     """Downloads the dataset to the chosen filepath."""
-    Dataset = (
+    data = (
         CIFAR100 if dataset == "cifar100" else CIFAR10 if dataset == "cifar10" else None
     )
-    assert Dataset is not None
-    Dataset(input_filepath, download=True)
+    assert data is not None
+    makedirs(path.join(input_filepath, dataset), exist_ok=True)
+    data(path.join(input_filepath, dataset), download=True)
 
 
 @click.command()

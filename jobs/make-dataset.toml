@@ -1,0 +1,13 @@
+queue = "hpc"
+name = "make_dataset"
+walltime = { hours = 12, minutes = 0 }
+single_host = true
+cpu = 16
+memory = 2
+standard_output = "logs/init_dataset.out"
+error_output = "logs/init_dataset.err"
+
+commands = [
+    "source venv/bin/activate",
+    "make data"
+]
