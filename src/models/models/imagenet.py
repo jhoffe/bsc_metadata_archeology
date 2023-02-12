@@ -1,8 +1,9 @@
-import torch
-from torchvision.models.resnet import resnet50
-from torch.nn import Module, functional as F
-from torch.optim import SGD
 import pytorch_lightning as pl
+import torch
+from torch.nn import Module
+from torch.nn import functional as F
+from torch.optim import SGD
+from torchvision.models.resnet import resnet50
 
 imagenet_model: Module = resnet50(weights=None)
 
