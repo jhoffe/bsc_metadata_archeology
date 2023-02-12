@@ -1,0 +1,12 @@
+[ssh]
+user = "<username>"
+host = "login.hpc.dtu.dk"
+default_cwd = "<cwd>"
+
+[github]
+access_token = "<access token>"
+
+[project]
+name = "bsc"
+path = "<project_path>"
+default_deploy_branch = "master"
