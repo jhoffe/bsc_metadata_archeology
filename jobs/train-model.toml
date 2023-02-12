@@ -12,5 +12,5 @@ commands = [
     "source venv/bin/activate",
     "module load python3/3.10.7",
     "module load cuda/11.7",
-    "jsrun python src/models/train_model.py"
+    "gpython src/models/train_model.py"
 ]
