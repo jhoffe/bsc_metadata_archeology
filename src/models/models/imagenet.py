@@ -25,7 +25,7 @@ class ImageNet(pl.LightningModule):
         y_hat = self(x)
         loss = F.cross_entropy(y_hat, y)
 
-        self.log("train/loss", loss, sync_dist=True)
+        self.log("train/loss", loss, sync_dist=True, on_step=True, on_epoch=True)
 
         return loss
 
@@ -36,7 +36,7 @@ class ImageNet(pl.LightningModule):
 
         y_hat = self(x)
         loss = F.cross_entropy(y_hat, y)
-        self.log("validation/loss", loss, sync_dist=True)
+        self.log("validation/loss", loss, sync_dist=True, on_step=False, on_epoch=True)
 
     def test_step(self, batch, batch_idx):
         x, y = batch
@@ -45,7 +45,7 @@ class ImageNet(pl.LightningModule):
 
         y_hat = self(x)
         loss = F.cross_entropy(y_hat, y)
-        self.log("test/loss", loss, sync_dist=True)
+        self.log("test/loss", loss, sync_dist=True, on_step=False, on_epoch=True)
 
     def configure_optimizers(self):
         return SGD(self.parameters(), lr=0.1, momentum=0.9, weight_decay=0.0005)
