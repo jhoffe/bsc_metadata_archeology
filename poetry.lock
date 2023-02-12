@@ -701,14 +701,14 @@ files = [
 
 [[package]]
 name = "dtuhpc"
-version = "2.0.0"
+version = "2.0.1"
 description = ""
 category = "main"
 optional = false
 python-versions = ">=3.9,<4.0"
 files = [
-    {file = "dtuhpc-2.0.0-py3-none-any.whl", hash = "sha256:6e914b637ea9986e0c90c7bfedf728825e2d54c38e31966fcc084cad2a64d2a7"},
-    {file = "dtuhpc-2.0.0.tar.gz", hash = "sha256:53f08b7449f1dc7f7f6036f60201e10bc55b0037dc4cca0e239190e1ea04d012"},
+    {file = "dtuhpc-2.0.1-py3-none-any.whl", hash = "sha256:b08b870bcc8f188ada5ac5295912164c79f92085ed8f4e77f3d487431b7e120d"},
+    {file = "dtuhpc-2.0.1.tar.gz", hash = "sha256:b9ce844b5d15ad3498330c51c692a5a9fdf269cd54a794dfe02e7ebbadbc7ea9"},
 ]
 
 [package.dependencies]
