@@ -30,7 +30,7 @@ def train(config):
     load_dotenv(dotenv_path)
 
     logger = (
-        WandbLogger(project="jhoffe", name="bsc", save_dir="models/")
+        WandbLogger(project="bsc", save_dir="models/")
         if hparams["logger"] == "wandb"
         else None
     )
