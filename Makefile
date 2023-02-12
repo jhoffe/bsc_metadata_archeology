@@ -1,4 +1,4 @@
-.PHONY: clean data lint requirements
+.PHONY: clean data lint requirements format
 
 #################################################################################
 # GLOBALS                                                                       #
@@ -22,8 +22,8 @@ endif
 
 ## Install Python Dependencies
 requirements: test_environment
-	$(PYTHON_INTERPRETER) -m pip install -U pip setuptools wheel
-	$(PYTHON_INTERPRETER) -m pip install -r requirements.txt
+	$(PYTHON_INTERPRETER) -m pip install poetry
+	$(PYTHON_INTERPRETER) -m poetry install
 
 ## Make Dataset
 data: 
@@ -37,6 +37,10 @@ clean:
 ## Lint using flake8
 lint:
 	flake8 src
+
+format:
+	poetry run black src
+	poetry run isort src
 
 ## Set up python interpreter environment
 create_environment:
