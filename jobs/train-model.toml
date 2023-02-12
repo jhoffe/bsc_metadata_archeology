@@ -6,6 +6,7 @@ cpu = 16
 memory = 8
 standard_output = "logs/train-model.out"
 error_output = "logs/train-model.err"
+use_gpu = { num_of_gpus = 1 }
 
 commands = [
     "source venv/bin/activate",
