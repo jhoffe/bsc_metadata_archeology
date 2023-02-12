@@ -17,8 +17,7 @@ def main():
         devices=2,
         max_epochs=1,
         strategy="ddp",
-        num_nodes=2,
-        plugins=[LSFEnvironment()],
+        num_nodes=2
     )
     trainer.fit(imagenet_module, datamodule=datamodule)
 

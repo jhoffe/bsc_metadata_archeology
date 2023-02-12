@@ -701,14 +701,14 @@ files = [
 
 [[package]]
 name = "dtuhpc"
-version = "2.0.3"
+version = "2.1.1"
 description = ""
 category = "main"
 optional = false
 python-versions = ">=3.9,<4.0"
 files = [
-    {file = "dtuhpc-2.0.3-py3-none-any.whl", hash = "sha256:113d9f2101f69614dcf1bdce9228a366c8d2e521a8b07bc08fab4bc2b2ad9150"},
-    {file = "dtuhpc-2.0.3.tar.gz", hash = "sha256:0a0b92d5d60968f680e0a873ecdcb60649715f50e86aa61aaf15a0af20979fd9"},
+    {file = "dtuhpc-2.1.1-py3-none-any.whl", hash = "sha256:d19d8a9d617bd28e91595d38d1726878db62c6641a24e5f15fb5bda3ff0009ff"},
+    {file = "dtuhpc-2.1.1.tar.gz", hash = "sha256:5a70c947b42ebf57b76e519bf0000a09327bbeff1c787cfe1f7ff07a0602678f"},
 ]
 
 [package.dependencies]
@@ -2707,4 +2707,4 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "57c2c7ed274ddc58b5f574b6583221e7a93b8e659bd2df979aea112fa98b1fda"
+content-hash = "35b82d0c856b35770cfd48e443ba8636cee9363b1ef0d9a560bab031fc63db93"
