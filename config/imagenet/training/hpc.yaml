@@ -7,3 +7,4 @@ devices: 2
 strategy: "ddp"
 num_nodes: 2
 num_workers: 8
+logger: wandb

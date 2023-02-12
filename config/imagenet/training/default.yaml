@@ -7,3 +7,4 @@ devices: 1
 strategy: null
 num_nodes: null
 num_workers: 8
+logger: null

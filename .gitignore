@@ -108,3 +108,4 @@ models/**.ckpt
 .dtuhpc.toml
 
 lightning_logs/
+.env
