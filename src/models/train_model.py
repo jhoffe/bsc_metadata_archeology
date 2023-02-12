@@ -37,7 +37,7 @@ def train(config):
 
     trainer = pl.Trainer(
         accelerator=hparams["accelerator"],
-        gpus=hparams["devices"],
+        devices=hparams["devices"],
         max_epochs=hparams["n_epochs"],
         strategy=hparams["strategy"],
         num_nodes=hparams["num_nodes"],
