@@ -1,4 +1,4 @@
-.PHONY: clean data lint requirements format
+.PHONY: clean data lint requirements format symlink
 
 #################################################################################
 # GLOBALS                                                                       #
@@ -41,6 +41,9 @@ lint:
 format:
 	poetry run black src
 	poetry run isort src
+
+symlink:
+	ln -s /dtu/imagenet data/raw/imagenet
 
 ## Set up python interpreter environment
 create_environment:
