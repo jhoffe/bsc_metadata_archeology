@@ -2,6 +2,7 @@ import os
 
 import hydra
 import pytorch_lightning as pl
+import torch
 from dotenv import find_dotenv, load_dotenv
 from omegaconf import OmegaConf
 from pytorch_lightning.loggers import WandbLogger
@@ -34,6 +35,8 @@ def train(config):
         if hparams["logger"] == "wandb"
         else None
     )
+
+    print(torch.cuda.device_count())
 
     trainer = pl.Trainer(
         accelerator=hparams["accelerator"],
