@@ -31,12 +31,17 @@ def train(config):
     load_dotenv(dotenv_path)
 
     logger = (
-        WandbLogger(project="bsc", save_dir="models/")
+        WandbLogger(
+            name=hparams["name"],
+            project="bsc",
+            save_dir="models/"
+        )
         if hparams["logger"] == "wandb"
         else None
     )
 
-    print(torch.cuda.device_count())
+    if logger is not None:
+        logger.experiment.config.update(config.training)
 
     trainer = pl.Trainer(
         accelerator=hparams["accelerator"],
