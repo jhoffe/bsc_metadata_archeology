@@ -4,9 +4,9 @@ from torch.nn import Module
 from torch.nn import functional as F
 from torch.optim import SGD
 from torch.optim.lr_scheduler import CosineAnnealingLR
-from torchvision.models.resnet import resnet50
 from torchmetrics import MetricCollection
 from torchmetrics.classification import MulticlassAccuracy, MulticlassF1Score
+from torchvision.models.resnet import resnet50
 
 imagenet_model: Module = resnet50(weights=None)
 
@@ -18,10 +18,12 @@ class ImageNet(pl.LightningModule):
         self.max_epochs = max_epochs
         self.save_hyperparameters(ignore=["model"])
 
-        self.val_metrics = MetricCollection({
-            "val/accuracy": MulticlassAccuracy(num_classes=1000),
-            "val/f1_score": MulticlassF1Score(num_classes=1000)
-        })
+        self.val_metrics = MetricCollection(
+            {
+                "val/accuracy": MulticlassAccuracy(num_classes=1000),
+                "val/f1_score": MulticlassF1Score(num_classes=1000),
+            }
+        )
 
     def forward(self, x):
         return self.model(x)
@@ -64,10 +66,7 @@ class ImageNet(pl.LightningModule):
 
         scheduler_dict = {
             "scheduler": CosineAnnealingLR(optimizer, T_max=self.max_epochs),
-            "interval": "epoch"
+            "interval": "epoch",
         }
 
-        return {
-            "optimizer": optimizer,
-            "scheduler": scheduler_dict
-        }
+        return {"optimizer": optimizer, "scheduler": scheduler_dict}

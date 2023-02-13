@@ -2,7 +2,6 @@ import os
 
 import hydra
 import pytorch_lightning as pl
-import torch
 from dotenv import find_dotenv, load_dotenv
 from omegaconf import OmegaConf
 from pytorch_lightning.loggers import WandbLogger
@@ -31,11 +30,7 @@ def train(config):
     load_dotenv(dotenv_path)
 
     logger = (
-        WandbLogger(
-            name=hparams["name"],
-            project="bsc",
-            save_dir="models/"
-        )
+        WandbLogger(name=hparams["name"], project="bsc", save_dir="models/")
         if hparams["logger"] == "wandb"
         else None
     )
@@ -49,7 +44,7 @@ def train(config):
         max_epochs=hparams["n_epochs"],
         strategy=hparams["strategy"],
         num_nodes=hparams["num_nodes"],
-        logger=logger
+        logger=logger,
     )
     trainer.fit(imagenet_module, datamodule=datamodule)
 
