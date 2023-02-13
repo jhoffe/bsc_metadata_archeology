@@ -7,6 +7,7 @@ import torchvision.io
 from torch.utils.data import Dataset
 from torchvision import transforms
 from torchvision.datasets import ImageFolder
+from torchvision.io import ImageReadMode
 
 
 class ImagenetValidationDataset(Dataset):
@@ -37,10 +38,11 @@ class ImagenetValidationDataset(Dataset):
 
     def __getitem__(self, index: int):
         image_path, label = self.samples[index]
-        image = torchvision.io.read_image(image_path)
+        image = torchvision.io.read_image(image_path, ImageReadMode.RGB)
 
         if self.transform is not None:
             image = self.transform(image)
+        assert image.shape == torch.Size([3, 224, 224])
 
         return image, label
 

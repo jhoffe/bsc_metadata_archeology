@@ -47,10 +47,11 @@ class ImageNetDataModule(pl.LightningDataModule):
             DataLoader, the dataloader for the validation set.
         """
         return DataLoader(
-            self.imagenet_val,
+            self.imagenet_train,
             batch_size=self.batch_size,
             num_workers=self.num_workers,
             shuffle=True,
+            pin_memory=True,
         )
 
     def test_dataloader(self) -> DataLoader:
@@ -60,7 +61,21 @@ class ImageNetDataModule(pl.LightningDataModule):
             DataLoader, the dataloader for the test set.
         """
         return DataLoader(
-            self.imagenet_train,
+            self.imagenet_val,
             batch_size=self.batch_size,
             num_workers=self.num_workers,
+            pin_memory=True,
+        )
+
+    def val_dataloader(self) -> DataLoader:
+        """Returns the dataloader for the test set.
+
+        Returns:
+            DataLoader, the dataloader for the test set.
+        """
+        return DataLoader(
+            self.imagenet_val,
+            batch_size=self.batch_size,
+            num_workers=self.num_workers,
+            pin_memory=True,
         )

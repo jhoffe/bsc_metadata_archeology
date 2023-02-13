@@ -106,3 +106,7 @@ models/**.ckpt
 .pytest_cache/
 
 .dtuhpc.toml
+
+lightning_logs/
+.env
+.hydra
