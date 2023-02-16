@@ -1,4 +1,4 @@
-run_name: "imagenet-resnet50"
+run_name: "imagenet-resnet50-multi-gpu"
 
 n_epochs: 100
 limit_train_batches: null
