@@ -1,8 +1,8 @@
 import os
 
+import torch
 from torch.utils.data import Dataset, Subset
 from torchvision.transforms import transforms
-import torch
 
 
 class AddGaussianNoise(object):

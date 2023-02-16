@@ -3,6 +3,7 @@ from collections import defaultdict
 
 import hydra
 import pytorch_lightning as pl
+import torch
 from dotenv import find_dotenv, load_dotenv
 from omegaconf import OmegaConf
 from pytorch_lightning.loggers import WandbLogger
@@ -12,13 +13,9 @@ from src.models.models import ImageNetResNet50
 
 
 def create_module_and_data(params: dict):
-    MODULES = {
-        "imagenet-resnet50": ImageNetResNet50
-    }
+    MODULES = {"imagenet-resnet50": ImageNetResNet50}
 
-    DATAMODULES = {
-        "imagenet": ImageNetDataModule
-    }
+    DATAMODULES = {"imagenet": ImageNetDataModule}
 
     module_name = params["model"]
     datamodule_name = params["datamodule"]
@@ -31,7 +28,7 @@ def create_module_and_data(params: dict):
 
     return (
         MODULES[module_name](**params["model_params"]),
-        DATAMODULES[datamodule_name](**params["data_params"])
+        DATAMODULES[datamodule_name](**params["data_params"]),
     )
 
 
@@ -56,8 +53,9 @@ def create_trainer(params: dict):
         max_epochs=params["n_epochs"],
         strategy=params["strategy"],
         num_nodes=params["num_nodes"],
+        limit_train_batches=params["limit_train_batches"],
         logger=logger,
-        precision=precision
+        precision=precision,
     )
 
 
@@ -74,6 +72,8 @@ def train(config):
 
     dotenv_path = find_dotenv()
     load_dotenv(dotenv_path)
+
+    torch.set_float32_matmul_precision(hparams["matmul_precision"])
 
     module, datamodule = create_module_and_data(hparams)
     trainer = create_trainer(hparams)
