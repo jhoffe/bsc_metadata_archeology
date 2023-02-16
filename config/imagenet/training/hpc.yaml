@@ -1,11 +1,27 @@
-name: 'imagenet-resnet50'
-seed: 123
-lr: 0.01
+run_name: "imagenet-resnet50"
+
 n_epochs: 100
-batch_size: 256
+
 accelerator: 'gpu'
-devices: 2
 strategy: "ddp"
-num_nodes: 2
-num_workers: 8
+devices: 2
+num_nodes: null
+
 logger: "wandb"
+
+precision: 16
+use_bf16_if_ampere: true
+
+seed: 123
+
+datamodule: "imagenet"
+data_params:
+  num_workers: 8
+  batch_size: 128
+
+model: "imagenet-resnet50"
+model_params:
+  lr: 0.1
+  momentum: 0.9
+  weight_decay: 0.0005
+  max_epochs: 100

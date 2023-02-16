@@ -8,14 +8,17 @@ from torchmetrics import MetricCollection
 from torchmetrics.classification import MulticlassAccuracy, MulticlassF1Score
 from torchvision.models.resnet import resnet50
 
-imagenet_model: Module = resnet50(weights=None)
 
-
-class ImageNet(pl.LightningModule):
-    def __init__(self, model: Module = imagenet_model, max_epochs: int = 100):
+class ImageNetResNet50(pl.LightningModule):
+    def __init__(self, max_epochs: int = 100, lr: float = 0.1, momentum: float = 0.9, weight_decay: float = 0.0005):
         super().__init__()
-        self.model = model
+        self.model = resnet50(weights=None)
+
         self.max_epochs = max_epochs
+        self.lr = lr
+        self.momentum = momentum
+        self.weight_decay = weight_decay
+
         self.save_hyperparameters(ignore=["model"])
 
         self.val_metrics = MetricCollection(
@@ -36,7 +39,7 @@ class ImageNet(pl.LightningModule):
         y_hat = self(x)
         loss = F.cross_entropy(y_hat, y)
 
-        self.log("train/loss", loss, sync_dist=True, on_step=True, on_epoch=True)
+        self.log("train/loss", loss, on_step=True, on_epoch=True)
 
         return loss
 
@@ -50,7 +53,7 @@ class ImageNet(pl.LightningModule):
         self.val_metrics.update(y_hat, y)
 
         self.log_dict(self.val_metrics, on_step=False, on_epoch=True, sync_dist=True)
-        self.log("validation/loss", loss, sync_dist=True, on_step=False, on_epoch=True)
+        self.log("validation/loss", loss, on_step=False, on_epoch=True)
 
     def test_step(self, batch, batch_idx):
         x, y = batch
@@ -59,10 +62,10 @@ class ImageNet(pl.LightningModule):
 
         y_hat = self(x)
         loss = F.cross_entropy(y_hat, y)
-        self.log("test/loss", loss, sync_dist=True, on_step=False, on_epoch=True)
+        self.log("test/loss", loss, on_step=False, on_epoch=True)
 
     def configure_optimizers(self):
-        optimizer = SGD(self.parameters(), lr=0.1, momentum=0.9, weight_decay=0.0005)
+        optimizer = SGD(self.parameters(), lr=self.lr, momentum=self.momentum, weight_decay=self.weight_decay)
 
         scheduler_dict = {
             "scheduler": CosineAnnealingLR(optimizer, T_max=self.max_epochs),

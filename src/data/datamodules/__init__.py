@@ -1,0 +1,2 @@
+from .cifar_datamodule import CIFAR10DataModule, CIFAR100DataModule
+from .imagenet_datamodule import ImageNetDataModule

@@ -1,8 +1,8 @@
 import os
 
-import torch
 from torch.utils.data import Dataset, Subset
 from torchvision.transforms import transforms
+import torch
 
 
 class AddGaussianNoise(object):
@@ -14,7 +14,7 @@ class AddGaussianNoise(object):
         return torch.clip(
             tensor + torch.randn(tensor.size()) * self.std + self.mean, 0.0, 1.0
         )
-7
+
 
 class ClampRangeTransform(object):
     def __init__(self):
@@ -109,7 +109,7 @@ class ProbeSuiteGenerator:
             if i not in subset_indices
         ]
 
-        return Subset(self.dataset, subset_indices)
+        return Subset(self.dataset, subset_indices.tolist())
 
 
 def make_probe_suites(
