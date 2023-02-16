@@ -12,7 +12,5 @@ commands = [
     "source venv/bin/activate",
     "module load python3/3.10.7",
     "module load cuda/11.7",
-    "module load mpi/4.1.4-gcc-12.2.0-binutils-2.39",
-    "export CUDA_VISIBLE_DEVICES=0,1",
-    "mpirun -np $LSB_DJOB_NUMPROC -bind-to none -map-by slot python src/models/train_model.py training=hpc"
+    "python3 src/models/train_model.py training=hpc"
 ]
