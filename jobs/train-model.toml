@@ -1,12 +1,12 @@
 queue = "gpua100"
 name = "train-model"
-walltime = { hours = 2, minutes = 0 }
+walltime = { hours = 16, minutes = 0 }
 cpu = 16
+single_host = true
 memory = 8
 standard_output = "logs/train-model.out"
 error_output = "logs/train-model.err"
 use_gpu = { num_of_gpus = 2 }
-core_p_tile_size = 8
 
 commands = [
     "source venv/bin/activate",
