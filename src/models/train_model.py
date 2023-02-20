@@ -65,6 +65,14 @@ def create_trainer(params: dict):
 def train(config):
     print(f"configuration: \n {OmegaConf.to_yaml(config.training)}")
 
+    LOCAL_RANK = int(os.environ['OMPI_COMM_WORLD_LOCAL_RANK'])
+    WORLD_SIZE = int(os.environ['OMPI_COMM_WORLD_SIZE'])
+    WORLD_RANK = int(os.environ['OMPI_COMM_WORLD_RANK'])
+
+    print("LOCAL_RANK: ", LOCAL_RANK)
+    print("WORLD_SIZE: ", WORLD_SIZE)
+    print("WORLD_RANK: ", WORLD_RANK)
+
     hparams = config.training
     pl.seed_everything(hparams["seed"])
 
