@@ -18,7 +18,7 @@ matmul_precision: "medium"
 
 datamodule: "imagenet"
 data_params:
-  num_workers: 8
+  num_workers: null
   batch_size: 128
 
 model: "imagenet-resnet50"
