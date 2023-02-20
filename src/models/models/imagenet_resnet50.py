@@ -2,15 +2,13 @@ from typing import Optional
 
 import pytorch_lightning as pl
 import torch
-import torch.distributed as dist
+import wandb
 from pytorch_lightning.loggers import WandbLogger
 from torch.nn import functional as F
 from torch.optim import SGD
 from torch.optim.lr_scheduler import CosineAnnealingLR
 from torchmetrics.classification import Accuracy
 from torchvision.models.resnet import resnet50
-
-from src.models.utils.loss_logger import LossCurveLogger
 
 
 class ImageNetResNet50(pl.LightningModule):
@@ -34,17 +32,7 @@ class ImageNetResNet50(pl.LightningModule):
 
         self.save_hyperparameters(ignore=["model", "loss_curve_logger"])
 
-        self.loss_curve_logger = (
-            LossCurveLogger(loss_curve_logger_path)
-            if loss_curve_logger_path is not None
-            else None
-        )
-
         self.val_accuracy = Accuracy(task="multiclass", num_classes=1000)
-
-    def log_loss_curve(self, idx: int, loss: torch.Tensor) -> None:
-        if self.loss_curve_logger is not None:
-            self.loss_curve_logger.log(idx, loss)
 
     def forward(self, x):
         return self.model(x)
@@ -56,7 +44,6 @@ class ImageNetResNet50(pl.LightningModule):
 
         y_hat = self(x)
         loss = F.cross_entropy(y_hat, y, reduction="none")
-        self.log_loss_curve(batch_idx, loss)
         mean_loss = loss.mean()
 
         self.log(
@@ -67,21 +54,33 @@ class ImageNetResNet50(pl.LightningModule):
             sync_dist=self.sync_dist,
         )
 
-        return mean_loss
+        return {"loss": mean_loss, "unreduced_loss": loss, "batch_idx": batch_idx}
+
+    def training_step_end(self, outputs):
+        if self.loss_curve_logger is not None:
+            unreduced_losses = outputs["unreduced_losses"]
+            batch_idx = outputs["batch_idx"]
+
+            outputs = []
+
+            for idx, losses in zip(batch_idx, unreduced_losses):
+                outputs.append((idx, losses))
+
+        return []
 
     def training_epoch_end(self, outputs):
-        if self.loss_curve_logger is not None:
-            self.loss_curve_logger.save().flush()
+        if isinstance(self.logger, WandbLogger):
+            epoch_losses = []
 
-    def on_fit_end(self) -> None:
-        if (
-            isinstance(self.logger, WandbLogger)
-            and self.loss_curve_logger is not None
-            and dist.get_rank() == 0
-        ):
-            self.logger.experiment.log_artifact(
-                self.loss_curve_logger.save_path, "losses.pt"
-            )
+            for output in outputs:
+                for batch in output:
+                    epoch_losses.append(batch)
+
+            torch.save(epoch_losses, "models/losses.pt")
+
+            artifact = wandb.Artifact("losses", "loss")
+            artifact.add_file("models/losses.pt")
+            self.logger.experiment.log_artifact(artifact)
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
