@@ -27,3 +27,4 @@ model_params:
   momentum: 0.9
   weight_decay: 0.0005
   max_epochs: 100
+  loss_curve_logger_path: null
