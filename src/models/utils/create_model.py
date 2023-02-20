@@ -1,6 +1,6 @@
-import torch
 import torchvision
 from torch import nn
+
 
 def create_model(dataset: str, batch_size: int) -> nn.Module:
     """Creates a ResNet50 model"""
