@@ -65,7 +65,7 @@ class ImageNetResNet50(pl.LightningModule):
 
             outputs = []
 
-            for losses in zip(all):
+            for losses in all:
                 outputs.append((batch_idx, losses.detach()))
 
             return outputs
