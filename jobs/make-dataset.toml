@@ -8,6 +8,7 @@ standard_output = "logs/init_dataset.out"
 error_output = "logs/init_dataset.err"
 
 commands = [
+    "module load python3/3.10.7",
     "source venv/bin/activate",
     "make data"
 ]
