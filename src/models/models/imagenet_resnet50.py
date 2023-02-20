@@ -18,7 +18,6 @@ class ImageNetResNet50(pl.LightningModule):
         lr: float = 0.1,
         momentum: float = 0.9,
         weight_decay: float = 0.0005,
-        loss_curve_logger_path: Optional[str] = "models/losses.pt",
         sync_dist: bool = False,
     ):
         super().__init__()
@@ -30,7 +29,7 @@ class ImageNetResNet50(pl.LightningModule):
         self.weight_decay = weight_decay
         self.sync_dist = sync_dist
 
-        self.save_hyperparameters(ignore=["model", "loss_curve_logger"])
+        self.save_hyperparameters(ignore=["model"])
 
         self.val_accuracy = Accuracy(task="multiclass", num_classes=1000)
 
@@ -57,16 +56,15 @@ class ImageNetResNet50(pl.LightningModule):
         return {"loss": mean_loss, "unreduced_loss": loss, "batch_idx": batch_idx}
 
     def training_step_end(self, outputs):
-        if self.loss_curve_logger is not None:
-            unreduced_losses = outputs["unreduced_losses"]
-            batch_idx = outputs["batch_idx"]
+        unreduced_losses = outputs["unreduced_losses"]
+        batch_idx = outputs["batch_idx"]
 
-            outputs = []
+        outputs = []
 
-            for idx, losses in zip(batch_idx, unreduced_losses):
-                outputs.append((idx, losses))
+        for idx, losses in zip(batch_idx, unreduced_losses):
+            outputs.append((idx, losses))
 
-        return []
+        return outputs
 
     def training_epoch_end(self, outputs):
         if isinstance(self.logger, WandbLogger):
