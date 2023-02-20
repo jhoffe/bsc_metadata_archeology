@@ -4,8 +4,8 @@ walltime = { hours = 16, minutes = 0 }
 cpu = 16
 single_host = true
 memory = 8
-standard_output = "logs/train-model.out"
-error_output = "logs/train-model.err"
+standard_output = { name = "logs/train-model.out", overwrite = true }
+error_output = { name = "logs/train-model.err", overwrite = true }
 use_gpu = { num_of_gpus = 2 }
 
 commands = [
