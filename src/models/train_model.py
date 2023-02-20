@@ -10,6 +10,37 @@ from pytorch_lightning.loggers import WandbLogger
 
 from src.data.datamodules import ImageNetDataModule
 from src.models.models import ImageNetResNet50
+from pytorch_lightning.plugins.environments import ClusterEnvironment
+
+MASTER_ADDR = os.environ['MASTER_ADDR']
+MASTER_PORT = os.environ['MASTER_PORT']
+LOCAL_RANK = int(os.environ['OMPI_COMM_WORLD_LOCAL_RANK'])
+WORLD_SIZE = int(os.environ['OMPI_COMM_WORLD_SIZE'])
+WORLD_RANK = int(os.environ['OMPI_COMM_WORLD_RANK'])
+class MyClusterEnvironment(ClusterEnvironment):
+    @property
+    def creates_processes_externally(self) -> bool:
+        """Return True if the cluster is managed (you don't launch processes yourself)"""
+        return True
+
+    def world_size(self) -> int:
+        return int(os.environ["OMPI_COMM_WORLD_SIZE"])
+
+    def global_rank(self) -> int:
+        return int(os.environ["OMPI_COMM_WORLD_RANK"])
+
+    def local_rank(self) -> int:
+        return int(os.environ["OMPI_COMM_WORLD_LOCAL_RANK"])
+
+    def node_rank(self) -> int:
+        return int(os.environ["NODE_RANK"])
+
+    def main_address(self) -> str:
+        return os.environ["MASTER_ADDRESS"]
+
+    def main_port(self) -> int:
+        return int(os.environ["MASTER_PORT"])
+
 
 
 def create_module_and_data(params: dict):
@@ -65,17 +96,8 @@ def create_trainer(params: dict):
 def train(config):
     print(f"configuration: \n {OmegaConf.to_yaml(config.training)}")
 
-    MASTER_ADDR = os.environ['MASTER_ADDR']
-    MASTER_PORT = os.environ['MASTER_PORT']
-    LOCAL_RANK = int(os.environ['OMPI_COMM_WORLD_LOCAL_RANK'])
-    WORLD_SIZE = int(os.environ['OMPI_COMM_WORLD_SIZE'])
-    WORLD_RANK = int(os.environ['OMPI_COMM_WORLD_RANK'])
-
-    print("MASTER_ADDR: ", MASTER_ADDR)
-    print("MASTER_PORT: ", MASTER_PORT)
-    print("LOCAL_RANK: ", LOCAL_RANK)
-    print("WORLD_SIZE: ", WORLD_SIZE)
-    print("WORLD_RANK: ", WORLD_RANK)
+    for k, v in os.environ.items():
+        print(f"{k} : {v}")
 
     hparams = config.training
     pl.seed_everything(hparams["seed"])
