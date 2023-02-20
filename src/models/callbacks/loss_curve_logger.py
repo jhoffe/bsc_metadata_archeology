@@ -24,6 +24,7 @@ class LossCurveLogger(Callback):
         batch_idx: int,
     ) -> None:
         unreduced_losses = outputs["unreduced_loss"]
+        filenames = outputs["filenames"]
 
         if pl_module.global_rank == 0:
             all = [
@@ -31,14 +32,18 @@ class LossCurveLogger(Callback):
             ] * trainer.num_devices
             torch.distributed.gather(unreduced_losses, all)
 
+            all_filenames = [None] * trainer.num_devices
+            torch.distributed.gather_object(filenames, all_filenames)
+
             all_losses = []
 
-            for losses in all:
-                all_losses.append((batch_idx, losses.detach()))
+            for losses, fns in zip(all, all_filenames):
+                all_losses.append((batch_idx, losses.detach(), fns))
 
             self.loss_curves += all_losses
         else:
             torch.distributed.gather(unreduced_losses)
+            torch.distributed.gather_object(filenames)
 
     def get_path(self, version: int) -> str:
         return os.path.join(self.dir, f"losses_v{version}.pt")
@@ -55,7 +60,10 @@ class LossCurveLogger(Callback):
             os.makedirs(self.dir, exist_ok=True)
             path = self.get_path(pl_module.current_epoch)
 
-            epoch_losses[pl_module.current_epoch] = [(batch_idx, lc.tolist()) for batch_idx, lc in self.loss_curves]
+            epoch_losses[pl_module.current_epoch] = [
+                (batch_idx, lc.tolist(), filenames)
+                for batch_idx, lc, filenames in self.loss_curves
+            ]
             torch.save(epoch_losses, path)
             artifact = wandb.Artifact(
                 f"losses-{self.wandb_suffix}",

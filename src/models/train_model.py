@@ -65,9 +65,7 @@ def create_trainer(params: dict):
     if "log_loss_curves" in params.keys() and params["log_loss_curves"]:
         callbacks.append(LossCurveLogger(f"models/losses/{time_dir}", time_dir))
 
-    log_every_n_steps = (
-        params["log_every_n"] if "log_every_n" in params.keys() else 50
-    )
+    log_every_n_steps = params["log_every_n"] if "log_every_n" in params.keys() else 50
 
     return pl.Trainer(
         accelerator=params["accelerator"],
