@@ -68,14 +68,16 @@ class ImageNetResNet50(pl.LightningModule):
             for losses in all:
                 outputs.append((batch_idx, losses.detach()))
 
-            return {"outputs": []}
+            return {"outputs": outputs, "loss": outputs["loss"]}
         else:
             torch.distributed.gather(unreduced_losses)
-        return {"outputs": []}
+        return {"outputs": [], "loss": outputs["loss"]}
 
     def training_epoch_end(self, outputs):
         if isinstance(self.logger, WandbLogger) and self.global_rank == 0:
             epoch_losses = []
+
+            print(outputs)
 
             for output in outputs:
                 for batch in output:
