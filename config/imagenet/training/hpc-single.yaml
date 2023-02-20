@@ -1,11 +1,11 @@
-run_name: "imagenet-resnet50-multi-gpu"
+run_name: "imagenet-resnet50-single-gpu"
 
 n_epochs: 100
 limit_train_batches: null
 
 accelerator: 'gpu'
-strategy: null
-devices: 1
+strategy: "ddp"
+devices: 2
 num_nodes: null
 
 logger: "wandb"
@@ -19,7 +19,7 @@ matmul_precision: "medium"
 datamodule: "imagenet"
 data_params:
   num_workers: 8
-  batch_size: 256
+  batch_size: 128
 
 model: "imagenet-resnet50"
 model_params:

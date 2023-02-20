@@ -1,17 +1,17 @@
-run_name: "imagenet-resnet50-multi-gpu"
+run_name: "imagenet-resnet50"
 
-n_epochs: 100
-limit_train_batches: null
+n_epochs: 1
+limit_train_batches: 1000
 
 accelerator: 'gpu'
 strategy: null
 devices: 1
 num_nodes: null
 
-logger: "wandb"
+logger: null
 
 precision: 16
-use_bf16_if_ampere: true
+use_bf16_if_ampere: false
 
 seed: 123
 matmul_precision: "medium"
@@ -19,7 +19,7 @@ matmul_precision: "medium"
 datamodule: "imagenet"
 data_params:
   num_workers: 8
-  batch_size: 256
+  batch_size: 128
 
 model: "imagenet-resnet50"
 model_params:

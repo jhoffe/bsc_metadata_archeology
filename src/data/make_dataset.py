@@ -18,7 +18,7 @@ def main(input_filepath, output_filepath):
     logger = logging.getLogger(__name__)
     logger.info("making final data set from raw data")
 
-    logger.info("Downloading the CIFAR10 and CIFAR100 datasets")
+    logger.info("Downloading the CIFAR10 and CIFAR100 datasets.")
     download_dataset(input_filepath, "cifar10")
     download_dataset(input_filepath, "cifar100")
 
