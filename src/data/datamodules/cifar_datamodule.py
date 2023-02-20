@@ -60,6 +60,7 @@ class CIFAR10DataModule(pl.LightningDataModule):
             batch_size=self.batch_size,
             num_workers=self.num_workers,
             shuffle=True,
+            pin_memory=True,
         )
 
     def test_dataloader(self) -> DataLoader:
@@ -69,7 +70,23 @@ class CIFAR10DataModule(pl.LightningDataModule):
             DataLoader, the dataloader for the test set.
         """
         return DataLoader(
-            self.cifar10_test, batch_size=self.batch_size, num_workers=self.num_workers
+            self.cifar10_test,
+            batch_size=self.batch_size,
+            num_workers=self.num_workers,
+            pin_memory=True,
+        )
+
+    def val_dataloader(self) -> DataLoader:
+        """Returns the dataloader for the test set.
+
+        Returns:
+            DataLoader, the dataloader for the test set.
+        """
+        return DataLoader(
+            self.cifar10_test,
+            batch_size=self.batch_size,
+            num_workers=self.num_workers,
+            pin_memory=True,
         )
 
 
