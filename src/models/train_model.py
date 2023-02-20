@@ -65,10 +65,14 @@ def create_trainer(params: dict):
 def train(config):
     print(f"configuration: \n {OmegaConf.to_yaml(config.training)}")
 
+    MASTER_ADDR = os.environ['MASTER_ADDR']
+    MASTER_PORT = os.environ['MASTER_PORT']
     LOCAL_RANK = int(os.environ['OMPI_COMM_WORLD_LOCAL_RANK'])
     WORLD_SIZE = int(os.environ['OMPI_COMM_WORLD_SIZE'])
     WORLD_RANK = int(os.environ['OMPI_COMM_WORLD_RANK'])
 
+    print("MASTER_ADDR: ", MASTER_ADDR)
+    print("MASTER_PORT: ", MASTER_PORT)
     print("LOCAL_RANK: ", LOCAL_RANK)
     print("WORLD_SIZE: ", WORLD_SIZE)
     print("WORLD_RANK: ", WORLD_RANK)
