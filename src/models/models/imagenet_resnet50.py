@@ -60,7 +60,7 @@ class ImageNetResNet50(pl.LightningModule):
         batch_idx = outputs["batch_indices"]
 
         if self.global_rank == 0:
-            all = [torch.zeros(unreduced_losses.shape)]*self.trainer.num_devices
+            all = [torch.zeros(unreduced_losses.shape, device=self.device)]*self.trainer.num_devices
             torch.distributed.gather(unreduced_losses, all)
 
             outputs = []
