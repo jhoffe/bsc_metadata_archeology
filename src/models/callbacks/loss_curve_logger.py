@@ -1,10 +1,11 @@
+import os
+from time import gmtime, strftime
+
 import pytorch_lightning as pl
 import torch
 import wandb
 from pytorch_lightning.callbacks import Callback
 from pytorch_lightning.loggers.wandb import WandbLogger
-from time import gmtime, strftime
-import os
 
 
 class LossCurveLogger(Callback):
@@ -13,7 +14,6 @@ class LossCurveLogger(Callback):
         self.dir = dir
         self.wandb_suffix = wandb_suffix
         self.loss_curves = []
-
 
     def on_train_batch_end(
         self,
@@ -40,6 +40,9 @@ class LossCurveLogger(Callback):
         else:
             torch.distributed.gather(unreduced_losses)
 
+    def get_path(self, version: int) -> str:
+        return os.path.join(self.dir, f"losses_v{version}.pt")
+
     def on_train_epoch_end(
         self, trainer: pl.Trainer, pl_module: pl.LightningModule
     ) -> None:
@@ -47,12 +50,10 @@ class LossCurveLogger(Callback):
             epoch_losses = {}
 
             if pl_module.current_epoch > 0:
-                epoch_losses = torch.load(
-                    f"models/losses_v{pl_module.current_epoch - 1}"
-                )
+                epoch_losses = torch.load(self.get_path(pl_module.current_epoch - 1))
 
             os.makedirs(self.dir, exist_ok=True)
-            path = os.path.join(self.dir, f"losses_v{pl_module.current_epoch}.pt")
+            path = self.get_path(pl_module.current_epoch)
 
             epoch_losses[pl_module.current_epoch] = self.loss_curves
             torch.save(epoch_losses, path)
@@ -63,4 +64,4 @@ class LossCurveLogger(Callback):
             )
             artifact.add_file(path)
 
-            pl_module.logger.experiment.log_artifact(artifact, "losses")
+            pl_module.logger.experiment.log_artifact(artifact, "loss_curves")

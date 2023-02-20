@@ -1,4 +1,5 @@
 import os
+from time import gmtime, strftime
 
 import hydra
 import pytorch_lightning as pl
@@ -7,7 +8,6 @@ from dotenv import find_dotenv, load_dotenv
 from omegaconf import OmegaConf
 from pytorch_lightning.loggers.wandb import WandbLogger
 from pytorch_lightning.strategies.ddp import DDPStrategy
-from time import gmtime, strftime
 
 from src.data.datamodules import ImageNetDataModule
 from src.models.callbacks import LossCurveLogger
@@ -61,6 +61,14 @@ def create_trainer(params: dict):
         else DDPStrategy(find_unused_parameters=False)
     )
 
+    callbacks = []
+    if "log_loss_curves" in params.keys() and params["log_loss_curves"]:
+        callbacks.append(LossCurveLogger(f"models/losses/{time_dir}", time_dir))
+
+    log_every_n_steps = (
+        params["log_every_n"] if "log_every_n" in params.keys() else 50
+    )
+
     return pl.Trainer(
         accelerator=params["accelerator"],
         devices=params["devices"],
@@ -70,7 +78,8 @@ def create_trainer(params: dict):
         limit_train_batches=params["limit_train_batches"],
         logger=logger,
         precision=precision,
-        callbacks=[LossCurveLogger(f"models/losses/{time_dir}", time_dir)],
+        callbacks=callbacks,
+        log_every_n_steps=log_every_n_steps,
     )
 
 
