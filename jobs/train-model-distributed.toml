@@ -12,5 +12,5 @@ commands = [
     "module load python3/3.10.7",
     "module load cuda/11.7",
     "source venv/bin/activate",
-    "torchrun --nnodes=3 --nproc_per_node=2 --rdzv_id=$LSB_JOBID --rdzv_backend=c10d src/models/train_model.py training=hpc"
+    "torchrun --nnodes=3 --nproc_per_node=2 --rdzv_id=$LSB_JOBID --rdzv_backend=c10d src/models/train_model.py training=hpc-distributed"
 ]
