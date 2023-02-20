@@ -110,3 +110,4 @@ models/**.ckpt
 lightning_logs/
 .env
 .hydra
+models/
