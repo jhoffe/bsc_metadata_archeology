@@ -7,6 +7,7 @@ from dotenv import find_dotenv, load_dotenv
 from omegaconf import OmegaConf
 from pytorch_lightning.loggers.wandb import WandbLogger
 from pytorch_lightning.strategies.ddp import DDPStrategy
+from time import gmtime, strftime
 
 from src.data.datamodules import ImageNetDataModule
 from src.models.callbacks import LossCurveLogger
@@ -34,12 +35,14 @@ def create_module_and_data(params: dict):
 
 
 def create_trainer(params: dict):
+    time_dir = strftime("%Y%m%d_%H%M", gmtime())
+
     logger = (
         [
             WandbLogger(
-                name=params["run_name"],
+                name=params["run_name"] + "-" + time_dir,
                 project="bsc",
-                save_dir="models/",
+                save_dir=f"models/",
                 config=params,
             )
         ]
@@ -67,7 +70,7 @@ def create_trainer(params: dict):
         limit_train_batches=params["limit_train_batches"],
         logger=logger,
         precision=precision,
-        callbacks=[LossCurveLogger()],
+        callbacks=[LossCurveLogger(f"models/losses/{time_dir}", time_dir)],
     )
 
 
