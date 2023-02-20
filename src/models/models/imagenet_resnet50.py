@@ -60,7 +60,9 @@ class ImageNetResNet50(pl.LightningModule):
         batch_idx = outputs["batch_indices"]
 
         if self.global_rank == 0:
-            all = [torch.zeros(unreduced_losses.shape, device=self.device)]*self.trainer.num_devices
+            all = [
+                torch.zeros(unreduced_losses.shape, device=self.device)
+            ] * self.trainer.num_devices
             torch.distributed.gather(unreduced_losses, all)
 
             all_losses = []
@@ -83,7 +85,10 @@ class ImageNetResNet50(pl.LightningModule):
 
             path = f"models/losses_v{self.current_epoch}.pt"
             torch.save(epoch_losses, path)
-            self.logger.experiment.log_artifact(path, f"losses:v{self.current_epoch}")
+            artifact = wandb.Artifact(
+                "losses", type="loss_curves", metadata={"epoch": self.current_epoch}
+            )
+            self.logger.experiment.log_artifact(artifact, "losses")
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
