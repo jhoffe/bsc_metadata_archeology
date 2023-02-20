@@ -56,7 +56,7 @@ class ImageNetResNet50(pl.LightningModule):
         return {"loss": mean_loss, "unreduced_loss": loss, "batch_idx": batch_idx}
 
     def training_step_end(self, outputs):
-        unreduced_losses = outputs["unreduced_losses"]
+        unreduced_losses = outputs["unreduced_loss"]
         batch_idx = outputs["batch_idx"]
 
         outputs = []
