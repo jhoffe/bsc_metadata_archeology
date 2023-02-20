@@ -17,7 +17,19 @@ MASTER_PORT = os.environ['MASTER_PORT']
 LOCAL_RANK = int(os.environ['OMPI_COMM_WORLD_LOCAL_RANK'])
 WORLD_SIZE = int(os.environ['OMPI_COMM_WORLD_SIZE'])
 WORLD_RANK = int(os.environ['OMPI_COMM_WORLD_RANK'])
+
+
 class MyClusterEnvironment(ClusterEnvironment):
+    @staticmethod
+    def detect() -> bool:
+        return True
+
+    def set_world_size(self, size: int) -> None:
+        pass
+
+    def set_global_rank(self, rank: int) -> None:
+        pass
+
     @property
     def creates_processes_externally(self) -> bool:
         """Return True if the cluster is managed (you don't launch processes yourself)"""
@@ -40,7 +52,6 @@ class MyClusterEnvironment(ClusterEnvironment):
 
     def main_port(self) -> int:
         return int(os.environ["MASTER_PORT"])
-
 
 
 def create_module_and_data(params: dict):
@@ -74,7 +85,6 @@ def create_trainer(params: dict):
 
     if params["use_bf16_if_ampere"]:
         precision = "bf16"
-
 
     return pl.Trainer(
         accelerator=params["accelerator"],
