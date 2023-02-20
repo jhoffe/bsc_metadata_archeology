@@ -6,6 +6,7 @@ import torch
 from dotenv import find_dotenv, load_dotenv
 from omegaconf import OmegaConf
 from pytorch_lightning.loggers import WandbLogger
+from pytorch_lightning.strategies import DDPStrategy
 
 from src.data.datamodules import ImageNetDataModule
 from src.models.models import ImageNetResNet50
@@ -50,11 +51,13 @@ def create_trainer(params: dict):
     if params["use_bf16_if_ampere"]:
         precision = "bf16"
 
+    strategy = params["strategy"] if params["strategy"] != "ddp" else DDPStrategy(find_unused_parameters=False)
+
     return pl.Trainer(
         accelerator=params["accelerator"],
         devices=params["devices"],
         max_epochs=params["n_epochs"],
-        strategy=params["strategy"],
+        strategy=strategy,
         num_nodes=params["num_nodes"],
         limit_train_batches=params["limit_train_batches"],
         logger=logger,

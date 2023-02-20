@@ -20,6 +20,7 @@ class ImageNetResNet50(pl.LightningModule):
         momentum: float = 0.9,
         weight_decay: float = 0.0005,
         loss_curve_logger_path: Optional[str] = "models/losses.pt",
+        sync_dist: bool = False,
     ):
         super().__init__()
         self.model = resnet50(weights=None)
@@ -28,6 +29,7 @@ class ImageNetResNet50(pl.LightningModule):
         self.lr = lr
         self.momentum = momentum
         self.weight_decay = weight_decay
+        self.sync_dist = sync_dist
 
         self.save_hyperparameters(ignore=["model", "loss_curve_logger"])
 
@@ -42,10 +44,6 @@ class ImageNetResNet50(pl.LightningModule):
     def log_loss_curve(self, idx: int, loss: torch.Tensor) -> None:
         if self.loss_curve_logger is not None:
             self.loss_curve_logger.log(idx, loss)
-
-    @property
-    def should_sync_dist(self):
-        return self.trainer.strategy == "ddp"
 
     def forward(self, x):
         return self.model(x)
@@ -65,7 +63,7 @@ class ImageNetResNet50(pl.LightningModule):
             mean_loss,
             on_step=True,
             on_epoch=False,
-            sync_dist=self.should_sync_dist,
+            sync_dist=self.sync_dist,
         )
 
         return mean_loss
@@ -94,14 +92,14 @@ class ImageNetResNet50(pl.LightningModule):
             self.val_accuracy,
             on_step=False,
             on_epoch=True,
-            sync_dist=self.should_sync_dist,
+            sync_dist=self.sync_dist,
         )
         self.log(
             "validation/loss",
             loss.mean(),
             on_step=False,
             on_epoch=True,
-            sync_dist=self.should_sync_dist,
+            sync_dist=self.sync_dist,
         )
 
     def test_step(self, batch, batch_idx):
