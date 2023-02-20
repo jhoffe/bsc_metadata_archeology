@@ -22,10 +22,10 @@ def main(input_filepath, output_filepath):
     download_dataset(input_filepath, "cifar10")
     download_dataset(input_filepath, "cifar100")
 
-    logger.info("Transforming the CIFAR10 dataset")
-    dataset_transform(input_filepath, output_filepath, "cifar10")
-    logger.info("Transforming the CIFAR100 dataset")
-    dataset_transform(input_filepath, output_filepath, "cifar100")
+    # logger.info("Transforming the CIFAR10 dataset")
+    # dataset_transform(input_filepath, output_filepath, "cifar10")
+    # logger.info("Transforming the CIFAR100 dataset")
+    # dataset_transform(input_filepath, output_filepath, "cifar100")
     logger.info("Transforming the ImageNet dataset")
     dataset_transform(input_filepath, output_filepath, "imagenet")
 

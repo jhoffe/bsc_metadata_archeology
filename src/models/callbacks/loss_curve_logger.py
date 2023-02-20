@@ -55,7 +55,7 @@ class LossCurveLogger(Callback):
             os.makedirs(self.dir, exist_ok=True)
             path = self.get_path(pl_module.current_epoch)
 
-            epoch_losses[pl_module.current_epoch] = self.loss_curves
+            epoch_losses[pl_module.current_epoch] = [(batch_idx, lc.tolist()) for batch_idx, lc in self.loss_curves]
             torch.save(epoch_losses, path)
             artifact = wandb.Artifact(
                 f"losses-{self.wandb_suffix}",
