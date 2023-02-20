@@ -59,7 +59,9 @@ class ImageNetResNet50(pl.LightningModule):
         unreduced_losses = outputs["unreduced_loss"]
         batch_idx = outputs["batch_indices"]
 
-        print(unreduced_losses, batch_idx)
+        print(outputs)
+
+        # print(unreduced_losses, batch_idx)
 
         outputs = []
 
