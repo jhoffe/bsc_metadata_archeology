@@ -14,5 +14,7 @@ commands = [
     "source venv/bin/activate",
     "export CUDA_VISIBLE_DEVICES=0,1",
     "export MASTER_ADDR=$(HOSTNAME)",
+    "cat $LSB_AFFINITY_HOSTFILE > hostfile.txt",
+    "cat $LSB_DJOB_RANKFILE > rankfile.txt",
     "printenv >> env.txt"
 ]
