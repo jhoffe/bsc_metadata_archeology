@@ -4,8 +4,8 @@ n_epochs: 100
 limit_train_batches: null
 
 accelerator: 'gpu'
-strategy: "ddp"
-devices: 2
+strategy: null
+devices: 1
 num_nodes: null
 
 logger: "wandb"
