@@ -63,15 +63,15 @@ class ImageNetResNet50(pl.LightningModule):
             all = [torch.zeros(unreduced_losses.shape, device=self.device)]*self.trainer.num_devices
             torch.distributed.gather(unreduced_losses, all)
 
-            outputs = []
+            losses = []
 
             for losses in all:
-                outputs.append((batch_idx, losses.detach()))
+                losses.append((batch_idx, losses.detach()))
 
-            return {"outputs": outputs, "loss": outputs["loss"]}
+            return {"losses": losses, "loss": outputs["loss"]}
         else:
             torch.distributed.gather(unreduced_losses)
-        return {"outputs": [], "loss": outputs["loss"]}
+        return {"losses": [], "loss": outputs["loss"]}
 
     def training_epoch_end(self, outputs):
         if isinstance(self.logger, WandbLogger) and self.global_rank == 0:
