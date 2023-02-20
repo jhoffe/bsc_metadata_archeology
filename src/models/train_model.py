@@ -44,6 +44,7 @@ def create_trainer(params: dict):
     if params["use_bf16_if_ampere"]:
         precision = "bf16"
 
+
     return pl.Trainer(
         accelerator=params["accelerator"],
         devices=params["devices"],

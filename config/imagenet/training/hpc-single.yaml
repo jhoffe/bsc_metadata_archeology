@@ -14,7 +14,7 @@ precision: 16
 use_bf16_if_ampere: true
 
 seed: 123
-matmul_precision: null
+matmul_precision: "medium"
 
 datamodule: "imagenet"
 data_params:
