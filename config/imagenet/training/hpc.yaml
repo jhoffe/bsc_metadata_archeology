@@ -13,6 +13,8 @@ logger: "wandb"
 precision: 16
 use_bf16_if_ampere: true
 
+log_loss_curves: true
+
 seed: 123
 matmul_precision: "medium"
 
