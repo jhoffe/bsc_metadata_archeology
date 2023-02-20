@@ -1,6 +1,6 @@
 queue = "gpua100"
 name = "train-model"
-walltime = { hours = 16, minutes = 0 }
+walltime = { hours = 72, minutes = 0 }
 cpu = 16
 single_host = true
 memory = 8
