@@ -33,7 +33,7 @@ class MyClusterEnvironment(ClusterEnvironment):
         return int(os.environ["OMPI_COMM_WORLD_LOCAL_RANK"])
 
     def node_rank(self) -> int:
-        return int(os.environ["NODE_RANK"])
+        return int(os.environ["OMPI_COMM_WORLD_NODE_RANK"])
 
     def main_address(self) -> str:
         return os.environ["MASTER_ADDRESS"]
@@ -85,6 +85,7 @@ def create_trainer(params: dict):
         limit_train_batches=params["limit_train_batches"],
         logger=logger,
         precision=precision,
+        plugins=[MyClusterEnvironment()],
     )
 
 
@@ -95,9 +96,6 @@ def create_trainer(params: dict):
 )
 def train(config):
     print(f"configuration: \n {OmegaConf.to_yaml(config.training)}")
-
-    for k, v in os.environ.items():
-        print(f"{k} : {v}")
 
     hparams = config.training
     pl.seed_everything(hparams["seed"])
