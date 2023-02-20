@@ -1,4 +1,3 @@
-import os
 from typing import Optional
 
 import pytorch_lightning as pl
@@ -9,7 +8,9 @@ from torch.optim import SGD
 from torch.optim.lr_scheduler import CosineAnnealingLR
 from torchmetrics.classification import Accuracy
 from torchvision.models.resnet import resnet50
+
 from src.models.utils.loss_logger import LossCurveLogger
+
 
 class ImageNetResNet50(pl.LightningModule):
     def __init__(
@@ -59,7 +60,13 @@ class ImageNetResNet50(pl.LightningModule):
         self.log_loss_curve(batch_idx, loss)
         mean_loss = loss.mean()
 
-        self.log("train/loss", mean_loss, on_step=True, on_epoch=False, sync_dist=self.should_sync_dist)
+        self.log(
+            "train/loss",
+            mean_loss,
+            on_step=True,
+            on_epoch=False,
+            sync_dist=self.should_sync_dist,
+        )
 
         return mean_loss
 
@@ -89,7 +96,13 @@ class ImageNetResNet50(pl.LightningModule):
             on_epoch=True,
             sync_dist=self.should_sync_dist,
         )
-        self.log("validation/loss", loss.mean(), on_step=False, on_epoch=True, sync_dist=self.should_sync_dist)
+        self.log(
+            "validation/loss",
+            loss.mean(),
+            on_step=False,
+            on_epoch=True,
+            sync_dist=self.should_sync_dist,
+        )
 
     def test_step(self, batch, batch_idx):
         x, y = batch

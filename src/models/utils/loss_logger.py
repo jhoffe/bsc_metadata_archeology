@@ -1,5 +1,7 @@
-import torch
 import os
+
+import torch
+
 
 class LossCurveLogger:
     losses: dict[int, torch.Tensor]
