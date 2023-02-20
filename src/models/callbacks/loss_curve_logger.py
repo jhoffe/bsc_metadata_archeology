@@ -40,8 +40,17 @@ class LossCurveLogger(Callback):
         self, trainer: pl.Trainer, pl_module: pl.LightningModule
     ) -> None:
         if isinstance(pl_module.logger, WandbLogger) and pl_module.global_rank == 0:
+            epoch_losses = {}
+
+            if pl_module.current_epoch > 0:
+                epoch_losses = torch.load(
+                    f"models/losses_v{pl_module.current_epoch - 1}"
+                )
+
             path = f"models/losses_v{pl_module.current_epoch}.pt"
-            torch.save(pl_module.loss_curves, path)
+
+            epoch_losses[pl_module.current_epoch] = pl_module.loss_curves
+            torch.save(epoch_losses, path)
             artifact = wandb.Artifact(
                 "losses",
                 type="loss_curves",
