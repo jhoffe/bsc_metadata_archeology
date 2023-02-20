@@ -70,7 +70,8 @@ def train(config):
     dotenv_path = find_dotenv()
     load_dotenv(dotenv_path)
 
-    torch.set_float32_matmul_precision(hparams["matmul_precision"])
+    if hparams["matmul_precision"] is not None:
+        torch.set_float32_matmul_precision(hparams["matmul_precision"])
 
     module, datamodule = create_module_and_data(hparams)
     trainer = create_trainer(hparams)
