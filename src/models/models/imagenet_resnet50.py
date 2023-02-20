@@ -63,10 +63,10 @@ class ImageNetResNet50(pl.LightningModule):
             all = [torch.zeros(unreduced_losses.shape, device=self.device)]*self.trainer.num_devices
             torch.distributed.gather(unreduced_losses, all)
 
-            losses = []
+            all_losses = []
 
             for losses in all:
-                losses.append((batch_idx, losses.detach()))
+                all_losses.append((batch_idx, losses.detach()))
 
             return {"losses": losses, "loss": outputs["loss"]}
         else:
