@@ -68,6 +68,8 @@ class ImageNetResNet50(pl.LightningModule):
             for losses in zip(all):
                 outputs.append((batch_idx, losses))
 
+            print(outputs)
+
             return outputs
         else:
             torch.distributed.gather(unreduced_losses)
