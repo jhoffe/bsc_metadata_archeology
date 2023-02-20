@@ -23,7 +23,7 @@ class LossCurveLogger(Callback):
 
         if pl_module.global_rank == 0:
             all = [
-                torch.zeros(unreduced_losses.shape, device=self.device)
+                torch.zeros(unreduced_losses.shape, device=pl_module.device)
             ] * trainer.num_devices
             torch.distributed.gather(unreduced_losses, all)
 
@@ -32,7 +32,7 @@ class LossCurveLogger(Callback):
             for losses in all:
                 all_losses.append((batch_idx, losses.detach()))
 
-            self.loss_curves += all_losses
+            pl_module.loss_curves += all_losses
         else:
             torch.distributed.gather(unreduced_losses)
 
