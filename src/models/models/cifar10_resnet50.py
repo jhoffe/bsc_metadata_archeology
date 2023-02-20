@@ -10,7 +10,6 @@ from torch.nn import functional as F
 from torch.optim import SGD
 from torch.optim.lr_scheduler import CosineAnnealingLR
 from torchmetrics.classification import Accuracy
-from torchvision.models.resnet import resnet50
 
 from src.models.utils.create_model import create_model
 from src.models.utils.loss_logger import LossCurveLogger
