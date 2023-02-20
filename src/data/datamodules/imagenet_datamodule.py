@@ -1,10 +1,10 @@
 import os
+from multiprocessing import cpu_count
 from typing import Optional
 
 import pytorch_lightning as pl
 import torch
 from torch.utils.data import DataLoader, Dataset
-from multiprocessing import cpu_count
 
 
 class ImageNetDataModule(pl.LightningDataModule):

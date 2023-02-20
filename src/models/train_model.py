@@ -51,7 +51,11 @@ def create_trainer(params: dict):
     if params["use_bf16_if_ampere"]:
         precision = "bf16"
 
-    strategy = params["strategy"] if params["strategy"] != "ddp" else DDPStrategy(find_unused_parameters=False)
+    strategy = (
+        params["strategy"]
+        if params["strategy"] != "ddp"
+        else DDPStrategy(find_unused_parameters=False)
+    )
 
     return pl.Trainer(
         accelerator=params["accelerator"],

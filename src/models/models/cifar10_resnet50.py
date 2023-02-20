@@ -1,9 +1,7 @@
-import os
 from typing import Optional
 
 import pytorch_lightning as pl
 import torch
-import torchvision
 from pytorch_lightning.loggers import WandbLogger
 from torch import nn
 from torch.nn import functional as F
