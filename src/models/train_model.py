@@ -1,14 +1,16 @@
 import os
+from time import gmtime, strftime
 
 import hydra
 import pytorch_lightning as pl
 import torch
 from dotenv import find_dotenv, load_dotenv
 from omegaconf import OmegaConf
-from pytorch_lightning.loggers import WandbLogger
-from pytorch_lightning.strategies import DDPStrategy
+from pytorch_lightning.loggers.wandb import WandbLogger
+from pytorch_lightning.strategies.ddp import DDPStrategy
 
 from src.data.datamodules import ImageNetDataModule
+from src.models.callbacks import LossCurveLogger
 from src.models.models import ImageNetResNet50
 
 
@@ -33,10 +35,12 @@ def create_module_and_data(params: dict):
 
 
 def create_trainer(params: dict):
+    time_dir = strftime("%Y%m%d_%H%M", gmtime())
+
     logger = (
         [
             WandbLogger(
-                name=params["run_name"],
+                name=params["run_name"] + "-" + time_dir,
                 project="bsc",
                 save_dir="models/",
                 config=params,
@@ -57,6 +61,12 @@ def create_trainer(params: dict):
         else DDPStrategy(find_unused_parameters=False)
     )
 
+    callbacks = []
+    if "log_loss_curves" in params.keys() and params["log_loss_curves"]:
+        callbacks.append(LossCurveLogger(f"models/losses/{time_dir}", time_dir))
+
+    log_every_n_steps = params["log_every_n"] if "log_every_n" in params.keys() else 50
+
     return pl.Trainer(
         accelerator=params["accelerator"],
         devices=params["devices"],
@@ -66,6 +76,8 @@ def create_trainer(params: dict):
         limit_train_batches=params["limit_train_batches"],
         logger=logger,
         precision=precision,
+        callbacks=callbacks,
+        log_every_n_steps=log_every_n_steps,
     )
 
 

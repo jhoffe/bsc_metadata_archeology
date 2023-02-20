@@ -1,7 +1,7 @@
 run_name: "imagenet-resnet50-multi-gpu"
 
-n_epochs: 100
-limit_train_batches: null
+n_epochs: 5
+limit_train_batches: 10
 
 accelerator: 'gpu'
 strategy: 'ddp'
@@ -13,10 +13,11 @@ logger: "wandb"
 precision: 16
 use_bf16_if_ampere: true
 
-log_loss_curves: true
-
 seed: 123
 matmul_precision: "medium"
+
+log_every_n: 1
+log_loss_curves: true
 
 datamodule: "imagenet"
 data_params:

@@ -4,9 +4,6 @@ import torch
 
 
 class LossCurveLogger:
-    losses: dict[int, torch.Tensor]
-    save_path: str
-
     def __init__(self, save_path: str):
         self.losses = {}
         self.save_path = save_path

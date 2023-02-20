@@ -50,6 +50,20 @@ class ImagenetValidationDataset(Dataset):
         return len(self.samples)
 
 
+class ImageNetTrainingDataset(ImageFolder):
+    def __getitem__(self, index):
+        path, target = self.samples[index]
+        sample = self.loader(path)
+        if self.transform is not None:
+            sample = self.transform(sample)
+        if self.target_transform is not None:
+            target = self.target_transform(target)
+
+        filename, class_name = self.imgs[index]
+
+        return sample, target, filename, class_name
+
+
 def imagenet_transform(input_filepath: str, output_filepath: str, dataset: str) -> None:
     imagenet_train_transform = transforms.Compose(
         [
@@ -68,7 +82,7 @@ def imagenet_transform(input_filepath: str, output_filepath: str, dataset: str) 
         ]
     )
 
-    dataset_train = ImageFolder(
+    dataset_train = ImageNetTrainingDataset(
         path.join(input_filepath, "imagenet/ILSVRC/Data/CLS-LOC/train"),
         transform=imagenet_train_transform,
     )
