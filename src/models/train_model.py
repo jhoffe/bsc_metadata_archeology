@@ -34,13 +34,10 @@ def create_module_and_data(params: dict):
 
 def create_trainer(params: dict):
     logger = (
-        [WandbLogger(name=params["run_name"], project="bsc", save_dir="models/")]
+        [WandbLogger(name=params["run_name"], project="bsc", save_dir="models/", config=params)]
         if params["logger"] == "wandb"
         else []
     )
-
-    if len(logger) > 0:
-        logger[0].experiment.config.update(params)
 
     precision = params["precision"]
 
