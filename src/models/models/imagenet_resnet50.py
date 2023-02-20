@@ -88,6 +88,8 @@ class ImageNetResNet50(pl.LightningModule):
             artifact = wandb.Artifact(
                 "losses", type="loss_curves", metadata={"epoch": self.current_epoch}
             )
+            artifact.add_file(path)
+
             self.logger.experiment.log_artifact(artifact, "losses")
 
     def validation_step(self, batch, batch_idx):
