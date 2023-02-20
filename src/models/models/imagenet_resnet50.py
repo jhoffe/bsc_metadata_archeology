@@ -77,17 +77,13 @@ class ImageNetResNet50(pl.LightningModule):
         if isinstance(self.logger, WandbLogger) and self.global_rank == 0:
             epoch_losses = []
 
-            print(outputs)
-
             for output in outputs:
                 for batch in output:
                     epoch_losses.append(batch)
 
-            torch.save(epoch_losses, "models/losses.pt")
-
-            artifact = wandb.Artifact("losses", "loss")
-            artifact.add_file("models/losses.pt")
-            self.logger.experiment.log_artifact(artifact)
+            path = f"models/losses_v{self.current_epoch}.pt"
+            torch.save(epoch_losses, path)
+            self.logger.experiment.log_artifact(path, f"losses:{self.current_epoch}")
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
