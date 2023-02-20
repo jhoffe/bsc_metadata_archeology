@@ -2,6 +2,7 @@ from typing import Optional
 
 import pytorch_lightning as pl
 import torch
+import torch.distributed as dist
 from pytorch_lightning.loggers import WandbLogger
 from torch.nn import functional as F
 from torch.optim import SGD
@@ -73,7 +74,11 @@ class ImageNetResNet50(pl.LightningModule):
             self.loss_curve_logger.save().flush()
 
     def on_fit_end(self) -> None:
-        if isinstance(self.logger, WandbLogger) and self.loss_curve_logger is not None:
+        if (
+            isinstance(self.logger, WandbLogger)
+            and self.loss_curve_logger is not None
+            and dist.get_rank() == 0
+        ):
             self.logger.experiment.log_artifact(
                 self.loss_curve_logger.save_path, "losses.pt"
             )
@@ -125,3 +130,6 @@ class ImageNetResNet50(pl.LightningModule):
         }
 
         return {"optimizer": optimizer, "lr_scheduler": scheduler_dict}
+
+    def optimizer_zero_grad(self, epoch, batch_idx, optimizer, optimizer_idx):
+        optimizer.zero_grad(set_to_none=True)
