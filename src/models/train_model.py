@@ -1,5 +1,4 @@
 import os
-from collections import defaultdict
 
 import hydra
 import pytorch_lightning as pl
@@ -7,6 +6,7 @@ import torch
 from dotenv import find_dotenv, load_dotenv
 from omegaconf import OmegaConf
 from pytorch_lightning.loggers import WandbLogger
+from pytorch_lightning.strategies import DDPStrategy
 
 from src.data.datamodules import ImageNetDataModule
 from src.models.models import ImageNetResNet50
@@ -34,24 +34,34 @@ def create_module_and_data(params: dict):
 
 def create_trainer(params: dict):
     logger = (
-        [WandbLogger(name=params["run_name"], project="bsc", save_dir="models/")]
+        [
+            WandbLogger(
+                name=params["run_name"],
+                project="bsc",
+                save_dir="models/",
+                config=params,
+            )
+        ]
         if params["logger"] == "wandb"
         else []
     )
-
-    if len(logger) > 0:
-        logger[0].experiment.config.update(params)
 
     precision = params["precision"]
 
     if params["use_bf16_if_ampere"]:
         precision = "bf16"
 
+    strategy = (
+        params["strategy"]
+        if params["strategy"] != "ddp"
+        else DDPStrategy(find_unused_parameters=False)
+    )
+
     return pl.Trainer(
         accelerator=params["accelerator"],
         devices=params["devices"],
         max_epochs=params["n_epochs"],
-        strategy=params["strategy"],
+        strategy=strategy,
         num_nodes=params["num_nodes"],
         limit_train_batches=params["limit_train_batches"],
         logger=logger,
@@ -73,7 +83,8 @@ def train(config):
     dotenv_path = find_dotenv()
     load_dotenv(dotenv_path)
 
-    torch.set_float32_matmul_precision(hparams["matmul_precision"])
+    if hparams["matmul_precision"] is not None:
+        torch.set_float32_matmul_precision(hparams["matmul_precision"])
 
     module, datamodule = create_module_and_data(hparams)
     trainer = create_trainer(hparams)

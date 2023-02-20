@@ -1,4 +1,6 @@
 import os
+from multiprocessing import cpu_count
+from typing import Optional
 
 import pytorch_lightning as pl
 import torch
@@ -14,7 +16,7 @@ class ImageNetDataModule(pl.LightningDataModule):
         self,
         data_dir: str = "data/processed/imagenet",
         batch_size: int = 128,
-        num_workers: int = 4,
+        num_workers: Optional[int] = None,
     ):
         """Initializes the data module.
 
@@ -26,7 +28,7 @@ class ImageNetDataModule(pl.LightningDataModule):
         super().__init__()
         self.data_dir = data_dir
         self.batch_size = batch_size
-        self.num_workers = num_workers
+        self.num_workers = cpu_count() if num_workers is None else num_workers
 
     def setup(self, stage: str) -> None:
         """Loads the CIFAR10 dataset from files.
