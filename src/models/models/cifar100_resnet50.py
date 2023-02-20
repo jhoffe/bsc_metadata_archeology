@@ -12,25 +12,9 @@ from torch.optim.lr_scheduler import CosineAnnealingLR
 from torchmetrics.classification import Accuracy
 from torchvision.models.resnet import resnet50
 from src.models.utils.loss_logger import LossCurveLogger
+from src.models.utils.create_model import create_model
 
-def create_model(dataset: str, batch_size: int) -> nn.Module:
-    """Creates a ResNet-50 model for CIFAR10 classification.
-
-    Returns:
-        nn.Module, the ResNet-18 model
-    """
-
-    num_classes = 10 if dataset == "cifar10" else 100
-    model = torchvision.models.resnet50(weights=None, num_classes=num_classes)
-
-    model.conv1 = nn.Conv2d(
-        3, batch_size, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False
-    )
-    model.maxpool = nn.Identity()
-
-    return model
-
-class CIFAR10ResNet50(pl.LightningModule):
+class CIFAR100ResNet50(pl.LightningModule):
     def __init__(
         self,
         max_epochs: int = 100,
@@ -38,11 +22,11 @@ class CIFAR10ResNet50(pl.LightningModule):
         momentum: float = 0.9,
         weight_decay: float = 0.0005,
         loss_curve_logger_path: Optional[str] = "models/losses.pt",
-        model: nn.Module = create_model("cifar10", 128),
+        model: nn.Module = create_model("cifar100", 128),
     ):
         super().__init__()
         self.model = model
-        self.num_classes = 10
+        self.num_classes = 100
         self.max_epochs = max_epochs
         self.lr = lr
         self.momentum = momentum
