@@ -6,6 +6,7 @@ import pytorch_lightning as pl
 import torch
 from dotenv import find_dotenv, load_dotenv
 from omegaconf import OmegaConf
+from pytorch_lightning.callbacks.model_checkpoint import ModelCheckpoint
 from pytorch_lightning.loggers.wandb import WandbLogger
 from pytorch_lightning.strategies.ddp import DDPStrategy
 
@@ -37,6 +38,7 @@ def create_module_and_data(params: dict):
 def create_trainer(params: dict):
     time_dir = strftime("%Y%m%d_%H%M", gmtime())
 
+    log_model = params["log_model"] if "log_model" in params.keys() else True
     logger = (
         [
             WandbLogger(
@@ -44,6 +46,7 @@ def create_trainer(params: dict):
                 project="bsc",
                 save_dir="models/",
                 config=params,
+                log_model=log_model
             )
         ]
         if params["logger"] == "wandb"
