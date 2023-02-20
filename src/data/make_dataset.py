@@ -28,6 +28,7 @@ def main(input_filepath, output_filepath):
     # dataset_transform(input_filepath, output_filepath, "cifar100")
     logger.info("Transforming the ImageNet dataset")
     dataset_transform(input_filepath, output_filepath, "imagenet")
+    logger.info("Transformed the ImageNet dataset")
 
 
 if __name__ == "__main__":
