@@ -12,5 +12,8 @@ commands = [
     "module load python3/3.10.7",
     "module load cuda/11.7",
     "source venv/bin/activate",
-    "printenv"
+    "export CUDA_VISIBLE_DEVICES=0,1",
+    "printenv",
+    "cat $LSB_DJOB_RANKFILE",
+    "echo $HOSTNAME"
 ]
