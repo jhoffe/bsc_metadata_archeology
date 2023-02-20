@@ -14,6 +14,6 @@ commands = [
     "source venv/bin/activate",
     "export CUDA_VISIBLE_DEVICES=0,1",
     "printenv",
-    "cat $LSB_DJOB_RANKFILE",
-    "echo $HOSTNAME"
+    "echo 'Printing hostfile for $(HOSTNAME)'",
+    "cat $LSB_DJOB_RANKFILE"
 ]
