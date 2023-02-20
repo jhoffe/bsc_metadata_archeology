@@ -1,5 +1,4 @@
 import os
-from time import gmtime, strftime
 
 import pytorch_lightning as pl
 import torch

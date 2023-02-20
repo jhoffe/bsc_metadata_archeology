@@ -1,9 +1,5 @@
-from typing import Optional
-
 import pytorch_lightning as pl
 import torch
-import wandb
-from pytorch_lightning.loggers import WandbLogger
 from torch.nn import functional as F
 from torch.optim import SGD
 from torch.optim.lr_scheduler import CosineAnnealingLR

@@ -42,7 +42,7 @@ def create_trainer(params: dict):
             WandbLogger(
                 name=params["run_name"] + "-" + time_dir,
                 project="bsc",
-                save_dir=f"models/",
+                save_dir="models/",
                 config=params,
             )
         ]
