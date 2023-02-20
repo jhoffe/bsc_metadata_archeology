@@ -56,7 +56,7 @@ class ImageNetResNet50(pl.LightningModule):
         return {"loss": mean_loss, "unreduced_loss": loss, "filenames": filenames}
 
     def validation_step(self, batch, batch_idx):
-        x, y, filenames, _class_names = batch
+        x, y = batch
 
         y = F.one_hot(y, num_classes=1000).to(torch.float32)
 
@@ -80,7 +80,7 @@ class ImageNetResNet50(pl.LightningModule):
         )
 
     def test_step(self, batch, batch_idx):
-        x, y, filenames, _class_names = batch
+        x, y = batch
 
         y = F.one_hot(y, num_classes=1000).to(torch.float32)
 
