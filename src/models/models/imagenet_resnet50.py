@@ -53,44 +53,7 @@ class ImageNetResNet50(pl.LightningModule):
             sync_dist=self.sync_dist,
         )
 
-        return {"loss": mean_loss, "unreduced_loss": loss, "batch_indices": batch_idx}
-
-    def training_step_end(self, outputs):
-        unreduced_losses = outputs["unreduced_loss"]
-        batch_idx = outputs["batch_indices"]
-
-        if self.global_rank == 0:
-            all = [
-                torch.zeros(unreduced_losses.shape, device=self.device)
-            ] * self.trainer.num_devices
-            torch.distributed.gather(unreduced_losses, all)
-
-            all_losses = []
-
-            for losses in all:
-                all_losses.append((batch_idx, losses.detach()))
-
-            return {"losses": losses, "loss": outputs["loss"]}
-        else:
-            torch.distributed.gather(unreduced_losses)
-        return {"losses": [], "loss": outputs["loss"]}
-
-    def training_epoch_end(self, outputs):
-        if isinstance(self.logger, WandbLogger) and self.global_rank == 0:
-            epoch_losses = []
-
-            for output in outputs:
-                for batch in output:
-                    epoch_losses.append(batch)
-
-            path = f"models/losses_v{self.current_epoch}.pt"
-            torch.save(epoch_losses, path)
-            artifact = wandb.Artifact(
-                "losses", type="loss_curves", metadata={"epoch": self.current_epoch}
-            )
-            artifact.add_file(path)
-
-            self.logger.experiment.log_artifact(artifact, "losses")
+        return {"loss": mean_loss, "unreduced_loss": loss}
 
     def validation_step(self, batch, batch_idx):
         x, y = batch

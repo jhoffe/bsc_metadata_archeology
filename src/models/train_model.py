@@ -5,8 +5,9 @@ import pytorch_lightning as pl
 import torch
 from dotenv import find_dotenv, load_dotenv
 from omegaconf import OmegaConf
-from pytorch_lightning.loggers import WandbLogger
-from pytorch_lightning.strategies import DDPStrategy
+from pytorch_lightning.loggers.wandb import WandbLogger
+from pytorch_lightning.strategies.ddp import DDPStrategy
+from src.models.callbacks import LossCurveLogger
 
 from src.data.datamodules import ImageNetDataModule
 from src.models.models import ImageNetResNet50
@@ -66,6 +67,7 @@ def create_trainer(params: dict):
         limit_train_batches=params["limit_train_batches"],
         logger=logger,
         precision=precision,
+        callbacks=[LossCurveLogger()]
     )
 
 
