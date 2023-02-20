@@ -3,6 +3,8 @@ from typing import Optional
 
 import pytorch_lightning as pl
 import torch
+import torchvision
+from torch import nn
 from pytorch_lightning.loggers import WandbLogger
 from torch.nn import functional as F
 from torch.optim import SGD
@@ -10,6 +12,23 @@ from torch.optim.lr_scheduler import CosineAnnealingLR
 from torchmetrics.classification import Accuracy
 from torchvision.models.resnet import resnet50
 from src.models.utils.loss_logger import LossCurveLogger
+
+def create_model(dataset: str, batch_size: int) -> nn.Module:
+    """Creates a ResNet-50 model for CIFAR10 classification.
+
+    Returns:
+        nn.Module, the ResNet-18 model
+    """
+
+    num_classes = 10 if dataset == "cifar10" else 100
+    model = torchvision.models.resnet50(weights=None, num_classes=num_classes)
+
+    model.conv1 = nn.Conv2d(
+        3, batch_size, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False
+    )
+    model.maxpool = nn.Identity()
+
+    return model
 
 class CIFAR10ResNet50(pl.LightningModule):
     def __init__(
@@ -19,10 +38,11 @@ class CIFAR10ResNet50(pl.LightningModule):
         momentum: float = 0.9,
         weight_decay: float = 0.0005,
         loss_curve_logger_path: Optional[str] = "models/losses.pt",
+        model: nn.Module = create_model("cifar10", 128),
     ):
         super().__init__()
-        self.model = resnet50(weights=None)
-
+        self.model = model
+        self.num_classes = 10
         self.max_epochs = max_epochs
         self.lr = lr
         self.momentum = momentum
@@ -36,7 +56,7 @@ class CIFAR10ResNet50(pl.LightningModule):
             else None
         )
 
-        self.val_accuracy = Accuracy(task="multiclass", num_classes=1000)
+        self.val_accuracy = Accuracy(task="multiclass", num_classes=self.num_classes)
 
     def log_loss_curve(self, idx: int, loss: torch.Tensor) -> None:
         if self.loss_curve_logger is not None:
@@ -52,7 +72,7 @@ class CIFAR10ResNet50(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         x, y = batch
 
-        y = F.one_hot(y, num_classes=1000).to(torch.float32)
+        y = F.one_hot(y, num_classes=self.num_classes).to(torch.float32)
 
         y_hat = self(x)
         loss = F.cross_entropy(y_hat, y, reduction="none")
