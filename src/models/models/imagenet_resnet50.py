@@ -59,8 +59,8 @@ class ImageNetResNet50(pl.LightningModule):
         unreduced_losses = outputs["unreduced_loss"]
         batch_idx = outputs["batch_indices"]
 
-        all = self.all_gather(unreduced_losses)
-
+        all = torch.distributed.gather(unreduced_losses)
+    
         print(all)
 
         for idx, losses in zip(batch_idx, unreduced_losses):
