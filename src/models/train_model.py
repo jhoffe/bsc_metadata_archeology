@@ -6,7 +6,6 @@ import pytorch_lightning as pl
 import torch
 from dotenv import find_dotenv, load_dotenv
 from omegaconf import OmegaConf
-from pytorch_lightning.callbacks.model_checkpoint import ModelCheckpoint
 from pytorch_lightning.loggers.wandb import WandbLogger
 from pytorch_lightning.strategies.ddp import DDPStrategy
 

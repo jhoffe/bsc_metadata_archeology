@@ -51,24 +51,21 @@ class LossCurveLogger(Callback):
         self, trainer: pl.Trainer, pl_module: pl.LightningModule
     ) -> None:
         if isinstance(pl_module.logger, WandbLogger) and pl_module.global_rank == 0:
-            epoch_losses = {}
-
-            if pl_module.current_epoch > 0:
-                epoch_losses = torch.load(self.get_path(pl_module.current_epoch - 1))
-
             os.makedirs(self.dir, exist_ok=True)
             path = self.get_path(pl_module.current_epoch)
 
-            epoch_losses[pl_module.current_epoch] = [
+            epoch_losses = [
                 (batch_idx, lc.tolist(), filenames)
                 for batch_idx, lc, filenames in self.loss_curves
             ]
             torch.save(epoch_losses, path)
+            self.loss_curves = []
+
+    def on_fit_end(self, trainer: pl.Trainer, pl_module: pl.LightningModule) -> None:
+        if pl_module.global_rank == 0:
             artifact = wandb.Artifact(
-                f"losses-{self.wandb_suffix}",
-                type="loss_curves",
-                metadata={"epoch": pl_module.current_epoch},
+                    f"loss_curves-{self.wandb_suffix}", type="loss_curves"
             )
-            artifact.add_file(path)
+            artifact.add_dir(self.dir)
 
             pl_module.logger.experiment.log_artifact(artifact, "loss_curves")
