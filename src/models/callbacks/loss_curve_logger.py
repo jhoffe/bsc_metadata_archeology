@@ -39,6 +39,7 @@ class LossCurveLogger(Callback):
         if isinstance(trainer.strategy, SingleDeviceStrategy):
             loss_curves = self.loss_curves
         else:
+            print(self.loss_curves)
             if pl_module.global_rank == 0:
                 devices = [None]*trainer.num_devices
                 torch.distributed.gather_object(self.loss_curves, devices)
