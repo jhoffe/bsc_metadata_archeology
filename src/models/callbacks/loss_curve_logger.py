@@ -69,6 +69,9 @@ class LossCurveLogger(Callback):
         os.makedirs(self.dir, exist_ok=True)
         path = self.get_path(pl_module.current_epoch)
 
+        print("Batch ids=", len(batch_ids))
+        print("Filenames=", len(filenames))
+        print("Losses=", losses.shape)
         pa_indices = pa.array(
             batch_ids,
             type=pa.uint16()
