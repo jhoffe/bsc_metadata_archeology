@@ -1,7 +1,6 @@
 run_name: "imagenet-resnet50"
 
-n_epochs: 100
-limit_train_batches: null
+checkpoint: "models/model.ckpt"
 
 accelerator: 'gpu'
 strategy: null
@@ -22,8 +21,3 @@ data_params:
   batch_size: 128
 
 model: "imagenet-resnet50"
-model_params:
-  lr: 0.1
-  momentum: 0.9
-  weight_decay: 0.0005
-  max_epochs: 100

@@ -28,14 +28,13 @@ class ImageNetResNet50(pl.LightningModule):
         self.save_hyperparameters(ignore=["model"])
 
         self.val_accuracy = Accuracy(task="multiclass", num_classes=1000)
+        self.test_accuracy = Accuracy(task="multiclass", num_classes=1000)
 
     def forward(self, x):
         return self.model(x)
 
     def training_step(self, batch, batch_idx):
         x, y, filenames, _class_names = batch
-
-        y = F.one_hot(y, num_classes=1000).to(torch.float32)
 
         y_hat = self(x)
         loss = F.cross_entropy(y_hat, y, reduction="none")
@@ -54,8 +53,6 @@ class ImageNetResNet50(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         x, y = batch
 
-        y = F.one_hot(y, num_classes=1000).to(torch.float32)
-
         y_hat = self(x)
         loss = F.cross_entropy(y_hat, y, reduction="none")
 
@@ -63,7 +60,7 @@ class ImageNetResNet50(pl.LightningModule):
         self.log(
             "val/accuracy",
             self.val_accuracy,
-            on_step=False,
+            on_step=True,
             on_epoch=True,
             sync_dist=self.sync_dist,
         )
@@ -78,11 +75,17 @@ class ImageNetResNet50(pl.LightningModule):
     def test_step(self, batch, batch_idx):
         x, y = batch
 
-        y = F.one_hot(y, num_classes=1000).to(torch.float32)
-
         y_hat = self(x)
         loss = F.cross_entropy(y_hat, y, reduction="none")
+        self.test_accuracy.update(y_hat, y)
         self.log("test/loss", loss.mean(), on_step=False, on_epoch=True)
+
+    def test_epoch_end(self, outputs) -> None:
+        self.log(
+            "testing/accuracy",
+            self.test_accuracy.compute(),
+            sync_dist=self.sync_dist,
+        )
 
     def configure_optimizers(self):
         optimizer = SGD(
