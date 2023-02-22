@@ -36,34 +36,41 @@ class LossCurveLogger(Callback):
     def on_train_epoch_end(
         self, trainer: pl.Trainer, pl_module: pl.LightningModule
     ) -> None:
-        if isinstance(trainer.strategy, SingleDeviceStrategy):
-            loss_curves = self.loss_curves
-        else:
-            print(self.loss_curves)
-            if pl_module.global_rank == 0:
-                devices = [None]*trainer.num_devices
-                torch.distributed.gather_object(self.loss_curves, devices)
+        batch_ids = []
+        filenames = []
+        for batch_idx, _, fns in self.loss_curves:
+            batch_ids.extend([batch_idx]*len(filenames))
+            filenames.extend(fns)
+        losses = torch.vstack([lc[1] for lc in self.loss_curves])
 
-                loss_curves = []
-                for device in devices:
-                    loss_curves.extend(device)
+        if not isinstance(trainer.strategy, SingleDeviceStrategy):
+            if pl_module.global_rank == 0:
+                device_batch_ids = [None]*trainer.num_devices
+                device_losses = [torch.zeros(losses.shape)]*trainer.num_devices
+                device_filenames = [None]*trainer.num_devices
+
+                torch.distributed.gather_object(batch_ids, device_batch_ids)
+                torch.distributed.gather(losses, device_losses)
+                torch.distributed.gather_object(filenames, device_filenames)
+
+                batch_ids = []
+                filenames = []
+                losses = torch.vstack(device_losses)
+
+                for i in range(trainer.num_devices):
+                    batch_ids.extend(device_batch_ids[i])
+                    device_filenames.extend(device_filenames[i])
             else:
-                torch.distributed.gather_object(self.loss_curves)
+                torch.distributed.gather_object(filenames)
+                torch.distributed.gather(losses)
+                torch.distributed.gather_object(batch_ids)
                 return
 
         os.makedirs(self.dir, exist_ok=True)
         path = self.get_path(pl_module.current_epoch)
 
-        indices = []
-        losses = []
-        filenames = []
-        for batch_idx, batch_loss, batch_filenames in loss_curves:
-            indices.extend([batch_idx]*len(batch_filenames))
-            losses.extend(batch_loss.cpu().numpy())
-            filenames.extend(batch_filenames)
-
         pa_indices = pa.array(
-            indices,
+            batch_ids,
             type=pa.uint16()
         )
         pa_losses = pa.array(losses)
