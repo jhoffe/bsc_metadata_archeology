@@ -69,17 +69,23 @@ def create_trainer(params: dict):
 
     log_every_n_steps = params["log_every_n"] if "log_every_n" in params.keys() else 50
 
+    profiler = params["profiler"] if "profiler" in params.keys() else None
+    limit_train_batches = params["limit_train_batches"] if "limit_train_batches" in params.keys() else None
+    limit_val_batches = params["limit_val_batches"] if "limit_val_batches" in params.keys() else None
+
     return pl.Trainer(
         accelerator=params["accelerator"],
         devices=params["devices"],
         max_epochs=params["n_epochs"],
         strategy=strategy,
         num_nodes=params["num_nodes"],
-        limit_train_batches=params["limit_train_batches"],
+        limit_train_batches=limit_train_batches,
+        limit_val_batches=limit_val_batches,
         logger=logger,
         precision=precision,
         callbacks=callbacks,
         log_every_n_steps=log_every_n_steps,
+        profiler=profiler
     )
 
 

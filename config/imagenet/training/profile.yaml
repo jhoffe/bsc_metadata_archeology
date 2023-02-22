@@ -1,17 +1,17 @@
-run_name: "imagenet-resnet50-dev"
+run_name: "imagenet-resnet50-profile"
 
-n_epochs: 10
-limit_train_batches: 20
-limit_val_batches: 20
+n_epochs: 5
+limit_train_batches: 25
+limit_val_batches: 25
 
 accelerator: 'gpu'
 strategy: null
 devices: 1
 num_nodes: null
 
-logger: "wandb"
+logger: null
 
-log_every_n: 1
+profiler: "simple"
 log_loss_curves: true
 log_model: "all"
 

@@ -7,6 +7,7 @@ import torch
 import wandb
 from pytorch_lightning.callbacks import Callback
 from pytorch_lightning.loggers.wandb import WandbLogger
+from pytorch_lightning.strategies.single_device import SingleDeviceStrategy
 
 
 class LossCurveLogger(Callback):
@@ -27,24 +28,7 @@ class LossCurveLogger(Callback):
         unreduced_losses = outputs["unreduced_loss"]
         filenames = outputs["filenames"]
 
-        if pl_module.global_rank == 0:
-            all = [
-                torch.zeros(unreduced_losses.shape, device=pl_module.device)
-            ] * trainer.num_devices
-            torch.distributed.gather(unreduced_losses, all)
-
-            all_filenames = [None] * trainer.num_devices
-            torch.distributed.gather_object(filenames, all_filenames)
-
-            all_losses = []
-
-            for losses, fns in zip(all, all_filenames):
-                all_losses.append((batch_idx, losses.detach(), fns))
-
-            self.loss_curves += all_losses
-        else:
-            torch.distributed.gather(unreduced_losses)
-            torch.distributed.gather_object(filenames)
+        self.loss_curves.append((batch_idx, unreduced_losses.detach(), filenames))
 
     def get_path(self, version: int) -> str:
         return os.path.join(self.dir, f"losses_v{version}.pt")
@@ -52,43 +36,58 @@ class LossCurveLogger(Callback):
     def on_train_epoch_end(
         self, trainer: pl.Trainer, pl_module: pl.LightningModule
     ) -> None:
-        if pl_module.global_rank == 0:
-            os.makedirs(self.dir, exist_ok=True)
-            path = self.get_path(pl_module.current_epoch)
+        if isinstance(trainer.strategy, SingleDeviceStrategy):
+            loss_curves = self.loss_curves
+        else:
+            if pl_module.global_rank == 0:
+                devices = [None]*trainer.num_devices
+                torch.distributed.gather_object(self.loss_curves, devices)
 
-            epoch_losses = [
-                (batch_idx, lc.tolist(), filenames)
-                for batch_idx, lc, filenames in self.loss_curves
-            ]
+                loss_curves = []
+                for device in devices:
+                    loss_curves.extend(device)
+            else:
+                torch.distributed.gather_object(self.loss_curves)
+                return
 
-            indices = []
-            losses = []
-            filenames = []
-            for batch_idx, batch_loss, batch_filenames in self.loss_curves:
-                indices.extend([batch_idx]*len(batch_filenames))
-                losses.extend(batch_loss.tolist())
-                filenames.extend(batch_filenames)
+        os.makedirs(self.dir, exist_ok=True)
+        path = self.get_path(pl_module.current_epoch)
 
-            pa_indices = pa.array(indices, type=pa.uint32())
-            pa_losses = pa.array(losses, type=pa.float16())
-            pa_filenames = pa.array(filenames)
-            pa_epochs = pa.array([pl_module.current_epoch]*len(losses), type=pa.uint8())
+        indices = []
+        losses = []
+        filenames = []
+        for batch_idx, batch_loss, batch_filenames in loss_curves:
+            indices.extend([batch_idx]*len(batch_filenames))
+            losses.extend(batch_loss.cpu().numpy())
+            filenames.extend(batch_filenames)
 
-            pa_table = pa.table(
-                [pa_indices, pa_losses, pa_filenames, pa_epochs],
-                names=["batch_idx", "loss", "filename", "epoch"]
-            )
-            pq.write_to_dataset(
-                pa_table,
-                self.dir,
-                partition_cols=["epoch"],
-                use_legacy_dataset=False
-            )
+        pa_indices = pa.array(
+            indices,
+            type=pa.uint16()
+        )
+        pa_losses = pa.array(losses)
+        pa_filenames = pa.array(filenames, type=pa.string())
+        pa_epochs = pa.array(
+            [pl_module.current_epoch]*len(losses),
+            type=pa.uint16()
+        )
 
-            self.loss_curves = []
+        pa_table = pa.table(
+            [pa_indices, pa_losses, pa_filenames, pa_epochs],
+            names=["batch_idx", "loss", "filename", "epoch"]
+        )
+        pq.write_to_dataset(
+            pa_table,
+            self.dir,
+            partition_cols=["epoch"],
+            use_legacy_dataset=False
+        )
 
-            if isinstance(pl_module.logger, WandbLogger):
-                self.log_artifact(pl_module.logger.experiment, pl_module.current_epoch)
+        self.loss_curves = []
+
+    def on_fit_end(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule") -> None:
+        if isinstance(pl_module.logger, WandbLogger):
+            self.log_artifact(pl_module.logger.experiment, pl_module.current_epoch)
 
     def log_artifact(self, experiment, epoch: int) -> None:
         artifact = wandb.Artifact(
