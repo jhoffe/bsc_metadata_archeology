@@ -73,7 +73,7 @@ class LossCurveLogger(Callback):
             batch_ids,
             type=pa.uint16()
         )
-        pa_losses = pa.array(losses)
+        pa_losses = pa.array(losses.cpu().numpy())
         pa_filenames = pa.array(filenames, type=pa.string())
         pa_epochs = pa.array(
             [pl_module.current_epoch]*len(losses),
