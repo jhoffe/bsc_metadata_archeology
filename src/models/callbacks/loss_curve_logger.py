@@ -39,7 +39,7 @@ class LossCurveLogger(Callback):
         batch_ids = []
         filenames = []
         for batch_idx, _, fns in self.loss_curves:
-            batch_ids.extend([batch_idx]*len(filenames))
+            batch_ids.extend([batch_idx]*len(fns))
             filenames.extend(fns)
 
         losses = torch.cat([lc[1] for lc in self.loss_curves], 0)
@@ -70,9 +70,6 @@ class LossCurveLogger(Callback):
         os.makedirs(self.dir, exist_ok=True)
         path = self.get_path(pl_module.current_epoch)
 
-        print("Batch ids=", len(batch_ids))
-        print("Filenames=", len(filenames))
-        print("Losses=", losses.shape)
         pa_indices = pa.array(
             batch_ids,
             type=pa.uint16()
