@@ -70,11 +70,16 @@ class LossCurveLogger(Callback):
         os.makedirs(self.dir, exist_ok=True)
         path = self.get_path(pl_module.current_epoch)
 
+        print("Epoch=", pl_module.current_epoch)
+        print("Filenames=", len(filenames))
+        print("Batch ids=", len(batch_ids))
+        print("Losses=", losses.shape)
+
         pa_indices = pa.array(
             batch_ids,
             type=pa.uint16()
         )
-        pa_losses = pa.array(losses.cpu().numpy().reshape(-1))
+        pa_losses = pa.array(losses.cpu().numpy())
         pa_filenames = pa.array(filenames, type=pa.string())
         pa_epochs = pa.array(
             [pl_module.current_epoch]*len(losses),
