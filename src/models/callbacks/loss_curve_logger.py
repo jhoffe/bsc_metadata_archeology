@@ -57,8 +57,6 @@ class LossCurveLogger(Callback):
                 batch_ids = []
                 filenames = []
                 losses = torch.cat(device_losses, 0)
-                print("FN=", len(device_filenames[0]), len(device_filenames[1]))
-                print("BI=", len(device_batch_ids[0]), len(device_batch_ids[1]))
 
                 for i in range(trainer.num_devices):
                     batch_ids.extend(device_batch_ids[i])
@@ -72,11 +70,6 @@ class LossCurveLogger(Callback):
                 return
 
         os.makedirs(self.dir, exist_ok=True)
-
-        print("Epoch=", pl_module.current_epoch)
-        print("Filenames=", len(filenames))
-        print("Batch ids=", len(batch_ids))
-        print("Losses=", losses.shape)
 
         pa_indices = pa.array(
             batch_ids,
