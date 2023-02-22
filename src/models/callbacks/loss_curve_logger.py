@@ -1,5 +1,7 @@
 import os
 
+import pyarrow as pa
+import pyarrow.parquet as pq
 import pytorch_lightning as pl
 import torch
 import wandb
@@ -50,7 +52,7 @@ class LossCurveLogger(Callback):
     def on_train_epoch_end(
         self, trainer: pl.Trainer, pl_module: pl.LightningModule
     ) -> None:
-        if isinstance(pl_module.logger, WandbLogger) and pl_module.global_rank == 0:
+        if pl_module.global_rank == 0:
             os.makedirs(self.dir, exist_ok=True)
             path = self.get_path(pl_module.current_epoch)
 
@@ -58,14 +60,40 @@ class LossCurveLogger(Callback):
                 (batch_idx, lc.tolist(), filenames)
                 for batch_idx, lc, filenames in self.loss_curves
             ]
-            torch.save(epoch_losses, path)
+
+            indices = []
+            losses = []
+            filenames = []
+            for batch_idx, batch_loss, batch_filenames in self.loss_curves:
+                indices.extend([batch_idx]*len(batch_filenames))
+                losses.extend(batch_loss.tolist())
+                filenames.extend(batch_filenames)
+
+            pa_indices = pa.array(indices, type=pa.uint32())
+            pa_losses = pa.array(losses, type=pa.float16())
+            pa_filenames = pa.array(filenames)
+            pa_epochs = pa.array([pl_module.current_epoch]*len(losses), type=pa.uint8())
+
+            pa_table = pa.table(
+                [pa_indices, pa_losses, pa_filenames, pa_epochs],
+                names=["batch_idx", "loss", "filename", "epoch"]
+            )
+            pq.write_to_dataset(
+                pa_table,
+                self.dir,
+                partition_cols=["epoch"],
+                use_legacy_dataset=False
+            )
+
             self.loss_curves = []
 
-    def on_fit_end(self, trainer: pl.Trainer, pl_module: pl.LightningModule) -> None:
-        if pl_module.global_rank == 0:
-            artifact = wandb.Artifact(
-                    f"loss_curves-{self.wandb_suffix}", type="loss_curves"
-            )
-            artifact.add_dir(self.dir)
+            if isinstance(pl_module.logger, WandbLogger):
+                self.log_artifact(pl_module.logger.experiment, pl_module.current_epoch)
 
-            pl_module.logger.experiment.log_artifact(artifact, "loss_curves")
+    def log_artifact(self, experiment, epoch: int) -> None:
+        artifact = wandb.Artifact(
+                f"loss_curves-epoch-{epoch}", type="loss_curves"
+        )
+        artifact.add_dir(self.dir)
+
+        experiment.log_artifact(artifact, "loss_curves")
