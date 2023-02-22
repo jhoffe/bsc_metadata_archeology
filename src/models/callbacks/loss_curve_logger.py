@@ -61,9 +61,9 @@ class LossCurveLogger(Callback):
                     batch_ids.extend(device_batch_ids[i])
                     device_filenames.extend(device_filenames[i])
             else:
-                torch.distributed.gather_object(filenames)
-                torch.distributed.gather(losses)
                 torch.distributed.gather_object(batch_ids)
+                torch.distributed.gather(losses)
+                torch.distributed.gather_object(filenames)
                 return
 
         os.makedirs(self.dir, exist_ok=True)
