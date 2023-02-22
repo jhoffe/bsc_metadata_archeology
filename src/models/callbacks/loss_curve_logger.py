@@ -46,7 +46,7 @@ class LossCurveLogger(Callback):
         if not isinstance(trainer.strategy, SingleDeviceStrategy):
             if pl_module.global_rank == 0:
                 device_batch_ids = [None]*trainer.num_devices
-                device_losses = [torch.zeros(losses.shape)]*trainer.num_devices
+                device_losses = [torch.zeros(losses.shape, device=pl_module.device)]*trainer.num_devices
                 device_filenames = [None]*trainer.num_devices
 
                 torch.distributed.gather_object(batch_ids, device_batch_ids)

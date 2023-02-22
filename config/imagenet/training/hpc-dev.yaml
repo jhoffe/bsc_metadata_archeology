@@ -2,6 +2,7 @@ run_name: "imagenet-resnet50-multi-gpu-dev"
 
 n_epochs: 5
 limit_train_batches: 10
+limit_val_batches: 10
 
 accelerator: 'gpu'
 strategy: 'ddp'
