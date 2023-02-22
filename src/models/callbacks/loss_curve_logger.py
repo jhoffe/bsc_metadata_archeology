@@ -41,6 +41,8 @@ class LossCurveLogger(Callback):
         for batch_idx, _, fns in self.loss_curves:
             batch_ids.extend([batch_idx]*len(filenames))
             filenames.extend(fns)
+
+        print(self.loss_curves[0][1].shap.shapee)
         losses = torch.vstack([lc[1] for lc in self.loss_curves])
 
         if not isinstance(trainer.strategy, SingleDeviceStrategy):
