@@ -11,7 +11,7 @@ num_nodes: null
 logger: "wandb"
 
 precision: 16
-use_bf16_if_ampere: true
+use_bf16_if_ampere: false
 
 seed: 123
 matmul_precision: "medium"
