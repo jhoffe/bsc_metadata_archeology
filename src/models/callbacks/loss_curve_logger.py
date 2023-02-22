@@ -42,8 +42,7 @@ class LossCurveLogger(Callback):
             batch_ids.extend([batch_idx]*len(filenames))
             filenames.extend(fns)
 
-        print(self.loss_curves[0][1].shape)
-        losses = torch.vstack([lc[1] for lc in self.loss_curves])
+        losses = torch.cat([lc[1] for lc in self.loss_curves], 0)
 
         if not isinstance(trainer.strategy, SingleDeviceStrategy):
             if pl_module.global_rank == 0:
@@ -57,7 +56,7 @@ class LossCurveLogger(Callback):
 
                 batch_ids = []
                 filenames = []
-                losses = torch.vstack(device_losses)
+                losses = torch.cat(device_losses, 0)
 
                 for i in range(trainer.num_devices):
                     batch_ids.extend(device_batch_ids[i])
