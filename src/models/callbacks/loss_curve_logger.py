@@ -42,8 +42,6 @@ class LossCurveLogger(Callback):
             batch_ids.extend([batch_idx]*len(filenames))
             filenames.extend(fns)
         losses = torch.vstack([lc[1] for lc in self.loss_curves])
-        print(losses.shape)
-        print(len(filenames))
 
         if not isinstance(trainer.strategy, SingleDeviceStrategy):
             if pl_module.global_rank == 0:
@@ -59,11 +57,9 @@ class LossCurveLogger(Callback):
                 filenames = []
                 losses = torch.vstack(device_losses)
 
-                print(device_filenames)
-
                 for i in range(trainer.num_devices):
                     batch_ids.extend(device_batch_ids[i])
-                    device_filenames.extend(device_filenames[i])
+                    filenames.extend(device_filenames[i])
             else:
                 torch.distributed.gather_object(batch_ids)
                 torch.distributed.gather(losses)
@@ -73,11 +69,6 @@ class LossCurveLogger(Callback):
         os.makedirs(self.dir, exist_ok=True)
         path = self.get_path(pl_module.current_epoch)
 
-        print(losses.shape)
-        print(losses)
-
-        print("Filenames=", len(filenames))
-        print("Batch ids=", len(batch_ids))
         pa_indices = pa.array(
             batch_ids,
             type=pa.uint16()
