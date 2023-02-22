@@ -72,6 +72,9 @@ class LossCurveLogger(Callback):
 
         print(losses.shape)
         print(losses)
+
+        print("Filenames=", len(filenames))
+        print("Batch ids=", len(batch_ids))
         pa_indices = pa.array(
             batch_ids,
             type=pa.uint16()
