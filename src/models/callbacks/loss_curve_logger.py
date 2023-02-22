@@ -67,6 +67,8 @@ class LossCurveLogger(Callback):
                 torch.distributed.gather_object(batch_ids)
                 torch.distributed.gather(losses)
                 torch.distributed.gather_object(filenames)
+
+                self.loss_curves = []
                 return
 
         os.makedirs(self.dir, exist_ok=True)
