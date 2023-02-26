@@ -1,0 +1,8 @@
+defaults:
+  - default
+
+n_epochs: 5
+limit_train_batches: 25
+limit_val_batches: 25
+logger: null
+profiler: "simple"

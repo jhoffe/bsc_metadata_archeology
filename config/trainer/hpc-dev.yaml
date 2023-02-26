@@ -1,0 +1,6 @@
+defaults:
+  - hpc
+
+n_epochs: 5
+limit_train_batches: 10
+limit_val_batches: 10

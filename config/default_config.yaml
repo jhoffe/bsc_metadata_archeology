@@ -1,0 +1,8 @@
+defaults:
+    - dataset: imagenet
+    - model: resnet50
+    - trainer: default
+    - _self_
+
+seed: 123
+name: "imagenet-resnet50"

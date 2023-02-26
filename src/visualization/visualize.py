@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
-import torch
 import numpy as np
+import torch
 from PIL import Image
 
 train_set = torch.load("data/processed/imagenet/train.pt")

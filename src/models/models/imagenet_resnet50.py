@@ -1,5 +1,4 @@
 import pytorch_lightning as pl
-import torch
 from torch.nn import functional as F
 from torch.optim import SGD
 from torch.optim.lr_scheduler import CosineAnnealingLR
@@ -80,7 +79,13 @@ class ImageNetResNet50(pl.LightningModule):
         y_hat = self(x)
         loss = F.cross_entropy(y_hat, y, reduction="none")
         self.test_accuracy.update(y_hat, y)
-        self.log("test/loss", loss.mean(), on_step=False, on_epoch=True, sync_dist=self.sync_dist_val)
+        self.log(
+            "test/loss",
+            loss.mean(),
+            on_step=False,
+            on_epoch=True,
+            sync_dist=self.sync_dist_val,
+        )
 
     def test_epoch_end(self, outputs) -> None:
         self.log(
