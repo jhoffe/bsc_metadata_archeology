@@ -1,0 +1,12 @@
+n_epochs: 100
+limit_train_batches: null
+accelerator: 'gpu'
+strategy: null
+devices: 1
+num_nodes: null
+precision: 16
+use_bf16_if_ampere: false
+matmul_precision: "medium"
+log_loss_curves: true
+log_model: "all"
+logger: "wandb"

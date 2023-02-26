@@ -26,7 +26,7 @@ requirements: test_environment
 	$(PYTHON_INTERPRETER) -m poetry install
 
 ## Make Dataset
-data: 
+data:
 	$(PYTHON_INTERPRETER) src/data/make_dataset.py data/raw data/processed
 
 ## Make transforms
@@ -49,8 +49,8 @@ lint:
 	flake8 src
 
 format:
-	poetry run black src
-	poetry run isort src
+	poetry run black src/**/*.py
+	poetry run isort src/**/*.py
 
 symlink:
 	ln -s /dtu/imagenet data/raw/imagenet
