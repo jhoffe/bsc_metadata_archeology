@@ -51,7 +51,7 @@ class CIFARResNet50(pl.LightningModule):
             sync_dist=self.sync_dist_train,
         )
 
-        return {"loss": mean_loss, "unreduced_loss": loss, "filenames": [""]*len(y)}
+        return {"loss": mean_loss, "unreduced_loss": loss, "filenames": [""] * len(y)}
 
     def validation_step(self, batch, batch_idx):
         x, y = batch

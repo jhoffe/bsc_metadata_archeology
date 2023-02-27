@@ -3,7 +3,6 @@ import os
 import pytorch_lightning as pl
 import torch
 from torch.utils.data import DataLoader, TensorDataset
-from src.data.c_scores import CustomCIFAR10, CustomCIFAR100
 
 
 class CIFAR10DataModule(pl.LightningDataModule):
