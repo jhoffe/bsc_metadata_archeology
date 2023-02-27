@@ -1,6 +1,6 @@
 n_epochs: 150
 limit_train_batches: null
-accelerator: 'cpu'
+accelerator: 'gpu'
 strategy: null
 devices: 1
 num_nodes: null

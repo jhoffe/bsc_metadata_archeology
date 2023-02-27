@@ -1,11 +1,11 @@
 queue = "gpua100"
-name = "train-model-dev"
+name = "train-imagenet-dev"
 walltime = { hours = 1, minutes = 0 }
 cpu = 16
 single_host = true
 memory = 8
-standard_output = { name = "logs/train-model-dev.out", overwrite = true }
-error_output = { name = "logs/train-model-dev.err", overwrite = true }
+standard_output = { name = "logs/train-imagenet-dev.out", overwrite = true }
+error_output = { name = "logs/train-imagenet-dev.err", overwrite = true }
 use_gpu = { num_of_gpus = 2 }
 
 commands = [

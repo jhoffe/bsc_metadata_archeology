@@ -1,0 +1,6 @@
+defaults:
+  - default-cifar
+
+accelerator: 'gpu'
+strategy: 'ddp'
+devices: 2
