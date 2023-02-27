@@ -5,9 +5,9 @@ import pytorch_lightning as pl
 from dotenv import find_dotenv, load_dotenv
 from omegaconf import DictConfig, OmegaConf
 
-from .create_datamodule import create_datamodule
-from .create_module import create_module
-from .create_trainer import create_trainer
+from src.models.create_datamodule import create_datamodule
+from src.models.create_module import create_module
+from src.models.create_trainer import create_trainer
 
 
 @hydra.main(
