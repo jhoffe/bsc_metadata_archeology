@@ -147,6 +147,16 @@ class CIFAR100DataModule(pl.LightningDataModule):
             shuffle=True,
         )
 
+    def val_dataloader(self) -> DataLoader:
+        """Returns the dataloader for the test set.
+
+        Returns:
+            DataLoader, the dataloader for the test set.
+        """
+        return DataLoader(
+            self.cifar100_test, batch_size=self.batch_size, num_workers=self.num_workers
+        )
+
     def test_dataloader(self) -> DataLoader:
         """Returns the dataloader for the test set.
 
