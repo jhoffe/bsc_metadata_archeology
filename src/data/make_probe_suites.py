@@ -39,6 +39,7 @@ class ProbeSuiteGenerator:
     def __init__(
         self,
         dataset: Dataset,
+        scores: list,
         dataset_len: int,
         label_count: int,
         seed: int = 123,
