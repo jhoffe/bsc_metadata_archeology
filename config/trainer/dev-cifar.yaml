@@ -1,0 +1,6 @@
+defaults:
+  - default-cifar
+
+n_epochs: 10
+limit_train_batches: 20
+log_every_n: 1

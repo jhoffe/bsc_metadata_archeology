@@ -1,65 +1,46 @@
-from typing import Optional
-
 import pytorch_lightning as pl
-import torch
-from pytorch_lightning.loggers import WandbLogger
-from torch import nn
 from torch.nn import functional as F
 from torch.optim import SGD
 from torch.optim.lr_scheduler import CosineAnnealingLR
 from torchmetrics.classification import Accuracy
 
 from src.models.utils.create_model import create_model
-from src.models.utils.loss_logger import LossCurveLogger
 
 
-class CIFAR10ResNet50(pl.LightningModule):
+class CIFARResNet50(pl.LightningModule):
     def __init__(
         self,
-        max_epochs: int = 100,
+        max_epochs: int = 150,
         lr: float = 0.1,
         momentum: float = 0.9,
         weight_decay: float = 0.0005,
-        loss_curve_logger_path: Optional[str] = "models/losses.pt",
-        model: nn.Module = create_model("cifar10", 128),
+        sync_dist_train: bool = False,
+        sync_dist_val: bool = False,
+        num_classes: int = 10,
     ):
         super().__init__()
-        self.model = model
-        self.num_classes = 10
+        self.model = create_model(num_classes=num_classes)
+
         self.max_epochs = max_epochs
         self.lr = lr
         self.momentum = momentum
         self.weight_decay = weight_decay
+        self.sync_dist_train = sync_dist_train
+        self.sync_dist_val = sync_dist_val
 
-        self.save_hyperparameters(ignore=["model", "loss_curve_logger"])
+        self.save_hyperparameters(ignore=["model"])
 
-        self.loss_curve_logger = (
-            LossCurveLogger(loss_curve_logger_path)
-            if loss_curve_logger_path is not None
-            else None
-        )
-
-        self.val_accuracy = Accuracy(task="multiclass", num_classes=self.num_classes)
-
-    def log_loss_curve(self, idx: int, loss: torch.Tensor) -> None:
-        if self.loss_curve_logger is not None:
-            self.loss_curve_logger.log(idx, loss)
-
-    @property
-    def should_sync_dist(self):
-        return self.trainer.strategy == "ddp"
+        self.val_accuracy = Accuracy(task="multiclass", num_classes=num_classes)
+        self.test_accuracy = Accuracy(task="multiclass", num_classes=num_classes)
 
     def forward(self, x):
         return self.model(x)
 
     def training_step(self, batch, batch_idx):
-        x, y = batch
-
-        y = F.one_hot(y, num_classes=self.num_classes).to(torch.float32)
+        x, y, c_score = batch
 
         y_hat = self(x)
         loss = F.cross_entropy(y_hat, y, reduction="none")
-        self.log_loss_curve(batch_idx, loss)
         mean_loss = loss.mean()
 
         self.log(
@@ -67,25 +48,13 @@ class CIFAR10ResNet50(pl.LightningModule):
             mean_loss,
             on_step=True,
             on_epoch=False,
-            sync_dist=self.should_sync_dist,
+            sync_dist=self.sync_dist_train,
         )
 
-        return mean_loss
-
-    def training_epoch_end(self, outputs):
-        if self.loss_curve_logger is not None:
-            self.loss_curve_logger.save().flush()
-
-    def on_fit_end(self) -> None:
-        if isinstance(self.logger, WandbLogger) and self.loss_curve_logger is not None:
-            self.logger.experiment.log_artifact(
-                self.loss_curve_logger.save_path, "losses.pt"
-            )
+        return {"loss": mean_loss, "unreduced_loss": loss, "filenames": [""] * len(y)}
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
-
-        y = F.one_hot(y, num_classes=1000).to(torch.float32)
 
         y_hat = self(x)
         loss = F.cross_entropy(y_hat, y, reduction="none")
@@ -94,26 +63,38 @@ class CIFAR10ResNet50(pl.LightningModule):
         self.log(
             "val/accuracy",
             self.val_accuracy,
-            on_step=False,
+            on_step=True,
             on_epoch=True,
-            sync_dist=self.should_sync_dist,
+            sync_dist=self.sync_dist_val,
         )
         self.log(
             "validation/loss",
             loss.mean(),
             on_step=False,
             on_epoch=True,
-            sync_dist=self.should_sync_dist,
+            sync_dist=self.sync_dist_val,
         )
 
     def test_step(self, batch, batch_idx):
         x, y = batch
 
-        y = F.one_hot(y, num_classes=1000).to(torch.float32)
-
         y_hat = self(x)
         loss = F.cross_entropy(y_hat, y, reduction="none")
-        self.log("test/loss", loss.mean(), on_step=False, on_epoch=True)
+        self.test_accuracy.update(y_hat, y)
+        self.log(
+            "test/loss",
+            loss.mean(),
+            on_step=False,
+            on_epoch=True,
+            sync_dist=self.sync_dist_val,
+        )
+
+    def test_epoch_end(self, outputs) -> None:
+        self.log(
+            "testing/accuracy",
+            self.test_accuracy.compute(),
+            sync_dist=self.sync_dist_val,
+        )
 
     def configure_optimizers(self):
         optimizer = SGD(
@@ -129,3 +110,6 @@ class CIFAR10ResNet50(pl.LightningModule):
         }
 
         return {"optimizer": optimizer, "lr_scheduler": scheduler_dict}
+
+    def optimizer_zero_grad(self, epoch, batch_idx, optimizer, optimizer_idx):
+        optimizer.zero_grad(set_to_none=True)
