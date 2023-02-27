@@ -6,6 +6,7 @@ from dotenv import find_dotenv, load_dotenv
 
 from src.data.download import download_dataset
 from src.data.transform import dataset_transform
+from src.data.c_scores import c_scores_dataset
 
 
 @click.command()
@@ -22,12 +23,12 @@ def main(input_filepath, output_filepath):
     download_dataset(input_filepath, "cifar10")
     download_dataset(input_filepath, "cifar100")
 
-    # logger.info("Transforming the CIFAR10 dataset")
-    # dataset_transform(input_filepath, output_filepath, "cifar10")
-    # logger.info("Transforming the CIFAR100 dataset")
-    # dataset_transform(input_filepath, output_filepath, "cifar100")
+    logger.info("Transforming the CIFAR10 dataset")
+    c_scores_dataset("cifar10", "data/raw", "data/processed")
+    logger.info("Transforming the CIFAR100 dataset")
+    c_scores_dataset("cifar100", "data/raw", "data/processed")
     logger.info("Transforming the ImageNet dataset")
-    dataset_transform(input_filepath, output_filepath, "imagenet")
+    #dataset_transform(input_filepath, output_filepath, "imagenet")
     logger.info("Transformed the ImageNet dataset")
 
 

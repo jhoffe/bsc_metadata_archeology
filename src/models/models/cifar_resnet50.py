@@ -19,7 +19,7 @@ class CIFARResNet50(pl.LightningModule):
         num_classes: int = 10,
     ):
         super().__init__()
-        self.model = create_model(n_classes=num_classes)
+        self.model = create_model(num_classes=num_classes)
 
         self.max_epochs = max_epochs
         self.lr = lr
@@ -54,7 +54,7 @@ class CIFARResNet50(pl.LightningModule):
         return {"loss": mean_loss, "unreduced_loss": loss, "filenames": [""]*len(y)}
 
     def validation_step(self, batch, batch_idx):
-        x, y, c_score = batch
+        x, y = batch
 
         y_hat = self(x)
         loss = F.cross_entropy(y_hat, y, reduction="none")
