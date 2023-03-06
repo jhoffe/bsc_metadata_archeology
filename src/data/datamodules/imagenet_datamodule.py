@@ -42,7 +42,7 @@ class ImageNetDataModule(pl.LightningDataModule):
         val_dataset = torch.load(os.path.join(self.data_dir, "val.pt"))
 
         self.imagenet_train = IDXDataset(train_dataset)
-        self.imagenet_val = IDXDataset(val_dataset)
+        self.imagenet_val = val_dataset
 
     def train_dataloader(self) -> DataLoader:
         """Returns the dataloader for the validation set.

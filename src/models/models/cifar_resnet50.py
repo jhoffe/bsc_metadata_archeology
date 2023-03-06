@@ -37,7 +37,7 @@ class CIFARResNet50(pl.LightningModule):
         return self.model(x)
 
     def training_step(self, batch, batch_idx):
-        x, y, c_score = batch
+        (x, y, c_score), indices = batch
 
         y_hat = self(x)
         loss = F.cross_entropy(y_hat, y, reduction="none")
@@ -51,7 +51,7 @@ class CIFARResNet50(pl.LightningModule):
             sync_dist=self.sync_dist_train,
         )
 
-        return {"loss": mean_loss, "unreduced_loss": loss, "filenames": [""] * len(y)}
+        return {"loss": mean_loss, "unreduced_loss": loss, "indices": indices}
 
     def validation_step(self, batch, batch_idx):
         x, y = batch

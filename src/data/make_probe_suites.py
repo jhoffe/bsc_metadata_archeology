@@ -1,21 +1,25 @@
 import os
-from typing import Optional
+from typing import Dict, Optional
 
 import numpy as np
 import torch
 from torch.utils.data import Dataset, Subset
-from torch.utils.data.dataset import T_co
 from torchvision.transforms import transforms
 
 
 class AddGaussianNoise(object):
-    def __init__(self, mean=0.0, std=1.0):
+    def __init__(self, mean=0.0, std=1.0, generator: torch.Generator = None):
         self.std = std
         self.mean = mean
+        self.generator = generator
 
     def __call__(self, tensor):
         return torch.clip(
-            tensor + torch.randn(tensor.size()) * self.std + self.mean, 0.0, 1.0
+            tensor
+            + torch.randn(tensor.size(), generator=self.generator) * self.std
+            + self.mean,
+            0.0,
+            1.0,
         )
 
 
@@ -35,19 +39,12 @@ class ProbeSuiteGenerator(Dataset):
     label_count: int
 
     typical: list
-    typical_idx: list
-
     atypical: list
-    atypical_idx: list
-
     random_outputs: list
-    random_outputs_idx: list
-
     random_inputs_outputs: list
-    random_inputs_outputs_idx: list
-
     corrupted: list
-    corrupted_idx: list
+
+    dataset_indices_to_probe_indices: Dict[int, int] = {}
 
     _combined: Optional[list] = None
 
@@ -65,68 +62,84 @@ class ProbeSuiteGenerator(Dataset):
         self.remaining_indices = list(range(dataset_len))
         self.label_count = label_count
         self.num_probes = num_probes
-        self.generator = torch.Generator().manual_seed(seed)
 
-    def generate(self):
+    def generate(self, generator: torch.Generator):
         self.generate_atypical()
         self.generate_typical()
-        self.generate_random_outputs()
-        self.generate_random_inputs_outputs()
-        self.generate_corrupted()
+        self.generate_random_outputs(generator)
+        self.generate_random_inputs_outputs(generator)
+        self.generate_corrupted(generator)
+
+        self.dataset_indices_to_probe_indices = {
+            ds_idx: ps_idx for ps_idx, (_, _, ds_idx) in enumerate(self.combined)
+        }
 
     def generate_typical(self):
         sorted_indices = np.argsort(self.dataset.score)
-        subset = self.get_subset(sorted_indices[: self.num_probes])
-        self.typical = [(x, y) for x, y, _ in subset]
+        subset = self.get_subset(indices=sorted_indices[: self.num_probes])
+        self.typical = [(x, y, idx) for (x, y, _), idx in zip(subset, subset.indices)]
 
     def generate_atypical(self):
         sorted_indices = np.argsort(self.dataset.score)
-        subset = self.get_subset(sorted_indices[-self.num_probes :])  # noqa: E203
-        self.atypical = [(x, y) for x, y, _ in subset]
+        subset = self.get_subset(
+            indices=sorted_indices[-self.num_probes :]  # noqa: E203
+        )  # noqa: E203
+        self.atypical = [(x, y, idx) for (x, y, _), idx in zip(subset, subset.indices)]
 
-    def generate_random_outputs(self):
-        subset = self.get_subset()
+    def generate_random_outputs(self, generator: torch.Generator):
+        subset = self.get_subset(generator=generator)
         self.random_outputs = [
             (
                 x,
                 torch.multinomial(
                     torch.Tensor([1 if y != i else 0 for i in range(self.label_count)]),
                     1,
-                    generator=self.generator,
+                    generator=generator,
                 ).item(),
+                idx,
             )
-            for x, y, _ in subset
+            for (x, y, _), idx in zip(subset, subset.indices)
         ]
 
-    def generate_random_inputs_outputs(self):
-        subset = self.get_subset()
+    def generate_random_inputs_outputs(self, generator: torch.Generator):
+        subset = self.get_subset(generator=generator)
 
         self.random_inputs_outputs = [
-            (torch.rand_like(x), torch.randint(0, self.label_count, (1,)).item())
-            for x, y, _ in subset
+            (
+                torch.rand_like(x),
+                torch.randint(0, self.label_count, (1,), generator=generator).item(),
+                idx,
+            )
+            for (x, y, _), idx in zip(subset, subset.indices)
         ]
 
-    def generate_corrupted(self):
-        subset = self.get_subset()
+    def generate_corrupted(self, generator: torch.Generator):
+        subset = self.get_subset(generator=generator)
         corruption_transform = transforms.Compose(
             [AddGaussianNoise(mean=0.0, std=0.25), ClampRangeTransform()]
         )
 
-        self.corrupted = [(corruption_transform(x), y) for x, y, _ in subset]
+        self.corrupted = [
+            (corruption_transform(x), y, idx)
+            for (x, y, _), idx in zip(subset, subset.indices)
+        ]
 
-    def get_subset(self, indices: Optional[list[int]] = None) -> Subset:
+    def get_subset(
+        self,
+        generator: Optional[torch.Generator] = None,
+        indices: Optional[list[int]] = None,
+    ) -> Subset:
         if indices is None:
             subset_indices = torch.multinomial(
                 torch.ones(len(self.remaining_indices)),
                 self.num_probes,
                 replacement=False,
-                generator=self.generator,
+                generator=generator,
             )
         else:
             subset_indices = indices
 
         self.used_indices.extend(subset_indices)
-
         self.remaining_indices = [
             self.remaining_indices[i]
             for i in range(len(self.remaining_indices))
@@ -148,35 +161,34 @@ class ProbeSuiteGenerator(Dataset):
 
         return self._combined
 
-    def __getitem__(self, index) -> T_co:
-        return self.combined[index]
+    def __getitem__(self, index):
+        if index in self.used_indices:
+            return self.combined[self.dataset_indices_to_probe_indices[index]], index
+
+        return self.dataset[index], index
 
     def __len__(self):
-        return len(self.combined)
+        return self.dataset_len
 
 
 def make_probe_suites(
-    input_filepath: str, output_filepath: str, dataset: str, num_probes: int = 250
+    input_filepath: str,
+    output_filepath: str,
+    dataset: str,
+    label_count: int,
+    num_probes: int = 500,
 ):
-    imagenet_dataset = torch.load(os.path.join(input_filepath, "cifar10", "train.pt"))
-    imagenet_dataset_len = len(imagenet_dataset)
-    imagenet_label_count = 10
+    data = torch.load(os.path.join(input_filepath, dataset, "train.pt"))
+    dataset_length = len(data)
 
     probe_suite = ProbeSuiteGenerator(
-        imagenet_dataset,
-        imagenet_dataset_len,
-        imagenet_label_count,
+        data,
+        dataset_length,
+        label_count,
         num_probes=num_probes,
     )
+    probe_suite.generate(torch.Generator().manual_seed(123))
 
-    probe_suite.generate()
-
-    print(len(probe_suite.used_indices))
-    print(len(imagenet_dataset))
-    print(
-        len(imagenet_dataset) - len(probe_suite.used_indices),
-        len(probe_suite.remaining_indices),
+    torch.save(
+        probe_suite, os.path.join(output_filepath, dataset, "train_probe_suite.pt")
     )
-
-
-make_probe_suites("data/processed", "data/processed", "cifar10")
