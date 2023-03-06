@@ -39,6 +39,8 @@ class LossCurveLogger(Callback):
             torch.int32
         )
 
+        print(indices.dtype)
+
         for batch_idx, _, fns in self.loss_curves:
             batch_ids.extend([batch_idx] * len(fns))
 
@@ -51,9 +53,7 @@ class LossCurveLogger(Callback):
                     torch.zeros(losses.shape, device=pl_module.device)
                 ] * trainer.num_devices
                 device_indices = [
-                    torch.zeros(
-                        losses.shape, device=pl_module.device, dtype=torch.int32
-                    )
+                    torch.zeros(losses.shape, dtype=torch.int32)
                 ] * trainer.num_devices
 
                 torch.distributed.gather_object(batch_ids, device_batch_ids)
