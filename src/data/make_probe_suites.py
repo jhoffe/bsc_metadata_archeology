@@ -72,6 +72,14 @@ class ProbeSuiteGenerator(Dataset):
         }
 
         assert len(np.intersect1d(self.remaining_indices, self.used_indices)) == 0
+        assert (
+            len(np.unique(self.remaining_indices + self.used_indices))
+            == self.dataset_len
+        )
+        assert (
+            len(np.unique(self.remaining_indices)) + len(np.unique(self.used_indices))
+            == self.dataset_len
+        )
 
     def generate_typical(self):
         sorted_indices = np.argsort(self.dataset.score)
@@ -127,11 +135,15 @@ class ProbeSuiteGenerator(Dataset):
         indices: Optional[list[int]] = None,
     ) -> Subset:
         if indices is None:
-            subset_indices = torch.multinomial(
+            remaining_indexes_indexes = torch.multinomial(
                 torch.ones(len(self.remaining_indices)),
                 self.num_probes,
                 replacement=False,
             )
+
+            subset_indices = [
+                self.remaining_indices[i] for i in remaining_indexes_indexes
+            ]
         else:
             subset_indices = indices
 
@@ -142,7 +154,7 @@ class ProbeSuiteGenerator(Dataset):
             if self.remaining_indices[i] not in subset_indices
         ]
 
-        return Subset(self.dataset, subset_indices.tolist())
+        return Subset(self.dataset, subset_indices)
 
     @property
     def combined(self):

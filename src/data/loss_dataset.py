@@ -19,4 +19,5 @@ if __name__ == "__main__":
 
     all_pos = list(range(0, 50000))
     unique_pos = df["sample_index"].unique().tolist()
+    print(len(unique_pos))
     probe_suite = torch.load("data/processed/cifar10/train_probe_suite.pt")
