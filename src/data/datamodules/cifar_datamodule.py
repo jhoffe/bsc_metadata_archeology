@@ -49,7 +49,7 @@ class CIFAR10DataModule(pl.LightningDataModule):
         print(train_dataset)
         test_dataset = torch.load(os.path.join(self.data_dir, "test.pt"))
 
-        self.cifar10_train = train_dataset
+        self.cifar10_train = IDXDataset(train_dataset)
         self.cifar10_test = test_dataset
 
     def train_dataloader(self) -> DataLoader:
