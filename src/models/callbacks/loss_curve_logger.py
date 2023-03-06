@@ -35,7 +35,9 @@ class LossCurveLogger(Callback):
         self, trainer: pl.Trainer, pl_module: pl.LightningModule
     ) -> None:
         batch_ids = []
-        indices = torch.cat([indices for _, _, indices in self.loss_curves], 0)
+        indices = torch.cat([indices for _, _, indices in self.loss_curves], 0).to(
+            torch.int32
+        )
 
         for batch_idx, _, fns in self.loss_curves:
             batch_ids.extend([batch_idx] * len(fns))
@@ -49,7 +51,9 @@ class LossCurveLogger(Callback):
                     torch.zeros(losses.shape, device=pl_module.device)
                 ] * trainer.num_devices
                 device_indices = [
-                    torch.zeros(losses.shape, device=pl_module.device)
+                    torch.zeros(
+                        losses.shape, device=pl_module.device, dtype=torch.int32
+                    )
                 ] * trainer.num_devices
 
                 torch.distributed.gather_object(batch_ids, device_batch_ids)
