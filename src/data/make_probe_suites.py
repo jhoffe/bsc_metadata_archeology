@@ -154,11 +154,12 @@ class ProbeSuiteGenerator(Dataset):
             subset_indices = indices
 
         self.used_indices.extend(subset_indices)
-        self.remaining_indices = [
-            self.remaining_indices[i]
-            for i in range(len(self.remaining_indices))
-            if self.remaining_indices[i] not in subset_indices
-        ]
+        self.remaining_indices = [idx for idx in self.remaining_indices if idx not in subset_indices]
+        #self.remaining_indices = [
+            #self.remaining_indices[i]
+            #for i in range(len(self.remaining_indices))
+            #if self.remaining_indices[i] not in subset_indices
+        #]
 
         return Subset(self.dataset, subset_indices)
 
