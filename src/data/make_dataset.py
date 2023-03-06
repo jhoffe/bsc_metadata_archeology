@@ -7,6 +7,7 @@ from dotenv import find_dotenv, load_dotenv
 from src.data.c_scores import c_scores_dataset
 from src.data.download import download_dataset
 from src.data.make_probe_suites import make_probe_suites
+from src.data.transform import dataset_transform
 
 
 @click.command()
@@ -28,7 +29,7 @@ def main(input_filepath, output_filepath):
     logger.info("Transforming the CIFAR100 dataset")
     c_scores_dataset("cifar100", "data/raw", "data/processed")
     logger.info("Transforming the ImageNet dataset")
-    # dataset_transform(input_filepath, output_filepath, "imagenet")
+    dataset_transform(input_filepath, output_filepath, "imagenet")
     logger.info("Transformed the ImageNet dataset")
 
     # Generating probe suites
@@ -37,7 +38,7 @@ def main(input_filepath, output_filepath):
     logger.info("Generating probe suites for CIFAR100")
     make_probe_suites("data/processed", "data/processed", "cifar100", label_count=100)
     logger.info("Generating probe suites for ImageNet")
-    # make_probe_suites("imagenet", "data/processed", "data/processed")
+    make_probe_suites("imagenet", "data/processed", "data/processed")
 
 
 if __name__ == "__main__":
