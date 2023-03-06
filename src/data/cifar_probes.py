@@ -1,8 +1,8 @@
-import torch
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+import torch
 
-data = torch.load('data/processed/cifar10/train.pt')
+data = torch.load("data/processed/cifar10/train.pt")
 scores = data.score
 
 sorted = np.argsort(scores)

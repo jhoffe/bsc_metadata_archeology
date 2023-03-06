@@ -4,6 +4,8 @@ import pytorch_lightning as pl
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 
+from src.data.utils import IDXDataset
+
 
 class CIFAR10DataModule(pl.LightningDataModule):
     """Data module for loading the CIFAR10 dataset.
@@ -100,8 +102,8 @@ class CIFAR100DataModule(pl.LightningDataModule):
         num_workers: int, number of worker to use for data loading
     """
 
-    cifar100_train: TensorDataset
-    cifar100_test: TensorDataset
+    cifar100_train: IDXDataset
+    cifar100_test: IDXDataset
     num_workers: int
 
     def __init__(
@@ -131,8 +133,8 @@ class CIFAR100DataModule(pl.LightningDataModule):
         train_dataset = torch.load(os.path.join(self.data_dir, "train.pt"))
         test_dataset = torch.load(os.path.join(self.data_dir, "test.pt"))
 
-        self.cifar100_train = train_dataset
-        self.cifar100_test = test_dataset
+        self.cifar100_train = IDXDataset(train_dataset)
+        self.cifar100_test = IDXDataset(test_dataset)
 
     def train_dataloader(self) -> DataLoader:
         """Returns the dataloader for the validation set.
