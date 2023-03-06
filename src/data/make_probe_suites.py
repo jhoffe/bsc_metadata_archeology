@@ -147,15 +147,9 @@ class ProbeSuiteGenerator(Dataset):
         indices: Optional[list[int]] = None,
     ) -> Subset:
         if indices is None:
-            remaining_indexes_indexes = torch.multinomial(
-                torch.ones(len(self.remaining_indices)),
-                self.num_probes,
-                replacement=False,
-            )
-
-            subset_indices = [
-                self.remaining_indices[i] for i in remaining_indexes_indexes
-            ]
+            subset_indices = np.random.choice(
+                self.remaining_indices, self.num_probes, replace=False
+            ).tolist()
         else:
             subset_indices = indices
 
