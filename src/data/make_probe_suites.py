@@ -8,16 +8,13 @@ from torchvision.transforms import transforms
 
 
 class AddGaussianNoise(object):
-    def __init__(self, mean=0.0, std=1.0, generator: torch.Generator = None):
+    def __init__(self, mean=0.0, std=1.0):
         self.std = std
         self.mean = mean
-        self.generator = generator
 
     def __call__(self, tensor):
         return torch.clip(
-            tensor
-            + torch.randn(tensor.size(), generator=self.generator) * self.std
-            + self.mean,
+            tensor + torch.randn(tensor.size()) * self.std + self.mean,
             0.0,
             1.0,
         )
@@ -33,7 +30,7 @@ class ClampRangeTransform(object):
 
 class ProbeSuiteGenerator(Dataset):
     dataset: Dataset
-    remaining_indices: list
+    remaining_indices: list = []
     used_indices: list = []
     dataset_len: int
     label_count: int
@@ -53,26 +50,28 @@ class ProbeSuiteGenerator(Dataset):
         dataset: Dataset,
         dataset_len: int,
         label_count: int,
-        seed: int = 123,
         num_probes: int = 250,
     ):
         self.dataset = dataset
         assert hasattr(self.dataset, "score")
         self.dataset_len = dataset_len
+        self.used_indices = []
         self.remaining_indices = list(range(dataset_len))
         self.label_count = label_count
         self.num_probes = num_probes
 
-    def generate(self, generator: torch.Generator):
+    def generate(self):
         self.generate_atypical()
         self.generate_typical()
-        self.generate_random_outputs(generator)
-        self.generate_random_inputs_outputs(generator)
-        self.generate_corrupted(generator)
+        self.generate_random_outputs()
+        self.generate_random_inputs_outputs()
+        self.generate_corrupted()
 
         self.dataset_indices_to_probe_indices = {
             ds_idx: ps_idx for ps_idx, (_, _, ds_idx) in enumerate(self.combined)
         }
+
+        assert len(np.intersect1d(self.remaining_indices, self.used_indices)) == 0
 
     def generate_typical(self):
         sorted_indices = np.argsort(self.dataset.score)
@@ -86,35 +85,34 @@ class ProbeSuiteGenerator(Dataset):
         )  # noqa: E203
         self.atypical = [(x, y, idx) for (x, y, _), idx in zip(subset, subset.indices)]
 
-    def generate_random_outputs(self, generator: torch.Generator):
-        subset = self.get_subset(generator=generator)
+    def generate_random_outputs(self):
+        subset = self.get_subset()
         self.random_outputs = [
             (
                 x,
                 torch.multinomial(
                     torch.Tensor([1 if y != i else 0 for i in range(self.label_count)]),
                     1,
-                    generator=generator,
                 ).item(),
                 idx,
             )
             for (x, y, _), idx in zip(subset, subset.indices)
         ]
 
-    def generate_random_inputs_outputs(self, generator: torch.Generator):
-        subset = self.get_subset(generator=generator)
+    def generate_random_inputs_outputs(self):
+        subset = self.get_subset()
 
         self.random_inputs_outputs = [
             (
                 torch.rand_like(x),
-                torch.randint(0, self.label_count, (1,), generator=generator).item(),
+                torch.randint(0, self.label_count, (1,)).item(),
                 idx,
             )
             for (x, y, _), idx in zip(subset, subset.indices)
         ]
 
-    def generate_corrupted(self, generator: torch.Generator):
-        subset = self.get_subset(generator=generator)
+    def generate_corrupted(self):
+        subset = self.get_subset()
         corruption_transform = transforms.Compose(
             [AddGaussianNoise(mean=0.0, std=0.25), ClampRangeTransform()]
         )
@@ -126,7 +124,6 @@ class ProbeSuiteGenerator(Dataset):
 
     def get_subset(
         self,
-        generator: Optional[torch.Generator] = None,
         indices: Optional[list[int]] = None,
     ) -> Subset:
         if indices is None:
@@ -134,7 +131,6 @@ class ProbeSuiteGenerator(Dataset):
                 torch.ones(len(self.remaining_indices)),
                 self.num_probes,
                 replacement=False,
-                generator=generator,
             )
         else:
             subset_indices = indices
@@ -143,7 +139,7 @@ class ProbeSuiteGenerator(Dataset):
         self.remaining_indices = [
             self.remaining_indices[i]
             for i in range(len(self.remaining_indices))
-            if i not in subset_indices
+            if self.remaining_indices[i] not in subset_indices
         ]
 
         return Subset(self.dataset, subset_indices.tolist())
@@ -187,7 +183,7 @@ def make_probe_suites(
         label_count,
         num_probes=num_probes,
     )
-    probe_suite.generate(torch.Generator().manual_seed(123))
+    probe_suite.generate()
 
     torch.save(
         probe_suite, os.path.join(output_filepath, dataset, "train_probe_suite.pt")

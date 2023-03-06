@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 
 import click
+import pytorch_lightning as pl
 from dotenv import find_dotenv, load_dotenv
 
 from src.data.c_scores import c_scores_dataset
@@ -14,6 +15,7 @@ from src.data.transform import dataset_transform
 @click.argument("input_filepath", type=click.Path(exists=True))
 @click.argument("output_filepath", type=click.Path())
 def main(input_filepath, output_filepath):
+    pl.seed_everything(123)
     """Runs data processing scripts to turn raw data from (../raw) into
     cleaned data ready to be analyzed (saved in ../processed).
     """
