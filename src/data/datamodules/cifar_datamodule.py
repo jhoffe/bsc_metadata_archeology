@@ -45,11 +45,10 @@ class CIFAR10DataModule(pl.LightningDataModule):
         Args:
             stage: str, the stage for which the setup is being run (e.g. 'fit', 'test')
         """
-        train_dataset = torch.load(os.path.join(self.data_dir, "train.pt"))
-        print(train_dataset)
+        train_dataset = torch.load(os.path.join(self.data_dir, "train_probe_suite.pt"))
         test_dataset = torch.load(os.path.join(self.data_dir, "test.pt"))
 
-        self.cifar10_train = IDXDataset(train_dataset)
+        self.cifar10_train = train_dataset
         self.cifar10_test = test_dataset
 
     def train_dataloader(self) -> DataLoader:
