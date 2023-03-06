@@ -68,7 +68,7 @@ class ProbeSuiteGenerator(Dataset):
         self.generate_corrupted()
 
         self.dataset_indices_to_probe_indices = {
-            ds_idx: ps_idx for ps_idx, (_, _, ds_idx) in enumerate(self.combined)
+            ds_idx: ps_idx for ps_idx, ((_, _, _), ds_idx) in enumerate(self.combined)
         }
 
         assert len(np.intersect1d(self.remaining_indices, self.used_indices)) == 0
@@ -84,27 +84,36 @@ class ProbeSuiteGenerator(Dataset):
     def generate_typical(self):
         sorted_indices = np.argsort(self.dataset.score)
         subset = self.get_subset(indices=sorted_indices[: self.num_probes])
-        self.typical = [(x, y, idx) for (x, y, _), idx in zip(subset, subset.indices)]
+        self.typical = [
+            ((x, y, c), idx) for (x, y, c), idx in zip(subset, subset.indices)
+        ]
 
     def generate_atypical(self):
         sorted_indices = np.argsort(self.dataset.score)
         subset = self.get_subset(
             indices=sorted_indices[-self.num_probes :]  # noqa: E203
         )  # noqa: E203
-        self.atypical = [(x, y, idx) for (x, y, _), idx in zip(subset, subset.indices)]
+        self.atypical = [
+            ((x, y, c), idx) for (x, y, c), idx in zip(subset, subset.indices)
+        ]
 
     def generate_random_outputs(self):
         subset = self.get_subset()
         self.random_outputs = [
             (
-                x,
-                torch.multinomial(
-                    torch.Tensor([1 if y != i else 0 for i in range(self.label_count)]),
-                    1,
-                ).item(),
+                (
+                    x,
+                    torch.multinomial(
+                        torch.Tensor(
+                            [1 if y != i else 0 for i in range(self.label_count)]
+                        ),
+                        1,
+                    ).item(),
+                    c,
+                ),
                 idx,
             )
-            for (x, y, _), idx in zip(subset, subset.indices)
+            for (x, y, c), idx in zip(subset, subset.indices)
         ]
 
     def generate_random_inputs_outputs(self):
@@ -112,11 +121,14 @@ class ProbeSuiteGenerator(Dataset):
 
         self.random_inputs_outputs = [
             (
-                torch.rand_like(x),
-                torch.randint(0, self.label_count, (1,)).item(),
+                (
+                    torch.rand_like(x),
+                    torch.randint(0, self.label_count, (1,)).item(),
+                    c,
+                ),
                 idx,
             )
-            for (x, y, _), idx in zip(subset, subset.indices)
+            for (x, y, c), idx in zip(subset, subset.indices)
         ]
 
     def generate_corrupted(self):
@@ -126,8 +138,8 @@ class ProbeSuiteGenerator(Dataset):
         )
 
         self.corrupted = [
-            (corruption_transform(x), y, idx)
-            for (x, y, _), idx in zip(subset, subset.indices)
+            ((corruption_transform(x), y, c), idx)
+            for (x, y, c), idx in zip(subset, subset.indices)
         ]
 
     def get_subset(
@@ -171,7 +183,7 @@ class ProbeSuiteGenerator(Dataset):
 
     def __getitem__(self, index):
         if index in self.used_indices:
-            return self.combined[self.dataset_indices_to_probe_indices[index]], index
+            return self.combined[self.dataset_indices_to_probe_indices[index]]
 
         return self.dataset[index], index
 
