@@ -3,4 +3,5 @@ defaults:
 
 n_epochs: 10
 limit_train_batches: 20
+limit_val_batches: 20
 log_every_n: 1
