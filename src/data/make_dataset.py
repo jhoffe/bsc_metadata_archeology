@@ -24,21 +24,21 @@ def main(input_filepath, output_filepath):
 
     logger.info("Downloading the CIFAR10 and CIFAR100 datasets.")
     download_dataset(input_filepath, "cifar10")
-    #download_dataset(input_filepath, "cifar100")
+    download_dataset(input_filepath, "cifar100")
 
     logger.info("Transforming the CIFAR10 dataset")
     c_scores_dataset("cifar10", "data/raw", "data/processed")
     logger.info("Transforming the CIFAR100 dataset")
-    #c_scores_dataset("cifar100", "data/raw", "data/processed")
+    c_scores_dataset("cifar100", "data/raw", "data/processed")
     logger.info("Transforming the ImageNet dataset")
-    #dataset_transform(input_filepath, output_filepath, "imagenet")
+    dataset_transform(input_filepath, output_filepath, "imagenet")
     logger.info("Transformed the ImageNet dataset")
 
     # Generating probe suites
     logger.info("Generating probe suites for CIFAR10")
     make_probe_suites("data/processed", "data/processed", "cifar10", label_count=10)
     logger.info("Generating probe suites for CIFAR100")
-    #make_probe_suites("data/processed", "data/processed", "cifar100", label_count=100)
+    make_probe_suites("data/processed", "data/processed", "cifar100", label_count=100)
     logger.info("Generating probe suites for ImageNet")
 
 
