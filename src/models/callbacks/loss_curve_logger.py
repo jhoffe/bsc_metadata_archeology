@@ -57,12 +57,11 @@ class LossCurveLogger(Callback):
                 torch.distributed.gather(indices, device_indices)
 
                 batch_ids = []
-                indices = []
+                indices = torch.cat(device_indices, 0)
                 losses = torch.cat(device_losses, 0)
 
                 for i in range(trainer.num_devices):
                     batch_ids.extend(device_batch_ids[i])
-                    indices.extend(device_indices[i])
             else:
                 torch.distributed.gather_object(batch_ids)
                 torch.distributed.gather(losses)
