@@ -35,10 +35,10 @@ class LossCurveLogger(Callback):
         self, trainer: pl.Trainer, pl_module: pl.LightningModule
     ) -> None:
         batch_ids = []
-        indices = []
+        indices = torch.cat([indices for _, _, indices in self.loss_curves], 0)
+
         for batch_idx, _, fns in self.loss_curves:
             batch_ids.extend([batch_idx] * len(fns))
-            indices.extend(fns)
 
         losses = torch.cat([lc[1] for lc in self.loss_curves], 0)
 
@@ -48,23 +48,25 @@ class LossCurveLogger(Callback):
                 device_losses = [
                     torch.zeros(losses.shape, device=pl_module.device)
                 ] * trainer.num_devices
-                device_filenames = [None] * trainer.num_devices
+                device_indices = [
+                    torch.zeros(losses.shape, device=pl_module.device)
+                ] * trainer.num_devices
 
                 torch.distributed.gather_object(batch_ids, device_batch_ids)
                 torch.distributed.gather(losses, device_losses)
-                torch.distributed.gather_object(indices, device_filenames)
+                torch.distributed.gather(indices, device_indices)
 
                 batch_ids = []
-                filenames = []
+                indices = []
                 losses = torch.cat(device_losses, 0)
 
                 for i in range(trainer.num_devices):
                     batch_ids.extend(device_batch_ids[i])
-                    filenames.extend(device_filenames[i])
+                    indices.extend(device_indices[i])
             else:
                 torch.distributed.gather_object(batch_ids)
                 torch.distributed.gather(losses)
-                torch.distributed.gather_object(indices)
+                torch.distributed.gather(indices)
 
                 self.loss_curves = []
                 return
@@ -73,7 +75,7 @@ class LossCurveLogger(Callback):
 
         pa_batch_indices = pa.array(batch_ids, type=pa.uint16())
         pa_losses = pa.array(losses.cpu().numpy())
-        pa_sample_indices = pa.array(indices, type=pa.uint32())
+        pa_sample_indices = pa.array(indices.cpu().numpy(), type=pa.uint32())
         pa_epochs = pa.array([pl_module.current_epoch] * len(losses), type=pa.uint16())
 
         pa_table = pa.table(
