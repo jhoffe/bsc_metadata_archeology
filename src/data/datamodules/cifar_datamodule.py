@@ -134,7 +134,7 @@ class CIFAR100DataModule(pl.LightningDataModule):
         test_dataset = torch.load(os.path.join(self.data_dir, "test.pt"))
 
         self.cifar100_train = IDXDataset(train_dataset)
-        self.cifar100_test = IDXDataset(test_dataset)
+        self.cifar100_test = test_dataset
 
     def train_dataloader(self) -> DataLoader:
         """Returns the dataloader for the validation set.

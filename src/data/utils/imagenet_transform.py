@@ -61,7 +61,7 @@ class ImageNetTrainingDataset(ImageFolder):
 
         filename, class_name = self.imgs[index]
 
-        return sample, target, filename, class_name
+        return sample, target, class_name
 
 
 def imagenet_transform(input_filepath: str, output_filepath: str, dataset: str) -> None:

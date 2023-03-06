@@ -35,7 +35,7 @@ class ImageNetResNet50(pl.LightningModule):
         return self.model(x)
 
     def training_step(self, batch, batch_idx):
-        x, y, filenames, _class_names = batch
+        (x, y, _), indices = batch
 
         y_hat = self(x)
         loss = F.cross_entropy(y_hat, y, reduction="none")
@@ -49,7 +49,7 @@ class ImageNetResNet50(pl.LightningModule):
             sync_dist=self.sync_dist_train,
         )
 
-        return {"loss": mean_loss, "unreduced_loss": loss, "filenames": filenames}
+        return {"loss": mean_loss, "unreduced_loss": loss, "indices": indices}
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
