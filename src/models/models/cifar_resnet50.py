@@ -54,7 +54,7 @@ class CIFARResNet50(pl.LightningModule):
         return {"loss": mean_loss, "unreduced_loss": loss, "indices": indices}
 
     def validation_step(self, batch, batch_idx):
-        x, y, _ = batch
+        x, y = batch
 
         y_hat = self(x)
         loss = F.cross_entropy(y_hat, y, reduction="none")
@@ -76,7 +76,7 @@ class CIFARResNet50(pl.LightningModule):
         )
 
     def test_step(self, batch, batch_idx):
-        x, y, _ = batch
+        x, y = batch
 
         y_hat = self(x)
         loss = F.cross_entropy(y_hat, y, reduction="none")
