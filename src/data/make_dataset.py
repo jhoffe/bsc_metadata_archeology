@@ -38,7 +38,7 @@ def main(input_filepath, output_filepath):
     logger.info("Generating probe suites for CIFAR100")
     make_probe_suites("data/processed", "data/processed", "cifar100", label_count=100)
     logger.info("Generating probe suites for ImageNet")
-    make_probe_suites("imagenet", "data/processed", "data/processed")
+    make_probe_suites("data/processed", "data/processed", "imagenet", label_count=1000)
 
 
 if __name__ == "__main__":
