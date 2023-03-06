@@ -20,10 +20,13 @@ def create_trainer(params: DictConfig):
     log_model = (
         trainer_params["log_model"] if "log_model" in trainer_params.keys() else True
     )
+
+    run_name = params["name"] + "-" + time_dir
+
     logger = (
         [
             WandbLogger(
-                name=params["name"] + "-" + time_dir,
+                name=run_name,
                 project="bsc",
                 save_dir="models/",
                 config=params,
@@ -47,7 +50,7 @@ def create_trainer(params: DictConfig):
 
     callbacks = []
     if "log_loss_curves" in trainer_params.keys() and trainer_params["log_loss_curves"]:
-        callbacks.append(LossCurveLogger(f"models/losses/{time_dir}", time_dir))
+        callbacks.append(LossCurveLogger(f"models/losses/{run_name}", time_dir))
 
     log_every_n_steps = (
         trainer_params["log_every_n"] if "log_every_n" in trainer_params.keys() else 50
