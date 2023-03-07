@@ -4,8 +4,8 @@ walltime = { hours = 6, minutes = 0 }
 cpu = 16
 single_host = true
 memory = 8
-standard_output = { name = "logs/train-cifar10_1x-gpu.out", overwrite = true }
-error_output = { name = "logs/train-cifar10_1x-gpu.err", overwrite = true }
+standard_output = { name = "logs/train-cifar10-1x-gpu.out", overwrite = true }
+error_output = { name = "logs/train-cifar10-1x-gpu.err", overwrite = true }
 use_gpu = { num_of_gpus = 1 }
 
 commands = [
