@@ -2,5 +2,5 @@ defaults:
   - default-cifar
 
 accelerator: 'gpu'
-strategy: Null
+strategy: null
 devices: 1
