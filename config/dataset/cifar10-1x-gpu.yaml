@@ -1,0 +1,3 @@
+name: "cifar10-1x-gpu"
+num_workers: 16
+batch_size: 128
