@@ -29,7 +29,13 @@ class LossCurveLogger(Callback):
         y_hat = outputs["y_hat"]
 
         self.loss_curves.append(
-            (batch_idx, unreduced_losses.detach(), indices, y.detach(), y_hat.detach())
+            (
+                batch_idx,
+                unreduced_losses.detach(),
+                indices.detach(),
+                y.detach(),
+                y_hat.detach(),
+            )
         )
 
     def get_path(self, version: int) -> str:
