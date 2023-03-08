@@ -1,0 +1,6 @@
+defaults:
+  - default
+
+accelerator: 'gpu'
+strategy: null
+devices: 1
