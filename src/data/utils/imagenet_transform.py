@@ -9,7 +9,7 @@ from torchvision import transforms
 from torchvision.datasets import ImageFolder
 from torchvision.io import ImageReadMode
 
-from src.data.c_scores import c_scores
+from src.data.imagenet_c_scores import imagenet_c_scores
 
 
 class ImagenetValidationDataset(Dataset):
@@ -93,7 +93,7 @@ def imagenet_transform(input_filepath: str, output_filepath: str, dataset: str) 
 
     dataset_train = ImageNetTrainingDataset(
         path.join(input_filepath, "imagenet/ILSVRC/Data/CLS-LOC/train"),
-        scores=c_scores(dataset),
+        c_scores=imagenet_c_scores(),
         transform=imagenet_train_transform,
     )
     dataset_val = ImagenetValidationDataset(
