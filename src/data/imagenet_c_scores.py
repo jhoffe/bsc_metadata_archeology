@@ -16,6 +16,10 @@ def imagenet_c_scores():
 
     return {
         "labels": cscores["labels"],
-        "scores": cscores["scores"],
-        "filenames": cscores["filenames"],
+        "scores": 1 - cscores["scores"],
+        "filenames": [f.decode("utf-8") for f in cscores["filenames"]],
     }
+
+
+if __name__ == "__main__":
+    c_scores = imagenet_c_scores()
