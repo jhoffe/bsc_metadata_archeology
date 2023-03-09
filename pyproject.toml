@@ -38,6 +38,7 @@ pyarrow = "^11.0.0"
 scikit-learn = "^1.2.1"
 pandas = "^1.5.3"
 seaborn = "^0.12.2"
+requests = "^2.28.2"
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "^6.0.0"
