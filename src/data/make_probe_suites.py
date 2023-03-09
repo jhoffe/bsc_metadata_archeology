@@ -51,6 +51,7 @@ class ProbeSuiteGenerator(Dataset):
         dataset_len: int,
         label_count: int,
         num_probes: int = 250,
+        corruption_std: float = 0.1,
     ):
         self.dataset = dataset
         assert hasattr(self.dataset, "score")
@@ -59,6 +60,7 @@ class ProbeSuiteGenerator(Dataset):
         self.remaining_indices = list(range(dataset_len))
         self.label_count = label_count
         self.num_probes = num_probes
+        self.corruption_std = corruption_std
 
     def generate(self):
         self.generate_atypical()
@@ -134,7 +136,7 @@ class ProbeSuiteGenerator(Dataset):
     def generate_corrupted(self):
         subset = self.get_subset()
         corruption_transform = transforms.Compose(
-            [AddGaussianNoise(mean=0.0, std=0.25), ClampRangeTransform()]
+            [AddGaussianNoise(mean=0.0, std=self.corruption_std), ClampRangeTransform()]
         )
 
         self.corrupted = [
@@ -203,6 +205,7 @@ def make_probe_suites(
         dataset_length,
         label_count,
         num_probes=num_probes,
+        corruption_std=0.1 if "cifar" in dataset else 0.25,
     )
     probe_suite.generate()
 
