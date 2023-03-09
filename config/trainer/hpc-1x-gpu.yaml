@@ -1,5 +1,5 @@
 defaults:
-  - default-cifar
+  - default
 
 accelerator: 'gpu'
 strategy: null

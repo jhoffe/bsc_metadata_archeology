@@ -38,7 +38,7 @@ class ImageNetDataModule(pl.LightningDataModule):
         Args:
             stage: str, the stage for which the setup is being run (e.g. 'fit', 'test')
         """
-        train_dataset = torch.load(os.path.join(self.data_dir, "train.pt"))
+        train_dataset = torch.load(os.path.join(self.data_dir, "train_probe_suite.pt"))
         val_dataset = torch.load(os.path.join(self.data_dir, "val.pt"))
 
         self.imagenet_train = IDXDataset(train_dataset)

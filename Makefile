@@ -39,6 +39,9 @@ transforms_cifar100:
 transforms_imagenet:
 	$(PYTHON_INTERPRETER) src/data/transform.py data/raw data/processed imagenet
 
+train-cifar10-dev:
+	$(PYTHON_INTERPRETER) src/models/train_model.py trainer=dev-cifar dataset=cifar10 model=cifar10-resnet50 name=cifar10-dev
+
 ## Delete all compiled Python files
 clean:
 	find . -type f -name "*.py[co]" -delete

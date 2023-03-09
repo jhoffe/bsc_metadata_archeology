@@ -4,14 +4,11 @@ from pathlib import Path
 import click
 from dotenv import find_dotenv, load_dotenv
 
-from src.data.utils.cifar_transform import cifar_transform
 from src.data.utils.imagenet_transform import imagenet_transform
 
 
 def dataset_transform(input_filepath: str, output_filepath: str, dataset: str) -> None:
-    if "cifar" in dataset:
-        cifar_transform(input_filepath, output_filepath, dataset)
-    elif "imagenet" in dataset:
+    if "imagenet" in dataset:
         imagenet_transform(input_filepath, output_filepath, dataset)
 
 

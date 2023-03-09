@@ -9,6 +9,8 @@ from torchvision import transforms
 from torchvision.datasets import ImageFolder
 from torchvision.io import ImageReadMode
 
+from src.data.imagenet_c_scores import imagenet_c_scores
+
 
 class ImagenetValidationDataset(Dataset):
     def __init__(
@@ -51,6 +53,15 @@ class ImagenetValidationDataset(Dataset):
 
 
 class ImageNetTrainingDataset(ImageFolder):
+    def __init__(self, root, c_scores, transform=None, target_transform=None):
+        super().__init__(root, transform, target_transform)
+
+        path_to_scores = {
+            path: score
+            for path, score in zip(c_scores["filenames"], c_scores["scores"])
+        }
+        self.score = [path_to_scores[os.path.basename(path)] for path, _ in self.imgs]
+
     def __getitem__(self, index):
         path, target = self.samples[index]
         sample = self.loader(path)
@@ -59,9 +70,7 @@ class ImageNetTrainingDataset(ImageFolder):
         if self.target_transform is not None:
             target = self.target_transform(target)
 
-        filename, class_name = self.imgs[index]
-
-        return sample, target, class_name
+        return sample, target, self.score[index]
 
 
 def imagenet_transform(input_filepath: str, output_filepath: str, dataset: str) -> None:
@@ -84,6 +93,7 @@ def imagenet_transform(input_filepath: str, output_filepath: str, dataset: str) 
 
     dataset_train = ImageNetTrainingDataset(
         path.join(input_filepath, "imagenet/ILSVRC/Data/CLS-LOC/train"),
+        c_scores=imagenet_c_scores(),
         transform=imagenet_train_transform,
     )
     dataset_val = ImagenetValidationDataset(

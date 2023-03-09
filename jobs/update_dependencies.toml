@@ -1,0 +1,14 @@
+queue = "hpc"
+name = "update_dependencies"
+walltime = { hours = 1, minutes = 0 }
+single_host = true
+cpu = 1
+memory = 2
+standard_output =  { name = "logs/update_dependencies.out", overwrite = true }
+error_output =  { name = "logs/update_dependencies.err", overwrite = true }
+
+commands = [
+    "module load python3/3.10.7",
+    "source venv/bin/activate",
+    "poetry install"
+]

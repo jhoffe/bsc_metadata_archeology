@@ -49,7 +49,14 @@ class ImageNetResNet50(pl.LightningModule):
             sync_dist=self.sync_dist_train,
         )
 
-        return {"loss": mean_loss, "unreduced_loss": loss, "indices": indices}
+        y_pred = y_hat.argmax(dim=1)
+        return {
+            "loss": mean_loss,
+            "unreduced_loss": loss,
+            "indices": indices,
+            "y": y,
+            "y_hat": y_pred,
+        }
 
     def validation_step(self, batch, batch_idx):
         x, y = batch

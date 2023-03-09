@@ -12,6 +12,8 @@ from src.data.utils.cifar_transform import cifar_transform
 
 
 def c_scores(dataset: str) -> np.ndarray:
+    mem_values = None
+
     if "cifar" in dataset:
         file = pathlib.Path(f"data/external/{dataset}-cscores-orig-order.npz")
         if not file.exists():
