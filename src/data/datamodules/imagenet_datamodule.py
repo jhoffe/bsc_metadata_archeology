@@ -6,8 +6,6 @@ import pytorch_lightning as pl
 import torch
 from torch.utils.data import DataLoader, Dataset
 
-from src.data.utils import IDXDataset
-
 
 class ImageNetDataModule(pl.LightningDataModule):
     imagenet_train: Dataset
@@ -41,7 +39,7 @@ class ImageNetDataModule(pl.LightningDataModule):
         train_dataset = torch.load(os.path.join(self.data_dir, "train_probe_suite.pt"))
         val_dataset = torch.load(os.path.join(self.data_dir, "val.pt"))
 
-        self.imagenet_train = IDXDataset(train_dataset)
+        self.imagenet_train = train_dataset
         self.imagenet_val = val_dataset
 
     def train_dataloader(self) -> DataLoader:
