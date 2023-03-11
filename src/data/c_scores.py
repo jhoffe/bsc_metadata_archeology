@@ -12,12 +12,17 @@ from src.data.utils.cifar_transform import cifar_transform
 
 
 def c_scores(dataset: str) -> np.ndarray:
-    mem_values = None
+    
+    if "cifar100" in dataset:
+        file = pathlib.Path(f"data/external/cifar100_infl_matrix.npz")
 
-    if "cifar" in dataset:
-        file = pathlib.Path(f"data/external/{dataset}-cscores-orig-order.npz")
-        if not file.exists():
-            c_score_downloader()
+        scores = np.load(file, allow_pickle=True)
+
+        labels = scores["tr_labels"]
+        mem_values = scores["tr_mem"]
+
+    else:
+        file = pathlib.Path(f"data/external/cifar10-cscores-orig-order.npz")
 
         cscores = np.load(file, allow_pickle=True)
 
@@ -25,9 +30,10 @@ def c_scores(dataset: str) -> np.ndarray:
         scores = cscores["scores"]
 
         mem_values = 1.0 - scores
-        data = CIFAR100 if dataset == "cifar100" else CIFAR10
-        data = data(root=f"data/raw/{dataset}", train=True, download=False)
-        assert np.all(data.targets == labels), "The labels are not the same."
+
+    data = CIFAR100 if dataset == "cifar100" else CIFAR10
+    data = data(root=f"data/raw/{dataset}", train=True, download=False)
+    assert np.all(data.targets == labels), "The labels are not the same."
 
     return mem_values
 
