@@ -7,7 +7,7 @@ import numpy as np
 import torch
 from torchvision.datasets import CIFAR10, CIFAR100
 
-from src.data.utils.c_score_downloader import c_score_downloader
+from src.data.utils.c_score_downloader import c_score_downloader, mem_score_downloader
 from src.data.utils.cifar_transform import cifar_transform
 
 
@@ -17,7 +17,7 @@ def c_scores(dataset: str) -> np.ndarray:
         file = pathlib.Path(f"data/external/cifar100_infl_matrix.npz")
 
         if not file.exists():
-            c_score_downloader()
+            mem_score_downloader()
 
         scores = np.load(file, allow_pickle=True)
 

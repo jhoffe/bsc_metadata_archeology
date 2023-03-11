@@ -2,7 +2,7 @@ import pathlib
 
 import numpy as np
 
-from src.data.utils.c_score_downloader import c_score_downloader
+from src.data.utils.c_score_downloader import c_score_downloader, mem_score_downloader
 
 
 def imagenet_c_scores():
@@ -15,7 +15,7 @@ def imagenet_c_scores():
     file = pathlib.Path("data/external/imagenet_index.npz")
 
     if not file.exists():
-        c_score_downloader()
+        mem_score_downloader()
 
     scores = np.load(file, allow_pickle=True)
 
