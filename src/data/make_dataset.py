@@ -31,7 +31,7 @@ def main(input_filepath, output_filepath):
     logger.info("Transforming the CIFAR100 dataset")
     c_scores_dataset("cifar100", "data/raw", "data/processed")
     logger.info("Transforming the ImageNet dataset")
-    dataset_transform(input_filepath, output_filepath, "imagenet")
+    #dataset_transform(input_filepath, output_filepath, "imagenet")
     logger.info("Transformed the ImageNet dataset")
 
     # Generating probe suites
@@ -40,7 +40,7 @@ def main(input_filepath, output_filepath):
     logger.info("Generating probe suites for CIFAR100")
     make_probe_suites("data/processed", "data/processed", "cifar100", label_count=100)
     logger.info("Generating probe suites for ImageNet")
-    make_probe_suites("data/processed", "data/processed", "imagenet", label_count=1000)
+    #make_probe_suites("data/processed", "data/processed", "imagenet", label_count=1000)
 
 
 if __name__ == "__main__":
