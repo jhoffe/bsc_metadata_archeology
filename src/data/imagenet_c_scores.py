@@ -14,11 +14,14 @@ def imagenet_c_scores():
 
     file = pathlib.Path("data/external/imagenet_index.npz")
 
+    if not file.exists():
+        c_score_downloader()
+
     scores = np.load(file, allow_pickle=True)
 
     return {
         "labels": scores["tr_labels"],
-        "scores": 1 - scores["tr_mem"],
+        "scores": scores["tr_mem"],
         "filenames": [f.decode("utf-8") for f in scores["tr_filenames"]],
     }
 

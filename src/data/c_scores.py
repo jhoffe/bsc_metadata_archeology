@@ -16,6 +16,9 @@ def c_scores(dataset: str) -> np.ndarray:
     if "cifar100" in dataset:
         file = pathlib.Path(f"data/external/cifar100_infl_matrix.npz")
 
+        if not file.exists():
+            c_score_downloader()
+
         scores = np.load(file, allow_pickle=True)
 
         labels = scores["tr_labels"]
@@ -23,6 +26,8 @@ def c_scores(dataset: str) -> np.ndarray:
 
     else:
         file = pathlib.Path(f"data/external/cifar10-cscores-orig-order.npz")
+        if not file.exists():
+            c_score_downloader()
 
         cscores = np.load(file, allow_pickle=True)
 
