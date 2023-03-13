@@ -1,5 +1,5 @@
 import os
-from typing import Dict, Optional
+from typing import Dict, Optional, Tuple
 
 import numpy as np
 import torch
@@ -167,6 +167,24 @@ class ProbeSuiteGenerator(Dataset):
         # ]
 
         return Subset(self.dataset, subset_indices)
+
+    def index_to_probe_suite_type_dict(self) -> Tuple[Dict[int, int], Dict[int, str]]:
+        suite_types = [
+            "typical",
+            "atypical",
+            "random_outputs",
+            "random_inputs_outputs",
+            "corrupted",
+        ]
+
+        map_dict = {}
+        label_index_to_name = {idx: name for idx, name in enumerate(suite_types)}
+
+        for label_idx, suite_type in enumerate(suite_types):
+            for _, idx in getattr(self, suite_type):
+                map_dict[idx] = label_idx
+
+        return map_dict, label_index_to_name
 
     @property
     def combined(self):
