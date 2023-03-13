@@ -2,20 +2,29 @@ import pathlib
 
 import numpy as np
 
-from src.data.utils.c_score_downloader import mem_score_downloader
+from src.data.utils.c_score_downloader import downloader
 
 
-def imagenet_c_scores():
-    """Get imagenet-c scores."""
-    # file = pathlib.Path("data/external/imagenet-cscores-with-filename.npz")
+def imagenet_c_scores(use_cscores: bool = False):
+    """Get imagenet c-scores."""
+    if use_cscores:
+        file = pathlib.Path("data/external/imagenet-cscores-with-filename.npz")
 
-    # if not file.exists():
-    #    c_score_downloader()
+        if not file.exists():
+            downloader()
 
-    file = pathlib.Path("data/external/imagenet_index.npz")
+        scores = np.load(file, allow_pickle=True)
+
+        return {
+            "labels": scores["labels"],
+            "scores": 1.0 - scores["scores"],
+            "filenames": [f.decode("utf-8") for f in scores["filenames"]],
+        }
+
+    pathlib.Path("data/external/imagenet_index.npz")
 
     if not file.exists():
-        mem_score_downloader()
+        downloader()
 
     scores = np.load(file, allow_pickle=True)
 

@@ -26,6 +26,10 @@ def mem_score_downloader():
         open(f"data/external/{file}", "wb").write(r.content)
 
 
-if __name__ == "__main__":
+def downloader():
     c_score_downloader()
     mem_score_downloader()
+
+
+if __name__ == "__main__":
+    downloader()
