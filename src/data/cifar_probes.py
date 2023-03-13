@@ -1,14 +1,7 @@
-import matplotlib.pyplot as plt
-import numpy as np
 import torch
 
-data = torch.load("data/processed/cifar10/train.pt")
-scores = data.score
+cifar10 = torch.load("data/processed/cifar10/train_probe_suite.pt")
+cifar100 = torch.load("data/processed/cifar100/train_probe_suite.pt")
 
-sorted = np.argsort(scores)
-typical = sorted[:250]
-atypical = sorted[-250:]
-
-plt.figure(figsize=(10, 10))
-plt.imshow(data[typical[0]][0].permute(1, 2, 0))
-plt.show()
+print(cifar10.random_outputs[0])
+print(cifar100.random_outputs[0])

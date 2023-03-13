@@ -1,4 +1,5 @@
 import os
+import random
 from typing import Dict, Optional
 
 import numpy as np
@@ -50,7 +51,7 @@ class ProbeSuiteGenerator(Dataset):
         dataset: Dataset,
         dataset_len: int,
         label_count: int,
-        num_probes: int = 250,
+        num_probes: int = 500,
         corruption_std: float = 0.1,
     ):
         self.dataset = dataset
@@ -105,12 +106,7 @@ class ProbeSuiteGenerator(Dataset):
             (
                 (
                     x,
-                    torch.multinomial(
-                        torch.Tensor(
-                            [1 if y != i else 0 for i in range(self.label_count)]
-                        ),
-                        1,
-                    ).item(),
+                    random.choice([i for i in range(self.label_count) if i != y]),
                     c,
                 ),
                 idx,
@@ -159,12 +155,6 @@ class ProbeSuiteGenerator(Dataset):
         self.remaining_indices = [
             idx for idx in self.remaining_indices if idx not in subset_indices
         ]
-
-        # self.remaining_indices = [
-        # self.remaining_indices[i]
-        # for i in range(len(self.remaining_indices))
-        # if self.remaining_indices[i] not in subset_indices
-        # ]
 
         return Subset(self.dataset, subset_indices)
 

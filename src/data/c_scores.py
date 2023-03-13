@@ -7,17 +7,20 @@ import numpy as np
 import torch
 from torchvision.datasets import CIFAR10, CIFAR100
 
-from src.data.utils.c_score_downloader import c_score_downloader, mem_score_downloader
+from src.data.utils.c_score_downloader import downloader
 from src.data.utils.cifar_transform import cifar_transform
 
 
-def c_scores(dataset: str) -> np.ndarray:
-    
+def c_scores(dataset: str, use_cscores: bool = False) -> np.ndarray:
     if "cifar100" in dataset:
-        file = pathlib.Path(f"data/external/cifar100_infl_matrix.npz")
+        file = (
+            pathlib.Path("data/external/cifar100-cscores-orig-order.npz")
+            if use_cscores
+            else pathlib.Path("data/external/cifar100_infl_matrix.npz")
+        )
 
         if not file.exists():
-            mem_score_downloader()
+            downloader()
 
         scores = np.load(file, allow_pickle=True)
 
@@ -25,9 +28,9 @@ def c_scores(dataset: str) -> np.ndarray:
         mem_values = scores["tr_mem"]
 
     else:
-        file = pathlib.Path(f"data/external/cifar10-cscores-orig-order.npz")
+        file = pathlib.Path("data/external/cifar10-cscores-orig-order.npz")
         if not file.exists():
-            c_score_downloader()
+            downloader()
 
         cscores = np.load(file, allow_pickle=True)
 
