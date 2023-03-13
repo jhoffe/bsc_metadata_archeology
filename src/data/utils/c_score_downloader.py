@@ -1,6 +1,4 @@
 import requests
-import pathlib
-import numpy as np
 
 
 def c_score_downloader():
@@ -15,6 +13,7 @@ def c_score_downloader():
         r = requests.get(URL)
         open(f"data/external/{file}", "wb").write(r.content)
 
+
 def mem_score_downloader():
     """Takes a list of files and downloads these into the data/external folder."""
     cscores = [
@@ -26,7 +25,7 @@ def mem_score_downloader():
         r = requests.get(URL)
         open(f"data/external/{file}", "wb").write(r.content)
 
+
 if __name__ == "__main__":
     c_score_downloader()
     mem_score_downloader()
-

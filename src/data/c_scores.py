@@ -12,9 +12,8 @@ from src.data.utils.cifar_transform import cifar_transform
 
 
 def c_scores(dataset: str) -> np.ndarray:
-    
     if "cifar100" in dataset:
-        file = pathlib.Path(f"data/external/cifar100_infl_matrix.npz")
+        file = pathlib.Path("data/external/cifar100_infl_matrix.npz")
 
         if not file.exists():
             mem_score_downloader()
@@ -25,7 +24,7 @@ def c_scores(dataset: str) -> np.ndarray:
         mem_values = scores["tr_mem"]
 
     else:
-        file = pathlib.Path(f"data/external/cifar10-cscores-orig-order.npz")
+        file = pathlib.Path("data/external/cifar10-cscores-orig-order.npz")
         if not file.exists():
             c_score_downloader()
 
