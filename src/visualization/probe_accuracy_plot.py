@@ -22,7 +22,7 @@ def get_indices_from_probe_suite(suite: list) -> list[int]:
 
 
 def plot_probe_accuracy(df: pd.DataFrame, output_path: str, dataset_name: str) -> None:
-    """Plot the accuracy for each probe suite pr epoch"""
+    """Plot the accuracy for each probe suite pr. epoch"""
 
     probe_suite = torch.load(f"data/processed/{dataset_name}/train_probe_suite.pt")
 
@@ -75,7 +75,7 @@ def plot_probe_accuracy(df: pd.DataFrame, output_path: str, dataset_name: str) -
         "cifar10": "CIFAR-10",
         "cifar100": "CIFAR-100",
         "imagenet": "ImageNet",
-    } 
+    }
     plt.figure(figsize=(10, 6))
     plt.title(f"Probe Suite Accuracy for {plot_titles[dataset_name]}")
     for i, suite in enumerate(suites):
