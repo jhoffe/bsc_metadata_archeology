@@ -5,6 +5,7 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset, Subset
 from torchvision.transforms import transforms
+import random
 
 
 class AddGaussianNoise(object):
@@ -105,12 +106,7 @@ class ProbeSuiteGenerator(Dataset):
             (
                 (
                     x,
-                    torch.multinomial(
-                        torch.Tensor(
-                            [1 if y != i else 0 for i in range(self.label_count)]
-                        ),
-                        1,
-                    ).item(),
+                    random.choice([i for i in range(self.label_count) if i != y]),
                     c,
                 ),
                 idx,

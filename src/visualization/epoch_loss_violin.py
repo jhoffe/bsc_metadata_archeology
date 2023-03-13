@@ -15,17 +15,24 @@ def get_indices_from_probe_suite(suite: list) -> list[int]:
 
 
 def plot_epoch_loss_violin(
-    epoch_index: int, df: pd.DataFrame, output_path: str
+    epoch_index: int, df: pd.DataFrame, output_path: str, dataset_name: str
 ) -> None:
+    """Plot a violin plot of the losses for each probe suite at a given epoch."""
+
+    figure_path = os.path.join(output_path, dataset_name)
+
+    if not os.path.exists(figure_path):
+        os.makedirs(figure_path)
+
     epoch = df.groupby("epoch").get_group(epoch_index)
 
-    probe_suite = torch.load("data/processed/cifar10/train_probe_suite.pt")
+    probe_suite = torch.load(f"data/processed/{dataset_name}/train_probe_suite.pt")
 
     suite_names = {
         "typical": "Typical",
         "atypical": "Atypical",
         "random_outputs": "Random outputs",
-        # "random_inputs_outputs": "Random inputs and outputs",
+        "random_inputs_outputs": "Random inputs and outputs",
         "corrupted": "Corrupted",
     }
 
@@ -76,19 +83,19 @@ def plot_epoch_loss_violin(
     ax.set_title(f"Losses for each probe suite at epoch {epoch_index + 1}")
     plt.xticks(rotation=90)
     fig.savefig(
-        os.path.join(output_path, f"epoch-{epoch_index + 1}_loss_violin.png"),
+        os.path.join(figure_path, f"epoch-{epoch_index + 1}_loss_violin.png"),
         bbox_inches="tight",
     )
 
 
-def main(dataset_path, output_filepath, epoch_indices):
+def main(dataset_path, output_filepath, dataset_name, epoch_indices):
     dataset = LossDataset(dataset_path)
     dataset.load()
 
     df = dataset.df
 
     for epoch_idx in epoch_indices:
-        plot_epoch_loss_violin(epoch_idx, df, output_filepath)
+        plot_epoch_loss_violin(epoch_idx, df, output_filepath, dataset_name)
 
 
 @click.command()
@@ -98,9 +105,10 @@ def main(dataset_path, output_filepath, epoch_indices):
 @click.argument(
     "output_filepath", type=click.Path(exists=True, dir_okay=True, file_okay=False)
 )
+@click.argument("dataset_name", type=str)
 @click.argument("epoch_indices", nargs=-1, type=int)
-def main_click(dataset_path, output_filepath, epoch_indices):
-    main(dataset_path, output_filepath, epoch_indices)
+def main_click(dataset_path, output_filepath, dataset_name, epoch_indices):
+    main(dataset_path, output_filepath, dataset_name, epoch_indices)
 
 
 if __name__ == "__main__":
