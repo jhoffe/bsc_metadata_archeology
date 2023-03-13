@@ -1,11 +1,11 @@
 import os
+import random
 from typing import Dict, Optional
 
 import numpy as np
 import torch
 from torch.utils.data import Dataset, Subset
 from torchvision.transforms import transforms
-import random
 
 
 class AddGaussianNoise(object):
@@ -155,12 +155,6 @@ class ProbeSuiteGenerator(Dataset):
         self.remaining_indices = [
             idx for idx in self.remaining_indices if idx not in subset_indices
         ]
-
-        # self.remaining_indices = [
-        # self.remaining_indices[i]
-        # for i in range(len(self.remaining_indices))
-        # if self.remaining_indices[i] not in subset_indices
-        # ]
 
         return Subset(self.dataset, subset_indices)
 
