@@ -51,7 +51,7 @@ class ProbeSuiteGenerator(Dataset):
         dataset: Dataset,
         dataset_len: int,
         label_count: int,
-        num_probes: int = 250,
+        num_probes: int = 500,
         corruption_std: float = 0.1,
     ):
         self.dataset = dataset

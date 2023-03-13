@@ -71,8 +71,13 @@ def plot_probe_accuracy(df: pd.DataFrame, output_path: str, dataset_name: str) -
         "tab:cyan",
     ]
 
+    plot_titles = {
+        "cifar10": "CIFAR-10",
+        "cifar100": "CIFAR-100",
+        "imagenet": "ImageNet",
+    } 
     plt.figure(figsize=(10, 6))
-    plt.title("Probe suite accuracy")
+    plt.title(f"Probe Suite Accuracy for {plot_titles[dataset_name]}")
     for i, suite in enumerate(suites):
         plt.plot(
             final[final["suite"] == suite]["epoch"],
