@@ -73,8 +73,9 @@ class LossDataset:
         sample_groups = df.groupby("sample_index", sort=False)
 
         losses = sample_groups["loss"].agg(list)
+        original_classes = sample_groups["y"].first().values
         sample_indices = losses.index
 
         X = np.asarray(losses.to_list())
 
-        return X, sample_indices, index_to_label_name
+        return X, original_classes, sample_indices, index_to_label_name
