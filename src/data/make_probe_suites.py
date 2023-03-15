@@ -30,21 +30,21 @@ class ClampRangeTransform(object):
 
 
 class ProbeSuiteGenerator(Dataset):
-    #dataset: Dataset
-    #remaining_indices: list = []
-    #used_indices: list = []
-    #dataset_len: int
-    #label_count: int
+    dataset: Dataset
+    remaining_indices: list = []
+    used_indices: list = []
+    dataset_len: int
+    label_count: int
 
-    #typical: list
-    #atypical: list
-    #random_outputs: list
-    #random_inputs_outputs: list
-    #corrupted: list
+    typical: list
+    atypical: list
+    random_outputs: list
+    random_inputs_outputs: list
+    corrupted: list
 
-    #dataset_indices_to_probe_indices: Dict[int, int] = {}
+    dataset_indices_to_probe_indices: Dict[int, int] = {}
 
-    #_combined: Optional[list] = None
+    _combined: Optional[list] = None
 
     def __init__(
         self,
