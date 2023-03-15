@@ -44,7 +44,7 @@ class ProbeSuiteGenerator(Dataset):
 
     #dataset_indices_to_probe_indices: Dict[int, int] = {}
 
-    _combined: Optional[list] = None
+    #_combined: Optional[list] = None
 
     def __init__(
         self,
@@ -62,6 +62,7 @@ class ProbeSuiteGenerator(Dataset):
         self.label_count = label_count
         self.num_probes = num_probes
         self.corruption_std = corruption_std
+        self._combined = None
 
     def generate(self):
         self.generate_atypical()
