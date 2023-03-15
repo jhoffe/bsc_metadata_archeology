@@ -101,8 +101,8 @@ class CIFAR100DataModule(pl.LightningDataModule):
         num_workers: int, number of worker to use for data loading
     """
 
-    cifar100_train: IDXDataset
-    cifar100_test: IDXDataset
+    cifar100_train: TensorDataset
+    cifar100_test: TensorDataset
     num_workers: int
 
     def __init__(
@@ -129,10 +129,10 @@ class CIFAR100DataModule(pl.LightningDataModule):
         Args:
             stage: str, the stage for which the setup is being run (e.g. 'fit', 'test')
         """
-        train_dataset = torch.load(os.path.join(self.data_dir, "train.pt"))
+        train_dataset = torch.load(os.path.join(self.data_dir, "train_probe_suite.pt"))
         test_dataset = torch.load(os.path.join(self.data_dir, "test.pt"))
 
-        self.cifar100_train = IDXDataset(train_dataset)
+        self.cifar100_train = train_dataset
         self.cifar100_test = test_dataset
 
     def train_dataloader(self) -> DataLoader:

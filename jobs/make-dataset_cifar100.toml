@@ -1,0 +1,14 @@
+queue = "hpc"
+name = "make_dataset_cifar100"
+walltime = { hours = 12, minutes = 0 }
+single_host = true
+cpu = 16
+memory = 2
+standard_output =  { name = "logs/init_dataset_cifar100.out", overwrite = true }
+error_output =  { name = "logs/init_dataset_cifar100.err", overwrite = true }
+
+commands = [
+    "module load python3/3.10.7",
+    "source venv/bin/activate",
+    "python3 src/data/make_dataset_cifar100.py data/raw data/processed"
+]
