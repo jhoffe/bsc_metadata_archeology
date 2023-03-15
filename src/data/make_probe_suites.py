@@ -44,7 +44,7 @@ class ProbeSuiteGenerator(Dataset):
 
     #dataset_indices_to_probe_indices: Dict[int, int] = {}
 
-    #_combined: Optional[list] = None
+    _combined: Optional[list] = None
 
     def __init__(
         self,
