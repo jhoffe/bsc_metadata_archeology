@@ -2,7 +2,7 @@ from time import gmtime, strftime
 
 import lightning as L
 import torch
-from lightning.loggers import WandbLogger
+from lightning.pytorch.loggers import WandbLogger
 from lightning.pytorch.strategies import DDPStrategy
 from omegaconf import DictConfig
 
