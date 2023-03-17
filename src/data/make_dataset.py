@@ -41,6 +41,7 @@ def main(input_filepath, output_filepath):
     make_probe_suites("data/processed", "data/processed", "cifar100", label_count=100)
     logger.info("Generating probe suites for ImageNet")
     make_probe_suites("data/processed", "data/processed", "imagenet", label_count=1000)
+    logger.info("Done!")
 
 
 if __name__ == "__main__":
