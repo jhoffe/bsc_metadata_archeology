@@ -46,6 +46,8 @@ class ProbeSuiteGenerator(Dataset):
 
     _combined: Optional[list] = None
 
+    only_probes: bool = False
+
     def __init__(
         self,
         dataset: Dataset,
@@ -53,6 +55,7 @@ class ProbeSuiteGenerator(Dataset):
         label_count: int,
         num_probes: int = 500,
         corruption_std: float = 0.1,
+        only_probes: bool = False,
     ):
         self.dataset = dataset
         assert hasattr(self.dataset, "score")
@@ -63,6 +66,7 @@ class ProbeSuiteGenerator(Dataset):
         self.num_probes = num_probes
         self.corruption_std = corruption_std
         self._combined = None
+        self.only_probes = only_probes
 
     def generate(self):
         self.generate_atypical()
@@ -173,11 +177,17 @@ class ProbeSuiteGenerator(Dataset):
         return self._combined
 
     def __getitem__(self, index):
+        if self.only_probes:
+            return self.combined[index]
+
         if index in self.used_indices:
             return self.combined[self.dataset_indices_to_probe_indices[index]]
         return self.dataset[index], index
 
     def __len__(self):
+        if self.only_probes:
+            return len(self.combined)
+
         return self.dataset_len
 
 

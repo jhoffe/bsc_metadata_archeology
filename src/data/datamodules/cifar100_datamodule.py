@@ -1,8 +1,9 @@
 import os
+from copy import deepcopy
 
 import lightning as L
 import torch
-from torch.utils.data import DataLoader, TensorDataset
+from torch.utils.data import DataLoader, Dataset, TensorDataset
 
 
 class CIFAR100DataModule(L.LightningDataModule):
@@ -17,6 +18,7 @@ class CIFAR100DataModule(L.LightningDataModule):
 
     cifar100_train: TensorDataset
     cifar100_test: TensorDataset
+    cifar100_probes: Dataset
     num_workers: int
 
     def __init__(
@@ -46,8 +48,12 @@ class CIFAR100DataModule(L.LightningDataModule):
         train_dataset = torch.load(os.path.join(self.data_dir, "train_probe_suite.pt"))
         test_dataset = torch.load(os.path.join(self.data_dir, "test.pt"))
 
+        probes_dataset = deepcopy(train_dataset)
+        probes_dataset.only_probes = True
+
         self.cifar100_train = train_dataset
         self.cifar100_test = test_dataset
+        self.cifar100_probes = probes_dataset
 
     def train_dataloader(self) -> DataLoader:
         """Returns the dataloader for the validation set.
@@ -76,15 +82,23 @@ class CIFAR100DataModule(L.LightningDataModule):
             pin_memory=True,
         )
 
-    def val_dataloader(self) -> DataLoader:
+    def val_dataloader(self) -> list[DataLoader]:
         """Returns the dataloader for the test set.
 
         Returns:
             DataLoader, the dataloader for the test set.
         """
-        return DataLoader(
-            self.cifar100_test,
-            batch_size=self.batch_size,
-            num_workers=self.num_workers,
-            pin_memory=True,
-        )
+        return [
+            DataLoader(
+                self.cifar100_test,
+                batch_size=self.batch_size,
+                num_workers=self.num_workers,
+                pin_memory=True,
+            ),
+            DataLoader(
+                self.cifar100_probes,
+                batch_size=self.batch_size,
+                num_workers=self.num_workers,
+                pin_memory=True,
+            ),
+        ]

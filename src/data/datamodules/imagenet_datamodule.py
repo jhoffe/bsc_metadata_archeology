@@ -1,4 +1,5 @@
 import os
+from copy import deepcopy
 from multiprocessing import cpu_count
 from typing import Optional
 
@@ -10,6 +11,7 @@ from torch.utils.data import DataLoader, Dataset
 class ImageNetDataModule(L.LightningDataModule):
     imagenet_train: Dataset
     imagenet_val: Dataset
+    imagenet_probes: Dataset
     num_workers: int
 
     def __init__(
@@ -39,8 +41,12 @@ class ImageNetDataModule(L.LightningDataModule):
         train_dataset = torch.load(os.path.join(self.data_dir, "train_probe_suite.pt"))
         val_dataset = torch.load(os.path.join(self.data_dir, "val.pt"))
 
+        probes_dataset = deepcopy(train_dataset)
+        probes_dataset.only_probes = True
+
         self.imagenet_train = train_dataset
         self.imagenet_val = val_dataset
+        self.imagenet_probes = probes_dataset
 
     def train_dataloader(self) -> DataLoader:
         """Returns the dataloader for the validation set.
@@ -69,15 +75,23 @@ class ImageNetDataModule(L.LightningDataModule):
             pin_memory=True,
         )
 
-    def val_dataloader(self) -> DataLoader:
+    def val_dataloader(self) -> list[DataLoader]:
         """Returns the dataloader for the test set.
 
         Returns:
             DataLoader, the dataloader for the test set.
         """
-        return DataLoader(
-            self.imagenet_val,
-            batch_size=self.batch_size,
-            num_workers=self.num_workers,
-            pin_memory=True,
-        )
+        return [
+            DataLoader(
+                self.imagenet_val,
+                batch_size=self.batch_size,
+                num_workers=self.num_workers,
+                pin_memory=True,
+            ),
+            DataLoader(
+                self.imagenet_probes,
+                batch_size=self.batch_size,
+                num_workers=self.num_workers,
+                pin_memory=True,
+            ),
+        ]
