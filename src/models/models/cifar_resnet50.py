@@ -37,7 +37,7 @@ class CIFARResNet50(L.LightningModule):
         return self.model(x)
 
     def training_step(self, batch, batch_idx):
-        (x, y, c_score), indices = batch
+        (x, y, _), indices = batch
 
         y_hat = self(x)
         loss = F.cross_entropy(y_hat, y, reduction="none")
@@ -61,11 +61,16 @@ class CIFARResNet50(L.LightningModule):
             "y_hat": y_pred,
         }
 
-    def validation_step(self, batch, batch_idx):
-        x, y = batch
+    def validation_step(self, batch, batch_idx, dataloader_idx=0):
+        if dataloader_idx == 0:
+            x, y = batch
+            indices = None
+        else:
+            (x, y, _), indices = batch
 
         y_hat = self(x)
         loss = F.cross_entropy(y_hat, y, reduction="none")
+        mean_loss = loss.mean()
 
         self.val_accuracy(y_hat, y)
         self.log(
@@ -77,11 +82,21 @@ class CIFARResNet50(L.LightningModule):
         )
         self.log(
             "validation/loss",
-            loss.mean(),
+            mean_loss,
             on_step=False,
             on_epoch=True,
             sync_dist=self.sync_dist_val,
         )
+
+        y_pred = y_hat.argmax(dim=1)
+
+        return {
+            "loss": mean_loss,
+            "unreduced_loss": loss,
+            "indices": indices,
+            "y": y,
+            "y_hat": y_pred,
+        }
 
     def test_step(self, batch, batch_idx):
         x, y = batch

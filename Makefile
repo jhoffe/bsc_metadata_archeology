@@ -49,11 +49,11 @@ clean:
 
 ## Lint using flake8
 lint:
-	flake8 src
+	$(PYTHON_INTERPRETER) -m flake8 src
 
 format:
-	poetry run black src/**/*.py
-	poetry run isort src/**/*.py
+	black src/**/*.py
+	isort src/**/*.py
 
 symlink:
 	ln -s /dtu/imagenet data/raw/imagenet
