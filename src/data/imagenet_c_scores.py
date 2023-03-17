@@ -21,7 +21,7 @@ def imagenet_c_scores(use_cscores: bool = False):
             "filenames": [f.decode("utf-8") for f in scores["filenames"]],
         }
 
-    pathlib.Path("data/external/imagenet_index.npz")
+    file = pathlib.Path("data/external/imagenet_index.npz")
 
     if not file.exists():
         downloader()
