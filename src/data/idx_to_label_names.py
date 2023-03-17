@@ -1,7 +1,17 @@
 import requests
 
+def get_idx_to_label_names(dataset: str) -> dict[int, str]:
+    if dataset == "cifar10":
+        return get_idx_to_label_names_cifar10()
+    
+    if dataset == "cifar100":
+        return get_idx_to_label_names_cifar100()
+    
+    if dataset == "imagenet":
+        return get_idx_to_label_names_imagenet()
 
-def get_idx_to_label_names() -> dict[int, str]:
+
+def get_idx_to_label_names_imagenet() -> dict[int, str]:
     URL = "https://gist.githubusercontent.com/yrevar/942d3a0ac09ec9e5eb3a/raw/238f720ff059c1f82f368259d1ca4ffa5dd8f9f5/imagenet1000_clsidx_to_labels.txt"  # noqa: E501
     response = requests.get(URL)
 
@@ -22,5 +32,15 @@ def get_idx_to_label_names_cifar100() -> dict[int, str]:
                    "spider", "worm", "baby", "boy", "girl", "man", "woman", "crocodile", "dinosaur", "lizard", "snake",
                    "turtle", "hamster", "mouse", "rabbit", "shrew", "squirrel", "maple", "oak", "palm", "pine", "willow",
                    "bicycle", "bus", "motorcycle", "pickup truck", "train", "lawn-mower", "rocket", "streetcar", "tank", "tractor"]
+    classes.sort()
+    
     label2name = {k: v for k, v in enumerate(classes)}
     return label2name
+
+def get_idx_to_label_names_cifar10() -> dict[int, str]:
+    classes = ["airplane", "automobile", "bird", "cat", "deer", "dog", "frog", "horse", "ship", "truck"]
+    classes.sort()
+    label2name = {k: v for k, v in enumerate(classes)}
+    return label2name
+
+

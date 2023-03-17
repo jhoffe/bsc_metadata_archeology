@@ -21,7 +21,7 @@ class ImageNetDataModule(pl.LightningDataModule):
         """Initializes the data module.
 
         Args:
-            data_dir: str, directory where the CIFAR10 dataset is stored.
+            data_dir: str, directory where the imagenet dataset is stored.
             batch_size: int, size of the mini-batch.
             num_workers: int, number of worker to use for data loading
         """
@@ -31,7 +31,7 @@ class ImageNetDataModule(pl.LightningDataModule):
         self.num_workers = cpu_count() if num_workers is None else num_workers
 
     def setup(self, stage: str) -> None:
-        """Loads the CIFAR10 dataset from files.
+        """Loads the imagenet dataset from files.
 
         Args:
             stage: str, the stage for which the setup is being run (e.g. 'fit', 'test')
@@ -53,7 +53,7 @@ class ImageNetDataModule(pl.LightningDataModule):
             batch_size=self.batch_size,
             num_workers=self.num_workers,
             shuffle=True,
-            pin_memory=True,
+            pin_memory=True
         )
 
     def test_dataloader(self) -> DataLoader:
@@ -66,7 +66,7 @@ class ImageNetDataModule(pl.LightningDataModule):
             self.imagenet_val,
             batch_size=self.batch_size,
             num_workers=self.num_workers,
-            pin_memory=True,
+            pin_memory=True
         )
 
     def val_dataloader(self) -> DataLoader:
@@ -79,5 +79,5 @@ class ImageNetDataModule(pl.LightningDataModule):
             self.imagenet_val,
             batch_size=self.batch_size,
             num_workers=self.num_workers,
-            pin_memory=True,
+            pin_memory=True
         )

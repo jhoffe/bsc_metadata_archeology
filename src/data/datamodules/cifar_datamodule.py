@@ -96,8 +96,9 @@ class CIFAR100DataModule(pl.LightningDataModule):
     """Data module for loading the CIFAR10 dataset.
 
     Attributes:
-        cifar10_train: TensorDataset, the train set of CIFAR100 dataset
-        cifar10_test: TensorDataset, the test set of CIFAR100 dataset
+        cifar100_train: TensorDataset, the train set of CIFAR100 dataset
+        cifar100_validation: TensorDataset, the validation set of CIFAR100 dataset
+        cifar100_test: TensorDataset, the test set of CIFAR100 dataset
         num_workers: int, number of worker to use for data loading
     """
 
@@ -146,16 +147,7 @@ class CIFAR100DataModule(pl.LightningDataModule):
             batch_size=self.batch_size,
             num_workers=self.num_workers,
             shuffle=True,
-        )
-
-    def val_dataloader(self) -> DataLoader:
-        """Returns the dataloader for the test set.
-
-        Returns:
-            DataLoader, the dataloader for the test set.
-        """
-        return DataLoader(
-            self.cifar100_test, batch_size=self.batch_size, num_workers=self.num_workers
+            pin_memory=True
         )
 
     def test_dataloader(self) -> DataLoader:
@@ -165,5 +157,21 @@ class CIFAR100DataModule(pl.LightningDataModule):
             DataLoader, the dataloader for the test set.
         """
         return DataLoader(
-            self.cifar100_test, batch_size=self.batch_size, num_workers=self.num_workers
+            self.cifar100_test,
+            batch_size=self.batch_size,
+            num_workers=self.num_workers,
+            pin_memory=True
+        )
+
+    def val_dataloader(self) -> DataLoader:
+        """Returns the dataloader for the test set.
+
+        Returns:
+            DataLoader, the dataloader for the test set.
+        """
+        return DataLoader(
+            self.cifar100_test,
+            batch_size=self.batch_size,
+            num_workers=self.num_workers,
+            pin_memory=True
         )
