@@ -1,10 +1,10 @@
 from time import gmtime, strftime
 
-import pytorch_lightning as pl
+import lightning as L
 import torch
+from lightning.loggers import WandbLogger
+from lightning.pytorch.strategies import DDPStrategy
 from omegaconf import DictConfig
-from pytorch_lightning.loggers.wandb import WandbLogger
-from pytorch_lightning.strategies import DDPStrategy
 
 from src.models.callbacks import LossCurveLogger
 
@@ -70,7 +70,7 @@ def create_trainer(params: DictConfig):
         else None
     )
 
-    return pl.Trainer(
+    return L.Trainer(
         accelerator=trainer_params["accelerator"],
         devices=trainer_params["devices"],
         max_epochs=trainer_params["n_epochs"],

@@ -2,12 +2,12 @@ import os
 from multiprocessing import cpu_count
 from typing import Optional
 
-import pytorch_lightning as pl
+import lightning as L
 import torch
 from torch.utils.data import DataLoader, Dataset
 
 
-class ImageNetDataModule(pl.LightningDataModule):
+class ImageNetDataModule(L.LightningDataModule):
     imagenet_train: Dataset
     imagenet_val: Dataset
     num_workers: int

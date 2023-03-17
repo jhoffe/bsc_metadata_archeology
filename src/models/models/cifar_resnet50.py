@@ -1,4 +1,4 @@
-import pytorch_lightning as pl
+import lightning as L
 from torch.nn import functional as F
 from torch.optim import SGD
 from torch.optim.lr_scheduler import CosineAnnealingLR
@@ -7,7 +7,7 @@ from torchmetrics.classification import Accuracy
 from src.models.utils.create_model import create_model
 
 
-class CIFARResNet50(pl.LightningModule):
+class CIFARResNet50(L.LightningModule):
     def __init__(
         self,
         max_epochs: int = 150,
@@ -118,6 +118,3 @@ class CIFARResNet50(pl.LightningModule):
         }
 
         return {"optimizer": optimizer, "lr_scheduler": scheduler_dict}
-
-    def optimizer_zero_grad(self, epoch, batch_idx, optimizer, optimizer_idx):
-        optimizer.zero_grad(set_to_none=True)

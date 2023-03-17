@@ -1,4 +1,5 @@
-import pytorch_lightning as pl
+import lightning as L
+import torch
 from torch.nn import functional as F
 from torch.optim import SGD
 from torch.optim.lr_scheduler import CosineAnnealingLR
@@ -6,7 +7,7 @@ from torchmetrics.classification import Accuracy
 from torchvision.models.resnet import resnet50
 
 
-class ImageNetResNet50(pl.LightningModule):
+class ImageNetResNet50(L.LightningModule):
     def __init__(
         self,
         max_epochs: int = 100,
@@ -17,7 +18,7 @@ class ImageNetResNet50(pl.LightningModule):
         sync_dist_val: bool = False,
     ):
         super().__init__()
-        self.model = resnet50(weights=None)
+        self.model = torch.compile(resnet50(weights=None))
 
         self.max_epochs = max_epochs
         self.lr = lr
@@ -115,6 +116,3 @@ class ImageNetResNet50(pl.LightningModule):
         }
 
         return {"optimizer": optimizer, "lr_scheduler": scheduler_dict}
-
-    def optimizer_zero_grad(self, epoch, batch_idx, optimizer, optimizer_idx):
-        optimizer.zero_grad(set_to_none=True)
