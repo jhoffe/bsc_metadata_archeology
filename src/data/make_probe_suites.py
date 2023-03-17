@@ -174,7 +174,6 @@ class ProbeSuiteGenerator(Dataset):
 
     def __getitem__(self, index):
         if index in self.used_indices:
-            print("Warning: using probe data for training")
             return self.combined[self.dataset_indices_to_probe_indices[index]]
         return self.dataset[index], index
 
