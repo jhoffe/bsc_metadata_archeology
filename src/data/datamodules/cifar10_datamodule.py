@@ -1,11 +1,11 @@
 import os
 
-import pytorch_lightning as pl
+import lightning as L
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 
 
-class CIFAR10DataModule(pl.LightningDataModule):
+class CIFAR10DataModule(L.LightningDataModule):
     """Data module for loading the CIFAR10 dataset.
 
     Attributes:

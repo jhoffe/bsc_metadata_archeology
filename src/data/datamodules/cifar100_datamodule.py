@@ -1,11 +1,11 @@
 import os
 
-import pytorch_lightning as pl
+import lightning as L
 import torch
 from torch.utils.data import DataLoader, TensorDataset
 
 
-class CIFAR100DataModule(pl.LightningDataModule):
+class CIFAR100DataModule(L.LightningDataModule):
     """Data module for loading the CIFAR10 dataset.
 
     Attributes:
@@ -60,7 +60,7 @@ class CIFAR100DataModule(pl.LightningDataModule):
             batch_size=self.batch_size,
             num_workers=self.num_workers,
             shuffle=True,
-            pin_memory=True
+            pin_memory=True,
         )
 
     def test_dataloader(self) -> DataLoader:
@@ -73,7 +73,7 @@ class CIFAR100DataModule(pl.LightningDataModule):
             self.cifar100_test,
             batch_size=self.batch_size,
             num_workers=self.num_workers,
-            pin_memory=True
+            pin_memory=True,
         )
 
     def val_dataloader(self) -> DataLoader:
@@ -86,5 +86,5 @@ class CIFAR100DataModule(pl.LightningDataModule):
             self.cifar100_test,
             batch_size=self.batch_size,
             num_workers=self.num_workers,
-            pin_memory=True
+            pin_memory=True,
         )

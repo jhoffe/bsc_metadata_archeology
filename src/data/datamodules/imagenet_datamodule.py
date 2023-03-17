@@ -2,12 +2,12 @@ import os
 from multiprocessing import cpu_count
 from typing import Optional
 
-import pytorch_lightning as pl
+import lightning as L
 import torch
 from torch.utils.data import DataLoader, Dataset
 
 
-class ImageNetDataModule(pl.LightningDataModule):
+class ImageNetDataModule(L.LightningDataModule):
     imagenet_train: Dataset
     imagenet_val: Dataset
     num_workers: int
@@ -53,7 +53,7 @@ class ImageNetDataModule(pl.LightningDataModule):
             batch_size=self.batch_size,
             num_workers=self.num_workers,
             shuffle=True,
-            pin_memory=True
+            pin_memory=True,
         )
 
     def test_dataloader(self) -> DataLoader:
@@ -66,7 +66,7 @@ class ImageNetDataModule(pl.LightningDataModule):
             self.imagenet_val,
             batch_size=self.batch_size,
             num_workers=self.num_workers,
-            pin_memory=True
+            pin_memory=True,
         )
 
     def val_dataloader(self) -> DataLoader:
@@ -79,5 +79,5 @@ class ImageNetDataModule(pl.LightningDataModule):
             self.imagenet_val,
             batch_size=self.batch_size,
             num_workers=self.num_workers,
-            pin_memory=True
+            pin_memory=True,
         )

@@ -1,14 +1,13 @@
 import os
 
+import lightning as L
 import pyarrow as pa
 import pyarrow.parquet as pq
-import pytorch_lightning as pl
 import torch
-from pytorch_lightning.callbacks import Callback
-from pytorch_lightning.strategies.single_device import SingleDeviceStrategy
+from lightning.pytorch.strategies import SingleDeviceStrategy
 
 
-class LossCurveLogger(Callback):
+class LossCurveLogger(L.Callback):
     def __init__(self, dir: str, wandb_suffix: str) -> None:
         super().__init__()
         self.dir = dir
@@ -17,8 +16,8 @@ class LossCurveLogger(Callback):
 
     def on_train_batch_end(
         self,
-        trainer: pl.Trainer,
-        pl_module: pl.LightningModule,
+        trainer: L.Trainer,
+        pl_module: L.LightningModule,
         outputs,
         batch,
         batch_idx: int,
@@ -42,7 +41,7 @@ class LossCurveLogger(Callback):
         return os.path.join(self.dir, f"losses_v{version}.pt")
 
     def on_train_epoch_end(
-        self, trainer: pl.Trainer, pl_module: pl.LightningModule
+        self, trainer: L.Trainer, pl_module: L.LightningModule
     ) -> None:
         batch_ids = []
         indices = torch.cat(
