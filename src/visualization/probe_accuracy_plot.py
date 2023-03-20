@@ -17,13 +17,22 @@ def probe_accuracy_plot(df: pd.DataFrame, output_path: str, dataset_name: str) -
 
     probe_suite = torch.load(f"data/processed/{dataset_name}/train_probe_suite.pt")
 
+    df.drop_duplicates(subset=["epoch", "sample_index", "stage"], inplace=True)
+
     df["epoch"] = df["epoch"].astype(int)
+
+    max_epoch = df["epoch"].max() + 1
+    num_suite_samples = len(probe_suite.combined)
+    num_train_samples = len(probe_suite)
+
+    assert df["stage"][df["stage"] == "val"].count() == max_epoch * num_suite_samples
+    assert df["stage"][df["stage"] == "train"].count() == max_epoch * num_train_samples
 
     suite_names = {
         "typical": "Typical",
         "atypical": "Atypical",
         "random_outputs": "Random outputs",
-        # "random_inputs_outputs": "Random inputs and outputs",
+        "random_inputs_outputs": "Random inputs and outputs",
         "corrupted": "Corrupted",
     }
 
@@ -41,12 +50,12 @@ def probe_accuracy_plot(df: pd.DataFrame, output_path: str, dataset_name: str) -
 
     df["prediction"] = df["y"] == df["y_hat"]
 
-    val_df = df[df['stage'] == 'val']
+    val_df = df[df["stage"] == "val"]
     val_df = val_df.groupby(["epoch", "suite"]).agg({"prediction": "mean"})
     val_df.reset_index(inplace=True)
     val_df["prediction"] = val_df["prediction"] * 100
 
-    train_df = df[df['stage'] == 'train']
+    train_df = df[df["stage"] == "train"]
     train_df = train_df.groupby(["epoch", "suite"]).agg({"prediction": "mean"})
     train_df.reset_index(inplace=True)
     train_df["prediction"] = train_df["prediction"] * 100
@@ -79,16 +88,16 @@ def probe_accuracy_plot(df: pd.DataFrame, output_path: str, dataset_name: str) -
     for i, suite in enumerate(suites):
         if "Train" in suite:
             plt.plot(
-            train_df[train_df["suite"] == suite]["epoch"],
-            train_df[train_df["suite"] == suite]["prediction"],
-            label=suite,
-            alpha=0.75,
-            linewidth=0.5,
-            linestyle=line_styles[i % len(line_styles)],
-            marker=marker_list[i % len(marker_list)],
-            markersize=3,
-            color=marker_colors[i % len(marker_colors)],
-        )
+                train_df[train_df["suite"] == suite]["epoch"],
+                train_df[train_df["suite"] == suite]["prediction"],
+                label=suite,
+                alpha=0.75,
+                linewidth=0.5,
+                linestyle=line_styles[i % len(line_styles)],
+                marker=marker_list[i % len(marker_list)],
+                markersize=3,
+                color=marker_colors[i % len(marker_colors)],
+            )
         else:
             plt.plot(
                 val_df[val_df["suite"] == suite]["epoch"],
