@@ -6,7 +6,7 @@ from torch.nn import functional as F
 
 @dataclass
 class LossCurve:
-    loss: torch.Tensor
+    unreduced_loss: torch.Tensor
     indices: torch.Tensor
     y: torch.Tensor
     y_hat: torch.Tensor
@@ -23,7 +23,8 @@ class LossCurve:
 
     def to_dict(self):
         return {
-            "loss": self.loss,
+            "unreduced_loss": self.unreduced_loss,
+            "loss": self.unreduced_loss.mean(),
             "indices": self.indices,
             "y": self.y,
             "y_hat": self.y_hat,
