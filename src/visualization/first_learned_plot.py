@@ -157,7 +157,7 @@ def first_learned_plot(df: pd.DataFrame, output_path: str, dataset_name: str) ->
     if not os.path.exists(figure_path):
         os.makedirs(figure_path)
 
-    plt.savefig(os.path.join(figure_path, f"{dataset_name}_probe_suite_accuracy.png"))
+    plt.savefig(os.path.join(figure_path, f"{dataset_name}_first_learned_accuracy.png"))
 
 
 def main(dataset_path, output_filepath, dataset_name):
