@@ -1,6 +1,0 @@
-defaults:
-  - default-cifar
-
-accelerator: 'gpu'
-strategy: "auto"
-devices: 1

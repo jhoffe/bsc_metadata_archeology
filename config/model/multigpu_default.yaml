@@ -4,4 +4,4 @@ momentum: 0.9
 weight_decay: 0.0005
 max_epochs: 100
 sync_dist_train: false
-sync_dist_val: false
+sync_dist_val: true
