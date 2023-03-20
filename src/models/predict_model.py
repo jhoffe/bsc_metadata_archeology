@@ -5,9 +5,9 @@ import lightning as L
 from dotenv import find_dotenv, load_dotenv
 from omegaconf import DictConfig, OmegaConf
 
-from src.models.create_datamodule import create_datamodule
-from src.models.create_module import create_module
-from src.models.create_trainer import create_trainer
+from src.models.utils.create_datamodule import create_datamodule
+from src.models.utils.create_module import create_module
+from src.models.utils.create_trainer import create_trainer
 
 
 @hydra.main(
