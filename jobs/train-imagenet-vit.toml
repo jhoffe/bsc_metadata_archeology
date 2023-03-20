@@ -1,6 +1,6 @@
 queue = "gpua100"
 name = "train-imagenet"
-walltime = { hours = 30, minutes = 0 }
+walltime = { hours = 72, minutes = 0 }
 cpu = 16
 single_host = true
 memory = 8
