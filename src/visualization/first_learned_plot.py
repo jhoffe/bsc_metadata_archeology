@@ -95,18 +95,14 @@ def first_learned_plot(df: pd.DataFrame, output_path: str, dataset_name: str) ->
     for epoch in range(max_epoch):
         epoch_train_group = temp_train.groupby(["epoch"]).get_group(epoch)
         learned["Train"].update(
-            epoch_train_group["sample_index"][
-                epoch_train_group["prediction"] == True  # noqa: E712
-            ].values
+            epoch_train_group["sample_index"][epoch_train_group["prediction"]].values
         )
         first_learned["Train"].append(len(learned["Train"]) / 47500)
         epoch_val_group = val_df.groupby(["epoch"]).get_group(epoch)
         for suite in suite_names:
             suite_group = epoch_val_group.groupby(["suite"]).get_group(suite)
             learned[suite].update(
-                suite_group["sample_index"][
-                    suite_group["prediction"] == True  # noqa: E712
-                ].values
+                suite_group["sample_index"][suite_group["prediction"]].values
             )
             first_learned[suite].append(len(learned[suite]) / 250)
 

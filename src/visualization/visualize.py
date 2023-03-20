@@ -1,9 +1,8 @@
 import click
 
-from src.visualization.utils.plot_utils import get_loss_dataset
-
 from src.visualization.first_learned_plot import main as first_learned_plot
 from src.visualization.probe_accuracy_plot import main as probe_accuracy_plot
+
 
 # add click options here
 @click.command()
