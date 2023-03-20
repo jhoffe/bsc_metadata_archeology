@@ -15,9 +15,12 @@ class ViT(L.LightningModule):
         sync_dist_val: bool = False,
         num_classes=1000,
         should_compile: bool = True,
+        model_version: str = "vit_b_16",
     ):
         super().__init__()
-        self.model = create_vit_model(num_classes, should_compile=should_compile)
+        self.model = create_vit_model(
+            num_classes, model_version, should_compile=should_compile
+        )
 
         self.lr = lr
         self.sync_dist_train = sync_dist_train

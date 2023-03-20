@@ -26,16 +26,31 @@ def create_resnet50_model(
     return torch.compile(model, disable=not should_compile)
 
 
-def create_vit_model(num_classes: int, should_compile: bool = True):
+def create_vit_model(
+    num_classes: int, version: str = "vit_b_16", should_compile: bool = True
+):
     """Create a ViT model.
 
     Args:
         num_classes: Number of classes in the dataset.
+        image_size: Size of the input images.
+        version: ViT version.
         should_compile: Whether to compile the model.
 
     Returns:
         A ViT model.
     """
-    model = torchvision.models.vit_b_16(weights=None, num_classes=num_classes)
+    if version == "vit_b_16":
+        model = torchvision.models.vit_b_16(weights=None, num_classes=num_classes)
+    elif version == "vit_b_32":
+        model = torchvision.models.vit_b_32(weights=None, num_classes=num_classes)
+    elif version == "vit_l_16":
+        model = torchvision.models.vit_l_16(weights=None, num_classes=num_classes)
+    elif version == "vit_l_32":
+        model = torchvision.models.vit_l_32(weights=None, num_classes=num_classes)
+    elif version == "vit_h_14":
+        model = torchvision.models.vit_h_14(weights=None, num_classes=num_classes)
+    else:
+        raise ValueError(f"ViT version '{version}' not supported")
 
     return torch.compile(model, disable=not should_compile)
