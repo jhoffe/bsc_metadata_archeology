@@ -70,6 +70,12 @@ def create_trainer(params: DictConfig):
         else None
     )
 
+    clip_grad_norm = (
+        trainer_params["clip_grad_norm"]
+        if "clip_grad_norm" in trainer_params.keys()
+        else None
+    )
+
     return L.Trainer(
         accelerator=trainer_params["accelerator"],
         devices=trainer_params["devices"],
@@ -83,4 +89,5 @@ def create_trainer(params: DictConfig):
         callbacks=callbacks,
         log_every_n_steps=log_every_n_steps,
         profiler=profiler,
+        clip_grad_norm=clip_grad_norm,
     )

@@ -1,0 +1,7 @@
+defaults:
+  - default
+
+accelerator: 'gpu'
+strategy: "auto"
+devices: 1
+clip_grad_norm: 1.0
