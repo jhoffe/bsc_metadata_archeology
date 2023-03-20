@@ -113,3 +113,5 @@ lightning_logs/
 /models/
 
 /reports/figures/**/*.png
+
+/checkpoints/

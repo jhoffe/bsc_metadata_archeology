@@ -16,10 +16,7 @@ def c_score_downloader():
 
 def mem_score_downloader():
     """Takes a list of files and downloads these into the data/external folder."""
-    cscores = [
-        "cifar100_infl_matrix.npz",
-        "imagenet_index.npz"
-    ]
+    cscores = ["cifar100_infl_matrix.npz", "imagenet_index.npz"]
     for file in cscores:
         URL = f"https://pluskid.github.io/influence-memorization/data/{file}"
         r = requests.get(URL)

@@ -3,7 +3,7 @@ import random
 import matplotlib.pyplot as plt
 import torch
 
-from src.data.idx_to_label_names import get_idx_to_label_names
+from src.data.utils.idx_to_label_names import get_idx_to_label_names
 
 random.seed(42)
 probe_suite = torch.load("data/processed/imagenet/train_probe_suite.pt")

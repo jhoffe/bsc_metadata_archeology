@@ -26,7 +26,6 @@ def plot_probe_accuracy(df: pd.DataFrame, output_path: str, dataset_name: str) -
 
     probe_suite = torch.load(f"data/processed/{dataset_name}/train_probe_suite.pt")
 
-    # df = get_loss_dataset("models/losses/cifar10-1x-gpua100-20230311_1752")
     df["epoch"] = df["epoch"].astype(int)
 
     suite_names = {
