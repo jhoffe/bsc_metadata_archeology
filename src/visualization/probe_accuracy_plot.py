@@ -6,22 +6,13 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import torch
 
-from src.data.loss_dataset import LossDataset
+from src.visualization.utils.plot_utils import (
+    get_indices_from_probe_suite,
+    get_loss_dataset,
+)
 
 
-def get_loss_dataset(dataset_path: str) -> pd.DataFrame:
-    dataset = LossDataset(dataset_path)
-    dataset.load()
-
-    df = dataset.df
-    return df
-
-
-def get_indices_from_probe_suite(suite: list) -> list[int]:
-    return [idx for _, idx in suite]
-
-
-def plot_probe_accuracy(df: pd.DataFrame, output_path: str, dataset_name: str) -> None:
+def probe_accuracy_plot(df: pd.DataFrame, output_path: str, dataset_name: str) -> None:
     """Plot the accuracy for each probe suite pr. epoch"""
 
     probe_suite = torch.load(f"data/processed/{dataset_name}/train_probe_suite.pt")
@@ -103,7 +94,7 @@ def plot_probe_accuracy(df: pd.DataFrame, output_path: str, dataset_name: str) -
 
 def main(dataset_path, output_filepath, dataset_name):
     df = get_loss_dataset(dataset_path)
-    plot_probe_accuracy(df, output_filepath, dataset_name)
+    probe_accuracy_plot(df, output_filepath, dataset_name)
 
 
 @click.command()
