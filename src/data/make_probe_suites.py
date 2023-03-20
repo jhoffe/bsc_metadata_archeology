@@ -1,4 +1,5 @@
 import os
+import random
 from typing import Dict, Optional, Tuple
 
 import numpy as np
@@ -45,13 +46,16 @@ class ProbeSuiteGenerator(Dataset):
 
     _combined: Optional[list] = None
 
+    only_probes: bool = False
+
     def __init__(
         self,
         dataset: Dataset,
         dataset_len: int,
         label_count: int,
-        num_probes: int = 250,
+        num_probes: int = 500,
         corruption_std: float = 0.1,
+        only_probes: bool = False,
     ):
         self.dataset = dataset
         assert hasattr(self.dataset, "score")
@@ -61,6 +65,8 @@ class ProbeSuiteGenerator(Dataset):
         self.label_count = label_count
         self.num_probes = num_probes
         self.corruption_std = corruption_std
+        self._combined = None
+        self.only_probes = only_probes
 
     def generate(self):
         self.generate_atypical()
@@ -105,12 +111,7 @@ class ProbeSuiteGenerator(Dataset):
             (
                 (
                     x,
-                    torch.multinomial(
-                        torch.Tensor(
-                            [1 if y != i else 0 for i in range(self.label_count)]
-                        ),
-                        1,
-                    ).item(),
+                    random.choice([i for i in range(self.label_count) if i != y]),
                     c,
                 ),
                 idx,
@@ -160,12 +161,6 @@ class ProbeSuiteGenerator(Dataset):
             idx for idx in self.remaining_indices if idx not in subset_indices
         ]
 
-        # self.remaining_indices = [
-        # self.remaining_indices[i]
-        # for i in range(len(self.remaining_indices))
-        # if self.remaining_indices[i] not in subset_indices
-        # ]
-
         return Subset(self.dataset, subset_indices)
 
     def index_to_probe_suite_type_dict(self) -> Tuple[Dict[int, int], Dict[int, str]]:
@@ -200,11 +195,17 @@ class ProbeSuiteGenerator(Dataset):
         return self._combined
 
     def __getitem__(self, index):
+        if self.only_probes:
+            return self.combined[index]
+
         if index in self.used_indices:
             return self.combined[self.dataset_indices_to_probe_indices[index]]
         return self.dataset[index], index
 
     def __len__(self):
+        if self.only_probes:
+            return len(self.combined)
+
         return self.dataset_len
 
 
