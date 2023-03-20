@@ -38,3 +38,8 @@ def first_learned_plot(df: pd.DataFrame, output_path: str, dataset_name: str) ->
 def main():
     df = get_loss_dataset("data/processed/cifar10/losses.csv")
     first_learned_plot(df, "data/processed/cifar10/losses.csv", "cifar10")
+
+if __name__ == "__main__":
+    df = get_loss_dataset("models/losses/cifar10-20230320_1038")
+    
+
