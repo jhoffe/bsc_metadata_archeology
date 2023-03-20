@@ -1,35 +1,25 @@
 import lightning as L
 from torch.nn import functional as F
-from torch.optim import SGD
-from torch.optim.lr_scheduler import CosineAnnealingLR
+from torch.optim import AdamW
 from torchmetrics.classification import Accuracy
 
-from src.models.utils.create_model import create_resnet50_model
+from src.models.utils.create_model import create_vit_model
 from src.models.utils.loss_curve import LossCurve
 
 
-class ResNet50(L.LightningModule):
+class ViT(L.LightningModule):
     def __init__(
         self,
-        max_epochs: int = 100,
         lr: float = 0.1,
-        momentum: float = 0.9,
-        weight_decay: float = 0.0005,
         sync_dist_train: bool = False,
         sync_dist_val: bool = False,
         num_classes=1000,
-        resize_conv1=False,
         should_compile: bool = True,
     ):
         super().__init__()
-        self.model = create_resnet50_model(
-            num_classes, resize_conv1=resize_conv1, should_compile=should_compile
-        )
+        self.model = create_vit_model(num_classes, should_compile=should_compile)
 
-        self.max_epochs = max_epochs
         self.lr = lr
-        self.momentum = momentum
-        self.weight_decay = weight_decay
         self.sync_dist_train = sync_dist_train
         self.sync_dist_val = sync_dist_val
 
@@ -109,16 +99,4 @@ class ResNet50(L.LightningModule):
         )
 
     def configure_optimizers(self):
-        optimizer = SGD(
-            self.parameters(),
-            lr=self.lr,
-            momentum=self.momentum,
-            weight_decay=self.weight_decay,
-        )
-
-        scheduler_dict = {
-            "scheduler": CosineAnnealingLR(optimizer, T_max=self.max_epochs),
-            "interval": "epoch",
-        }
-
-        return {"optimizer": optimizer, "lr_scheduler": scheduler_dict}
+        return AdamW(self.parameters(), lr=self.lr)

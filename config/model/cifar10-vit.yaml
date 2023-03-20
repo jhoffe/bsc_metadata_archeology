@@ -1,0 +1,4 @@
+defaults:
+  - cifar10-vit-defaults
+
+num_classes: 10

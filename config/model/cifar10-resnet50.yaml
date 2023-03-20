@@ -1,4 +1,4 @@
 defaults:
-  - default
+  - cifar10-resnet50-defaults
 
 num_classes: 10
