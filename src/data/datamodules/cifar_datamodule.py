@@ -16,9 +16,9 @@ class CIFAR10DataModule(L.LightningDataModule):
         num_workers: int, number of worker to use for data loading
     """
 
-    cifar10_train: TensorDataset
-    cifar10_test: TensorDataset
-    cifar10_probes: Dataset
+    cifar_train: TensorDataset
+    cifar_test: TensorDataset
+    cifar_probes: Dataset
     num_workers: int
 
     def __init__(
@@ -30,7 +30,7 @@ class CIFAR10DataModule(L.LightningDataModule):
         """Initializes the data module.
 
         Args:
-            data_dir: str, directory where the CIFAR10 dataset is stored.
+            data_dir: str, directory where the CIFAR dataset is stored.
             batch_size: int, size of the mini-batch.
             num_workers: int, number of worker to use for data loading
         """
@@ -51,9 +51,9 @@ class CIFAR10DataModule(L.LightningDataModule):
         probes_dataset = deepcopy(train_dataset)
         probes_dataset.only_probes = True
 
-        self.cifar10_train = train_dataset
-        self.cifar10_probes = probes_dataset
-        self.cifar10_test = test_dataset
+        self.cifar_train = train_dataset
+        self.cifar_probes = probes_dataset
+        self.cifar_test = test_dataset
 
     def train_dataloader(self) -> DataLoader:
         """Returns the dataloader for the validation set.
@@ -62,7 +62,7 @@ class CIFAR10DataModule(L.LightningDataModule):
             DataLoader, the dataloader for the validation set.
         """
         return DataLoader(
-            self.cifar10_train,
+            self.cifar_train,
             batch_size=self.batch_size,
             num_workers=self.num_workers,
             shuffle=True,
@@ -76,7 +76,7 @@ class CIFAR10DataModule(L.LightningDataModule):
             DataLoader, the dataloader for the test set.
         """
         return DataLoader(
-            self.cifar10_test,
+            self.cifar_test,
             batch_size=self.batch_size,
             num_workers=self.num_workers,
             pin_memory=True,
@@ -90,13 +90,13 @@ class CIFAR10DataModule(L.LightningDataModule):
         """
         return [
             DataLoader(
-                self.cifar10_test,
+                self.cifar_test,
                 batch_size=self.batch_size,
                 num_workers=self.num_workers,
                 pin_memory=True,
             ),
             DataLoader(
-                self.cifar10_probes,
+                self.cifar_probes,
                 batch_size=self.batch_size,
                 num_workers=self.num_workers,
                 pin_memory=True,

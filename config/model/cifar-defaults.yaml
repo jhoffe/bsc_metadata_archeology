@@ -2,8 +2,8 @@ name: "resnet50"
 lr: 0.1
 momentum: 0.9
 weight_decay: 0.0005
-max_epochs: 100
+max_epochs: 150
 sync_dist_train: false
 sync_dist_val: false
-resize_conv1: false
+resize_conv1: true
 compile: true

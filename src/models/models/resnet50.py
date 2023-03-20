@@ -1,13 +1,14 @@
 import lightning as L
-import torch
 from torch.nn import functional as F
 from torch.optim import SGD
 from torch.optim.lr_scheduler import CosineAnnealingLR
 from torchmetrics.classification import Accuracy
-from torchvision.models.resnet import resnet50
+
+from src.models.utils.create_model import create_model
+from src.models.utils.loss_curve import LossCurve
 
 
-class ImageNetResNet50(L.LightningModule):
+class ResNet50(L.LightningModule):
     def __init__(
         self,
         max_epochs: int = 100,
@@ -16,9 +17,14 @@ class ImageNetResNet50(L.LightningModule):
         weight_decay: float = 0.0005,
         sync_dist_train: bool = False,
         sync_dist_val: bool = False,
+        num_classes=1000,
+        resize_conv1=False,
+        should_compile: bool = True,
     ):
         super().__init__()
-        self.model = torch.compile(resnet50(weights=None))
+        self.model = create_model(
+            num_classes, resize_conv1=resize_conv1, should_compile=should_compile
+        )
 
         self.max_epochs = max_epochs
         self.lr = lr
@@ -29,8 +35,8 @@ class ImageNetResNet50(L.LightningModule):
 
         self.save_hyperparameters(ignore=["model"])
 
-        self.val_accuracy = Accuracy(task="multiclass", num_classes=1000)
-        self.test_accuracy = Accuracy(task="multiclass", num_classes=1000)
+        self.val_accuracy = Accuracy(task="multiclass", num_classes=num_classes)
+        self.test_accuracy = Accuracy(task="multiclass", num_classes=num_classes)
 
     def forward(self, x):
         return self.model(x)
@@ -38,8 +44,8 @@ class ImageNetResNet50(L.LightningModule):
     def training_step(self, batch, batch_idx):
         (x, y, _), indices = batch
 
-        y_hat = self(x)
-        loss = F.cross_entropy(y_hat, y, reduction="none")
+        logits = self(x)
+        loss = F.cross_entropy(logits, y, reduction="none")
         mean_loss = loss.mean()
 
         self.log(
@@ -50,14 +56,7 @@ class ImageNetResNet50(L.LightningModule):
             sync_dist=self.sync_dist_train,
         )
 
-        y_pred = y_hat.argmax(dim=1)
-        return {
-            "loss": mean_loss,
-            "unreduced_loss": loss,
-            "indices": indices,
-            "y": y,
-            "y_hat": y_pred,
-        }
+        return LossCurve.create(loss, indices, y, logits)
 
     def validation_step(self, batch, batch_idx, dataloader_idx=0):
         if dataloader_idx == 0:
@@ -66,11 +65,11 @@ class ImageNetResNet50(L.LightningModule):
         else:
             (x, y, _), indices = batch
 
-        y_hat = self(x)
-        loss = F.cross_entropy(y_hat, y, reduction="none")
+        logits = self(x)
+        loss = F.cross_entropy(logits, y, reduction="none")
         mean_loss = loss.mean()
 
-        self.val_accuracy(y_hat, y)
+        self.val_accuracy(logits, y)
         self.log(
             "val/accuracy",
             self.val_accuracy,
@@ -86,14 +85,7 @@ class ImageNetResNet50(L.LightningModule):
             sync_dist=self.sync_dist_val,
         )
 
-        y_pred = y_hat.argmax(dim=1)
-        return {
-            "loss": mean_loss,
-            "unreduced_loss": loss,
-            "indices": indices,
-            "y": y,
-            "y_hat": y_pred,
-        }
+        return LossCurve.create(loss, indices, y, logits)
 
     def test_step(self, batch, batch_idx):
         x, y = batch
