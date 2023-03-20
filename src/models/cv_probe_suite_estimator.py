@@ -1,5 +1,6 @@
 import click
 import numpy as np
+from lightning import seed_everything
 from sklearn.base import BaseEstimator, is_classifier
 from sklearn.ensemble import AdaBoostClassifier, RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
@@ -9,6 +10,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
+from xgboost import XGBClassifier, XGBRFClassifier
 
 from src.data.loss_dataset import LossDataset
 
@@ -39,7 +41,10 @@ def cv_metadata_model(classifier: BaseEstimator, X: np.array, y: np.array) -> np
 @click.argument(
     "probe_suite_path", type=click.Path(exists=True, dir_okay=False, file_okay=True)
 )
-def main(loss_dataset_path, probe_suite_path):
+@click.option("--seed", type=int, default=42)
+def main(loss_dataset_path, probe_suite_path, seed):
+    seed_everything(seed)
+
     loss_dataset = LossDataset(loss_dataset_path)
     loss_dataset.load()
     loss_dataset.load_probe_suite(probe_suite_path)
@@ -55,6 +60,8 @@ def main(loss_dataset_path, probe_suite_path):
         "Random Forest": RandomForestClassifier(),
         "AdaBoost": AdaBoostClassifier(),
         "MLP": MLPClassifier((50, 25, 10), max_iter=1000),
+        "XGBoost": XGBClassifier(),
+        "XGBoost RF": XGBRFClassifier(n_estimators=100),
     }
 
     for name, classifier in classifiers.items():

@@ -39,7 +39,7 @@ class LossDataset:
 
         df = self.df[self.df["sample_index"].isin(self.probe_suite.used_indices)].copy()
 
-        # Convert to int from categorrical
+        # Convert to int from categorical
         df["epoch"] = df["epoch"].astype(int)
 
         df.sort_values(["sample_index", "epoch"], inplace=True)
