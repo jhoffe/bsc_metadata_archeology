@@ -1,7 +1,6 @@
 from omegaconf import DictConfig
 
-from src.models.models import ResNet50
-from src.models.models.vit import ViT
+from src.models.models import ResNet50, ViT
 
 
 def create_module(params: DictConfig):

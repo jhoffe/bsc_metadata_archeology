@@ -1,4 +1,4 @@
-from .cifar_resnet50 import CIFARResNet50
 from .resnet50 import ResNet50
+from .vit import ViT
 
-__all__ = ["ResNet50", "CIFARResNet50"]
+__all__ = ["ResNet50", "ViT"]
