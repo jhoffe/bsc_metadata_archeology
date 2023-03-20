@@ -39,6 +39,7 @@ class ViT(L.LightningModule):
 
         logits = self(x)
         loss = F.cross_entropy(logits, y, reduction="none")
+        print(loss)
         mean_loss = loss.mean()
 
         self.log(
