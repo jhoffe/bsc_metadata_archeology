@@ -9,8 +9,8 @@ import torch
 from src.visualization.utils.plot_utils import (
     get_indices_from_probe_suite,
     get_loss_dataset,
-    plot_styles,
     plot_dicts,
+    plot_styles,
 )
 
 
@@ -55,7 +55,6 @@ def first_learned_plot(df: pd.DataFrame, output_path: str, dataset_name: str) ->
     first_learned, learned, suite_names = plot_dicts()
 
     temp_train = train_df[train_df["suite"] == "Train"]
-    
 
     for epoch in range(max_epoch):
         epoch_train_group = temp_train.groupby(["epoch"]).get_group(epoch)

@@ -7,9 +7,7 @@ def get_loss_dataset(dataset_path: str) -> pd.DataFrame:
     """Load the loss dataset"""
     dataset = LossDataset(dataset_path)
     dataset.load()
-
     df = dataset.df
-    
     return df
 
 

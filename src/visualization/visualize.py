@@ -1,8 +1,10 @@
 import click
 
+from src.visualization.consistently_learned_plot import (
+    main as consistently_learned_plot,
+)
 from src.visualization.first_learned_plot import main as first_learned_plot
 from src.visualization.probe_accuracy_plot import main as probe_accuracy_plot
-from src.visualization.consistently_learned_plot import main as consistently_learned_plot
 
 
 # add click options here
