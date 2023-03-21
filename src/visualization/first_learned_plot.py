@@ -9,6 +9,8 @@ import torch
 from src.visualization.utils.plot_utils import (
     get_indices_from_probe_suite,
     get_loss_dataset,
+    plot_styles,
+    plot_dicts,
 )
 
 
@@ -50,86 +52,29 @@ def first_learned_plot(df: pd.DataFrame, output_path: str, dataset_name: str) ->
     val_df = df[df["stage"] == "val"]
     train_df = df[df["stage"] == "train"]
 
-    first_learned = {
-        "Typical": [],
-        "Atypical": [],
-        "Random outputs": [],
-        "Random inputs and outputs": [],
-        "Corrupted": [],
-        "Typical [Val]": [],
-        "Atypical [Val]": [],
-        "Random outputs [Val]": [],
-        "Random inputs and outputs [Val]": [],
-        "Corrupted [Val]": [],
-        "Train": [],
-    }
+    first_learned, learned, suite_names = plot_dicts()
 
-    learned = {
-        "Typical": set([]),
-        "Atypical": set([]),
-        "Random outputs": set([]),
-        "Random inputs and outputs": set([]),
-        "Corrupted": set([]),
-        "Typical [Val]": set([]),
-        "Atypical [Val]": set([]),
-        "Random outputs [Val]": set([]),
-        "Random inputs and outputs [Val]": set([]),
-        "Corrupted [Val]": set([]),
-        "Train": set([]),
-    }
-
-    suite_names = [
-        "Typical",
-        "Atypical",
-        "Random outputs",
-        "Random inputs and outputs",
-        "Corrupted",
-        "Typical [Val]",
-        "Atypical [Val]",
-        "Random outputs [Val]",
-        "Random inputs and outputs [Val]",
-        "Corrupted [Val]",
-    ]
     temp_train = train_df[train_df["suite"] == "Train"]
+    
 
     for epoch in range(max_epoch):
         epoch_train_group = temp_train.groupby(["epoch"]).get_group(epoch)
         learned["Train"].update(
             epoch_train_group["sample_index"][epoch_train_group["prediction"]].values
         )
-        first_learned["Train"].append(len(learned["Train"]) / 47500)
+        first_learned["Train"].append(len(learned["Train"]) / len(temp_train))
         epoch_val_group = val_df.groupby(["epoch"]).get_group(epoch)
         for suite in suite_names:
             suite_group = epoch_val_group.groupby(["suite"]).get_group(suite)
             learned[suite].update(
                 suite_group["sample_index"][suite_group["prediction"]].values
             )
-            first_learned[suite].append(len(learned[suite]) / 250)
+            first_learned[suite].append(len(learned[suite]) / len(suite_group))
 
     suites = first_learned.keys()
 
     # Plot
-    line_styles = ["solid", "dashed", "dashdot", "dotted"]
-    marker_list = ["o", "*", "X", "P", "p", "D", "v", "^", "h", "1", "2", "3", "4"]
-    marker_colors = [
-        "tab:gray",
-        "tab:green",
-        "tab:blue",
-        "tab:purple",
-        "tab:orange",
-        "tab:red",
-        "tab:pink",
-        "tab:olive",
-        "tab:brown",
-        "tab:cyan",
-    ]
-
-    plot_titles = {
-        "cifar10": "CIFAR-10",
-        "cifar100": "CIFAR-100",
-        "imagenet": "ImageNet",
-    }
-    # Plot
+    line_styles, marker_list, marker_colors, plot_titles = plot_styles()
 
     plt.figure(figsize=(10, 6))
     plt.title(f"Percent First Learned for {plot_titles['cifar10']}")
@@ -156,21 +101,21 @@ def first_learned_plot(df: pd.DataFrame, output_path: str, dataset_name: str) ->
     plt.savefig(os.path.join(figure_path, f"{dataset_name}_first_learned_accuracy.png"))
 
 
-def main(dataset_path, output_filepath, dataset_name):
-    df = get_loss_dataset(dataset_path)
+def main(loss_dataset_path, output_filepath, dataset_name):
+    df = get_loss_dataset(loss_dataset_path)
     first_learned_plot(df, output_filepath, dataset_name)
 
 
 @click.command()
 @click.argument(
-    "dataset_path", type=click.Path(exists=True, dir_okay=True, file_okay=False)
+    "loss_dataset_path", type=click.Path(exists=True, dir_okay=True, file_okay=False)
 )
 @click.argument(
     "output_filepath", type=click.Path(exists=True, dir_okay=True, file_okay=False)
 )
 @click.argument("dataset_name", type=str)
-def main_click(dataset_path, output_filepath, dataset_name):
-    main(dataset_path, output_filepath, dataset_name)
+def main_click(loss_dataset_path, output_filepath, dataset_name):
+    main(loss_dataset_path, output_filepath, dataset_name)
 
 
 if __name__ == "__main__":

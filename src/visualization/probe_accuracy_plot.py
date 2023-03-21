@@ -9,6 +9,7 @@ import torch
 from src.visualization.utils.plot_utils import (
     get_indices_from_probe_suite,
     get_loss_dataset,
+    plot_styles,
 )
 
 
@@ -63,26 +64,8 @@ def probe_accuracy_plot(df: pd.DataFrame, output_path: str, dataset_name: str) -
     suites = sorted(train_df["suite"].unique())
 
     # Plot
-    line_styles = ["solid", "dashed", "dashdot", "dotted"]
-    marker_list = ["o", "*", "X", "P", "p", "D", "v", "^", "h", "1", "2", "3", "4"]
-    marker_colors = [
-        "tab:gray",
-        "tab:green",
-        "tab:blue",
-        "tab:purple",
-        "tab:orange",
-        "tab:red",
-        "tab:pink",
-        "tab:olive",
-        "tab:brown",
-        "tab:cyan",
-    ]
+    line_styles, marker_list, marker_colors, plot_titles = plot_styles()
 
-    plot_titles = {
-        "cifar10": "CIFAR-10",
-        "cifar100": "CIFAR-100",
-        "imagenet": "ImageNet",
-    }
     plt.figure(figsize=(10, 6))
     plt.title(f"Probe Suite Accuracy for {plot_titles['cifar10']}")
     for i, suite in enumerate(suites):
@@ -122,21 +105,21 @@ def probe_accuracy_plot(df: pd.DataFrame, output_path: str, dataset_name: str) -
     plt.savefig(os.path.join(figure_path, f"{dataset_name}_probe_suite_accuracy.png"))
 
 
-def main(dataset_path, output_filepath, dataset_name):
-    df = get_loss_dataset(dataset_path)
+def main(loss_dataset_path, output_filepath, dataset_name):
+    df = get_loss_dataset(loss_dataset_path)
     probe_accuracy_plot(df, output_filepath, dataset_name)
 
 
 @click.command()
 @click.argument(
-    "dataset_path", type=click.Path(exists=True, dir_okay=True, file_okay=False)
+    "loss_dataset_path", type=click.Path(exists=True, dir_okay=True, file_okay=False)
 )
 @click.argument(
     "output_filepath", type=click.Path(exists=True, dir_okay=True, file_okay=False)
 )
 @click.argument("dataset_name", type=str)
-def main_click(dataset_path, output_filepath, dataset_name):
-    main(dataset_path, output_filepath, dataset_name)
+def main_click(loss_dataset_path, output_filepath, dataset_name):
+    main(loss_dataset_path, output_filepath, dataset_name)
 
 
 if __name__ == "__main__":
