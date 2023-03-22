@@ -43,7 +43,7 @@ class ViT(L.LightningModule):
         self.test_accuracy = Accuracy(task="multiclass", num_classes=num_classes)
 
         self.criterion = nn.CrossEntropyLoss(
-            reduce="none", label_smoothing=self.label_smoothing
+            reduction="none", label_smoothing=self.label_smoothing
         )
 
     def forward(self, x):
