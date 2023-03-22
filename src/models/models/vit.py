@@ -54,7 +54,6 @@ class ViT(L.LightningModule):
 
         logits = self(x)
         loss = self.criterion(logits, y)
-        print(loss)
         mean_loss = loss.mean()
 
         self.log(
