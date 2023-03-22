@@ -70,9 +70,9 @@ def create_trainer(params: DictConfig):
         else None
     )
 
-    clip_grad_norm = (
-        trainer_params["clip_grad_norm"]
-        if "clip_grad_norm" in trainer_params.keys()
+    gradient_clip_val = (
+        trainer_params["gradient_clip_val"]
+        if "gradient_clip_val" in trainer_params.keys()
         else None
     )
 
@@ -89,5 +89,5 @@ def create_trainer(params: DictConfig):
         callbacks=callbacks,
         log_every_n_steps=log_every_n_steps,
         profiler=profiler,
-        clip_grad_norm=clip_grad_norm,
+        gradient_clip_val=gradient_clip_val,
     )

@@ -4,4 +4,4 @@ defaults:
 accelerator: 'gpu'
 strategy: "auto"
 devices: 1
-clip_grad_norm: 1.0
+gradient_clip_val: 1.0
