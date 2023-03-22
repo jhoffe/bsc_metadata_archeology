@@ -3,7 +3,7 @@ name = "train-imagenet-vit"
 walltime = { hours = 72, minutes = 0 }
 cpu = 16
 single_host = true
-memory = 8
+memory = 32
 standard_output = { name = "logs/train-imagenet-vit.out", overwrite = true }
 error_output = { name = "logs/train-imagenet-vit.err", overwrite = true }
 use_gpu = { num_of_gpus = 1 }
