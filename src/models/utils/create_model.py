@@ -23,7 +23,7 @@ def create_resnet50_model(
         )
         model.maxpool = torch.nn.Identity()
 
-    return torch.compile(model, disable=not should_compile)
+    return torch.compile(model, disable=not should_compile, mode="max-autotune")
 
 
 def create_vit_model(
@@ -53,4 +53,4 @@ def create_vit_model(
     else:
         raise ValueError(f"ViT version '{version}' not supported")
 
-    return torch.compile(model, disable=not should_compile)
+    return torch.compile(model, disable=not should_compile, mode="max-autotune")
