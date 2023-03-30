@@ -6,13 +6,13 @@ import torch
 from torch.utils.data import DataLoader, Dataset, TensorDataset
 
 
-class CIFAR10DataModule(L.LightningDataModule):
-    """Data module for loading the CIFAR10 dataset.
+class CIFARDataModule(L.LightningDataModule):
+    """Data module for loading the CIFAR dataset.
 
     Attributes:
-        cifar10_train: TensorDataset, the train set of CIFAR10 dataset
-        cifar10_validation: TensorDataset, the validation set of CIFAR10 dataset
-        cifar10_test: TensorDataset, the test set of CIFAR10 dataset
+        cifar_train: TensorDataset, the train set of CIFAR dataset
+        cifar_validation: TensorDataset, the validation set of CIFAR dataset
+        cifar_test: TensorDataset, the test set of CIFAR dataset
         num_workers: int, number of worker to use for data loading
     """
 

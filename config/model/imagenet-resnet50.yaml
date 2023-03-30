@@ -6,4 +6,4 @@ max_epochs: 100
 sync_dist_train: false
 sync_dist_val: false
 resize_conv1: false
-compile: true
+should_compile: true

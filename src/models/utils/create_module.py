@@ -1,10 +1,10 @@
 from omegaconf import DictConfig
 
-from src.models.models import ResNet50
+from src.models.models import ResNet50, ViT
 
 
 def create_module(params: DictConfig):
-    MODULES = {"resnet50": ResNet50}
+    MODULES = {"resnet50": ResNet50, "vit": ViT}
 
     model_params = params.model
     module_name = model_params["name"]

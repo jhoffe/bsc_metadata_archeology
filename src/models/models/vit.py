@@ -1,42 +1,50 @@
 import lightning as L
-from torch.nn import functional as F
-from torch.optim import SGD
-from torch.optim.lr_scheduler import CosineAnnealingLR
+from torch import nn
+from torch.optim import AdamW
+from torch.optim.lr_scheduler import CosineAnnealingLR, LinearLR, SequentialLR
 from torchmetrics.classification import Accuracy
 
-from src.models.utils.create_model import create_resnet50_model
+from src.models.utils.create_model import create_vit_model
 from src.models.utils.loss_curve import LossCurve
 
 
-class ResNet50(L.LightningModule):
+class ViT(L.LightningModule):
     def __init__(
         self,
-        max_epochs: int = 100,
-        lr: float = 0.1,
-        momentum: float = 0.9,
-        weight_decay: float = 0.0005,
+        lr: float = 0.003,
+        weight_decay: float = 0.3,
+        max_epochs: int = 300,
+        label_smoothing: float = 0.11,
         sync_dist_train: bool = False,
         sync_dist_val: bool = False,
         num_classes=1000,
-        resize_conv1=False,
         should_compile: bool = True,
+        model_version: str = "vit_b_16",
+        warmup_epochs: int = 30,
+        lr_warmup_decay: float = 0.033,
     ):
         super().__init__()
-        self.model = create_resnet50_model(
-            num_classes, resize_conv1=resize_conv1, should_compile=should_compile
+        self.model = create_vit_model(
+            num_classes, model_version, should_compile=should_compile
         )
 
-        self.max_epochs = max_epochs
         self.lr = lr
-        self.momentum = momentum
         self.weight_decay = weight_decay
+        self.max_epochs = max_epochs
+        self.label_smoothing = label_smoothing
         self.sync_dist_train = sync_dist_train
         self.sync_dist_val = sync_dist_val
+        self.warmup_epochs = warmup_epochs
+        self.lr_warmup_decay = lr_warmup_decay
 
         self.save_hyperparameters(ignore=["model"])
 
         self.val_accuracy = Accuracy(task="multiclass", num_classes=num_classes)
         self.test_accuracy = Accuracy(task="multiclass", num_classes=num_classes)
+
+        self.criterion = nn.CrossEntropyLoss(
+            reduction="none", label_smoothing=self.label_smoothing
+        )
 
     def forward(self, x):
         return self.model(x)
@@ -45,7 +53,7 @@ class ResNet50(L.LightningModule):
         (x, y, _), indices = batch
 
         logits = self(x)
-        loss = F.cross_entropy(logits, y, reduction="none")
+        loss = self.criterion(logits, y)
         mean_loss = loss.mean()
 
         self.log(
@@ -66,7 +74,7 @@ class ResNet50(L.LightningModule):
             (x, y, _), indices = batch
 
         logits = self(x)
-        loss = F.cross_entropy(logits, y, reduction="none")
+        loss = self.criterion(logits, y)
         mean_loss = loss.mean()
 
         self.val_accuracy(logits, y)
@@ -90,9 +98,9 @@ class ResNet50(L.LightningModule):
     def test_step(self, batch, batch_idx):
         x, y = batch
 
-        y_hat = self(x)
-        loss = F.cross_entropy(y_hat, y, reduction="none")
-        self.test_accuracy.update(y_hat, y)
+        logits = self(x)
+        loss = self.criterion(logits, y)
+        self.test_accuracy.update(logits, y)
         self.log(
             "test/loss",
             loss.mean(),
@@ -109,16 +117,27 @@ class ResNet50(L.LightningModule):
         )
 
     def configure_optimizers(self):
-        optimizer = SGD(
-            self.parameters(),
-            lr=self.lr,
-            momentum=self.momentum,
-            weight_decay=self.weight_decay,
-        )
+        optimizer = AdamW(self.parameters(), lr=self.lr)
 
-        scheduler_dict = {
-            "scheduler": CosineAnnealingLR(optimizer, T_max=self.max_epochs),
-            "interval": "epoch",
-        }
+        if self.warmup_epochs > 0:
+            warmup_scheduler = LinearLR(
+                optimizer,
+                total_iters=self.warmup_epochs,
+                start_factor=self.lr_warmup_decay,
+            )
+            scheduler = CosineAnnealingLR(optimizer, T_max=self.max_epochs)
+            scheduler_dict = {
+                "scheduler": SequentialLR(
+                    optimizer,
+                    schedulers=[warmup_scheduler, scheduler],
+                    milestones=[self.warmup_epochs],
+                ),
+                "interval": "epoch",
+            }
+        else:
+            scheduler_dict = {
+                "scheduler": CosineAnnealingLR(optimizer, T_max=self.max_epochs),
+                "interval": "epoch",
+            }
 
         return {"optimizer": optimizer, "lr_scheduler": scheduler_dict}
