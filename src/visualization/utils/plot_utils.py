@@ -21,7 +21,6 @@ def plot_styles():
     marker_list = ["o", "*", "X", "P", "p", "D", "v", "^", "h", "1", "2", "3", "4"]
 
     marker_colors = [
-        "tab:gray",
         "tab:green",
         "tab:blue",
         "tab:purple",
@@ -31,6 +30,7 @@ def plot_styles():
         "tab:olive",
         "tab:brown",
         "tab:cyan",
+        "tab:gray",
     ]
 
     plot_titles = {
