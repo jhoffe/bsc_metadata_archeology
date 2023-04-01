@@ -1,4 +1,4 @@
 name: "imagenet"
-num_workers: 24
-prefetch_factor: 4
+num_workers: 28
+prefetch_factor: 8
 batch_size: 128
