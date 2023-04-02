@@ -93,7 +93,7 @@ def imagenet_transform(input_filepath: str, output_filepath: str, dataset: str) 
 
     dataset_train = ImageNetTrainingDataset(
         path.join(input_filepath, "imagenet/ILSVRC/Data/CLS-LOC/train"),
-        c_scores=imagenet_c_scores(),
+        c_scores=imagenet_c_scores(use_cscores=True),
         transform=imagenet_train_transform,
     )
     dataset_val = ImagenetValidationDataset(
