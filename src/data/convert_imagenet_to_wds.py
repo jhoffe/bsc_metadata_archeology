@@ -21,8 +21,10 @@ def readfile(fname):
 @click.argument("output_path", type=click.Path(exists=True))
 @click.option("--maxsize", default=1e9, help="maximum size of each shard")
 @click.option("--maxcount", default=1000, help="maximum number of samples per shard")
-def write_to_wbs(train_path, val_path, output_path, maxsize: int, maxcount: int):
-    all_keys = set()
+@click.option("--split", default="train", help="which split to write")
+def write_to_wbs(
+    train_path, val_path, output_path, maxsize: int, maxcount: int, split: str
+):
     logger = logging.getLogger(__name__)
 
     logger.info("Reading imagenet training dataset")
@@ -30,26 +32,33 @@ def write_to_wbs(train_path, val_path, output_path, maxsize: int, maxcount: int)
     logger.info("Reading imagenet validation dataset")
     val_ds = ImagenetValidationDataset(val_path, class_to_idx=train_ds.class_to_idx)
 
-    for split, ds in [("train", train_ds), ("val", val_ds)]:
-        logger.info(f"Writing {split} dataset")
-        pattern = os.path.join(output_path, f"imagenet-{split}-%06d.tar")
+    if split == "train":
+        ds = train_ds
+    elif split == "val":
+        ds = val_ds
+    else:
+        raise ValueError(f"Unknown split: {split}")
 
-        indices = list(range(len(train_ds)))
-        random.shuffle(indices)
+    all_keys = set()
+    logger.info(f"Writing {split} dataset")
+    pattern = os.path.join(output_path, f"imagenet-{split}-%06d.tar")
 
-        with wds.ShardWriter(pattern, maxcount=maxcount, maxsize=maxsize) as sink:
-            for i in tqdm(indices, desc=f"Writing {split}"):
-                fname, cls = train_ds.samples[i]
-                image = readfile(fname)
+    indices = list(range(len(ds)))
+    random.shuffle(indices)
 
-                fname_key = os.path.splitext(os.path.basename(fname))[0]
+    with wds.ShardWriter(pattern, maxcount=maxcount, maxsize=maxsize) as sink:
+        for i in tqdm(indices, desc=f"Writing {split}"):
+            fname, cls = ds.samples[i]
+            image = readfile(fname)
 
-                assert fname_key not in all_keys
-                all_keys.add(fname_key)
+            fname_key = os.path.splitext(os.path.basename(fname))[0]
 
-                sample = {"__key__": fname_key, "jpg": image, "cls": cls}
+            assert fname_key not in all_keys
+            all_keys.add(fname_key)
 
-                sink.write(sample)
+            sample = {"__key__": fname_key, "jpg": image, "cls": cls}
+
+            sink.write(sample)
 
     logger.info("Finished writing to webdataset")
 
