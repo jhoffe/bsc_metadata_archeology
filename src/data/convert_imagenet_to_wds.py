@@ -22,10 +22,13 @@ def readfile(fname):
 def write_to_wbs(input_path, output_path, maxsize: int, maxcount: int):
     all_keys = set()
 
+    print("Reading imagenet training dataset")
     train_ds = ImageNetTrainingDataset(input_path)
+    print("Reading imagenet validation dataset")
     val_ds = ImagenetValidationDataset(input_path, class_to_idx=train_ds.class_to_idx)
 
     for split, ds in [("train", train_ds), ("val", val_ds)]:
+        print(f"Writing {split} dataset")
         pattern = os.path.join(output_path, f"imagenet-{split}-%06d.tar")
 
         indices = list(range(len(train_ds)))
