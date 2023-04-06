@@ -32,7 +32,7 @@ def imagenet_transform(input_filepath: str, output_filepath: str) -> None:
         transform=imagenet_train_transform,
     )
     dataset_val = ImagenetValidationDataset(
-        input_filepath,
+        path.join(input_filepath, "imagenet"),
         class_to_idx=dataset_train.class_to_idx,
         transform=imagenet_val_transform,
     )

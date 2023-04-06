@@ -15,7 +15,7 @@ class ImagenetValidationDataset(Dataset):
         transform=None,
     ) -> None:
         super().__init__()
-        solution_path = path.join(input_filepath, "imagenet/LOC_val_solution.csv")
+        solution_path = path.join(input_filepath, "LOC_val_solution.csv")
         self.transform = transform
 
         with open(solution_path, "r") as f:

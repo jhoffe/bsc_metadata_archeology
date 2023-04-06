@@ -16,18 +16,19 @@ def readfile(fname):
 
 
 @click.command()
-@click.argument("input_path", type=click.Path(exists=True))
+@click.argument("train_path", type=click.Path(exists=True))
+@click.argument("val_path", type=click.Path(exists=True))
 @click.argument("output_path", type=click.Path(exists=True))
 @click.option("--maxsize", default=1e9, help="maximum size of each shard")
 @click.option("--maxcount", default=1000, help="maximum number of samples per shard")
-def write_to_wbs(input_path, output_path, maxsize: int, maxcount: int):
+def write_to_wbs(train_path, val_path, output_path, maxsize: int, maxcount: int):
     all_keys = set()
     logger = logging.getLogger(__name__)
 
     logger.info("Reading imagenet training dataset")
-    train_ds = ImageNetTrainingDataset(input_path)
+    train_ds = ImageNetTrainingDataset(train_path)
     logger.info("Reading imagenet validation dataset")
-    val_ds = ImagenetValidationDataset(input_path, class_to_idx=train_ds.class_to_idx)
+    val_ds = ImagenetValidationDataset(val_path, class_to_idx=train_ds.class_to_idx)
 
     for split, ds in [("train", train_ds), ("val", val_ds)]:
         logger.info(f"Writing {split} dataset")
