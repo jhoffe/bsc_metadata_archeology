@@ -24,7 +24,7 @@ class ImagenetValidationDataset(Dataset):
                 (
                     path.join(
                         input_filepath,
-                        "imagenet/ILSVRC/Data/CLS-LOC/val",
+                        "ILSVRC/Data/CLS-LOC/val",
                         row[0] + ".JPEG",
                     ),
                     class_to_idx[row[1].split(" ")[0]],
