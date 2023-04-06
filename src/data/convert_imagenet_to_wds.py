@@ -1,3 +1,4 @@
+import logging
 import os
 import random
 
@@ -21,14 +22,15 @@ def readfile(fname):
 @click.option("--maxcount", default=1000, help="maximum number of samples per shard")
 def write_to_wbs(input_path, output_path, maxsize: int, maxcount: int):
     all_keys = set()
+    logger = logging.getLogger(__name__)
 
-    print("Reading imagenet training dataset")
+    logger.log("Reading imagenet training dataset")
     train_ds = ImageNetTrainingDataset(input_path)
-    print("Reading imagenet validation dataset")
+    logger.log("Reading imagenet validation dataset")
     val_ds = ImagenetValidationDataset(input_path, class_to_idx=train_ds.class_to_idx)
 
     for split, ds in [("train", train_ds), ("val", val_ds)]:
-        print(f"Writing {split} dataset")
+        logger.log(f"Writing {split} dataset")
         pattern = os.path.join(output_path, f"imagenet-{split}-%06d.tar")
 
         indices = list(range(len(train_ds)))
@@ -50,4 +52,9 @@ def write_to_wbs(input_path, output_path, maxsize: int, maxcount: int):
 
 
 if __name__ == "__main__":
+    log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    logging.basicConfig(level=logging.INFO, format=log_fmt)
+
+    logger = logging.getLogger(__name__)
+    logger.log("Beginning conversion")
     write_to_wbs()
