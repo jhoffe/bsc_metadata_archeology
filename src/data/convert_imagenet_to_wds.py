@@ -44,3 +44,7 @@ def write_to_wbs(input_path, output_path, maxsize: int, maxcount: int):
                 sample = {"__key__": key, "jpg": image, "cls": cls, "idx": i}
 
                 sink.write(sample)
+
+
+if __name__ == "__main__":
+    write_to_wbs()
