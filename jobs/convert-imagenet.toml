@@ -13,6 +13,6 @@ commands = [
     """python3 src/data/convert_imagenet_to_wds.py \
        data/raw/imagenet/ILSVRC/Data/CLS-LOC/train \
        data/raw/imagenet \
-       data/processed/imagenet_wds\
+       data/processed/imagenet_wds \
        --split val"""
 ]
