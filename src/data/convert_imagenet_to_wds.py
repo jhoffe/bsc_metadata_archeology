@@ -37,19 +37,34 @@ def write_to_wbs(train_path, val_path, output_path, maxsize: int, maxcount: int)
         indices = list(range(len(train_ds)))
         random.shuffle(indices)
 
+        indices_to_fname = {}
+
         with wds.ShardWriter(pattern, maxcount=maxcount, maxsize=maxsize) as sink:
             for i in tqdm(indices, desc=f"Writing {split}"):
                 fname, cls = train_ds.samples[i]
                 image = readfile(fname)
 
-                key = os.path.splitext(os.path.basename(fname))[0]
+                fname_key = os.path.splitext(os.path.basename(fname))[0]
 
-                assert key not in all_keys
-                all_keys.add(key)
+                assert fname_key not in all_keys
+                all_keys.add(fname_key)
 
-                sample = {"__key__": key, "jpg": image, "cls": cls, "idx": i}
+                sample = {"__key__": i, "jpg": image, "cls": cls}
+
+                indices_to_fname[i] = fname_key
 
                 sink.write(sample)
+
+        logger.info("Writing index to filename mapping")
+        with open(
+            os.path.join(output_path, f"imagenet-{split}-index-to-fname.txt"), "w"
+        ) as f:
+            f.write("index,fname")
+            for i, fname in indices_to_fname.items():
+                f.write(f"{i},{fname}")
+        logger.info("Finished writing index to filename mapping")
+
+    logger.info("Finished writing to webdataset")
 
 
 if __name__ == "__main__":
