@@ -24,13 +24,13 @@ def write_to_wbs(input_path, output_path, maxsize: int, maxcount: int):
     all_keys = set()
     logger = logging.getLogger(__name__)
 
-    logger.log("Reading imagenet training dataset")
+    logger.info("Reading imagenet training dataset")
     train_ds = ImageNetTrainingDataset(input_path)
-    logger.log("Reading imagenet validation dataset")
+    logger.info("Reading imagenet validation dataset")
     val_ds = ImagenetValidationDataset(input_path, class_to_idx=train_ds.class_to_idx)
 
     for split, ds in [("train", train_ds), ("val", val_ds)]:
-        logger.log(f"Writing {split} dataset")
+        logger.info(f"Writing {split} dataset")
         pattern = os.path.join(output_path, f"imagenet-{split}-%06d.tar")
 
         indices = list(range(len(train_ds)))
@@ -56,5 +56,5 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format=log_fmt)
 
     logger = logging.getLogger(__name__)
-    logger.log("Beginning conversion")
+    logger.info("Beginning conversion")
     write_to_wbs()
