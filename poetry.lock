@@ -327,6 +327,18 @@ six = ">=1.9.0"
 wcwidth = ">=0.1.4"
 
 [[package]]
+name = "braceexpand"
+version = "0.1.7"
+description = "Bash-style brace expansion for Python"
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "braceexpand-0.1.7-py2.py3-none-any.whl", hash = "sha256:91332d53de7828103dcae5773fb43bc34950b0c8160e35e0f44c4427a3b85014"},
+    {file = "braceexpand-0.1.7.tar.gz", hash = "sha256:e6e539bd20eaea53547472ff94f4fb5c3d3bf9d0a89388c4b56663aba765f705"},
+]
+
+[[package]]
 name = "certifi"
 version = "2022.12.7"
 description = "Python package for providing Mozilla's CA Bundle."
@@ -4250,6 +4262,23 @@ files = [
 ]
 
 [[package]]
+name = "webdataset"
+version = "0.2.48"
+description = "Record sequential storage for deep learning."
+category = "main"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "webdataset-0.2.48-py3-none-any.whl", hash = "sha256:e6d06895720afdef5cbf03cbb316434d67d9fb578e1bd9815fbd47ced4bcc731"},
+    {file = "webdataset-0.2.48.tar.gz", hash = "sha256:c1c3914881e89f594cbf5cc048f405e760ec764575c80f0ce97521ebc91c44e2"},
+]
+
+[package.dependencies]
+braceexpand = "*"
+numpy = "*"
+pyyaml = "*"
+
+[[package]]
 name = "webencodings"
 version = "0.5.1"
 description = "Character encoding aliases for legacy web content"
@@ -4553,4 +4582,4 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "7b98cce95b2700bdb9cf7de2ca10d906f3dfc706af4b2776964dbb0659564c7e"
+content-hash = "81e15d77d481d039b43a9d2013215eb6bbc62905551ab50f2af13c82a2fe02b2"
