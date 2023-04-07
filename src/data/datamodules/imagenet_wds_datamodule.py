@@ -23,6 +23,18 @@ class WDSWithLen(wds.WebDataset):
         return self.length
 
 
+class WDSLoaderWithLen(wds.WebLoader):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def with_len(self, length):
+        self.length = length
+        return self
+
+    def __len__(self):
+        return self.length
+
+
 class ImageNetWDSDataModule(L.LightningDataModule):
     imagenet_train: Dataset
     imagenet_val: Dataset
@@ -87,15 +99,14 @@ class ImageNetWDSDataModule(L.LightningDataModule):
 
         dataset.with_len(dataset_size)
 
-        loader = wds.WebLoader(
+        loader = WDSLoaderWithLen(
             dataset,
             batch_size=None,
             shuffle=False,
             num_workers=self.num_workers,
         )
 
-        loader.size = dataset_size
-        # loader.length = dataset_size // self.batch_size
+        loader.with_len(dataset_size)
 
         return loader
 
