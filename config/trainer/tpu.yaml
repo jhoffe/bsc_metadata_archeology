@@ -2,7 +2,7 @@ defaults:
   - default
 
 accelerator: 'tpu'
-strategy: 'ddp'
+strategy: 'auto'
 devices: 8
 sync_batchnorm: true
 log_loss_curves: false
