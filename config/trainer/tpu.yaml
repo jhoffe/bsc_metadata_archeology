@@ -3,6 +3,6 @@ defaults:
 
 accelerator: 'tpu'
 strategy: 'auto'
-devices: "auto"
+devices: [0]
 sync_batchnorm: true
 log_loss_curves: false
