@@ -127,7 +127,7 @@ class ImageNetWDSDataModule(L.LightningDataModule):
 
         dataset.with_len(epoch_size)
 
-        loader = torch.utils.data.DataLoader(
+        loader = wds.WebLoader(
             dataset, batch_size=None, shuffle=False, num_workers=self.num_workers
         )
 
