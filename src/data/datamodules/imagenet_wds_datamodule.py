@@ -1,6 +1,7 @@
 from multiprocessing import cpu_count
 from typing import Optional
 
+import braceexpand
 import lightning as L
 import torch
 import webdataset as wds
@@ -103,8 +104,15 @@ class ImageNetWDSDataModule(L.LightningDataModule):
 
         return loader
 
+    def convert_url_string_to_list(self, urls):
+        return braceexpand.braceexpand(urls)
+
     def train_dataloader(self):
-        return self.make_loader(self.training_urls, mode="train")
+        return self.make_loader(
+            self.convert_url_string_to_list(self.training_urls), mode="train"
+        )
 
     def val_dataloader(self):
-        return self.make_loader(self.val_urls, mode="val")
+        return self.make_loader(
+            self.convert_url_string_to_list(self.val_urls), mode="val"
+        )
