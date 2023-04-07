@@ -1,13 +1,13 @@
 FROM gcr.io/tpu-pytorch/xla:r2.0_3.8_tpuvm
 
-# Install poetry
-RUN curl -sSL https://install.python-poetry.org | python3 -
+RUN bash -c "source ~/.bashrc && pip install poetry"
 
 # Install dependencies
 COPY pyproject.toml pyproject.toml
 COPY poetry.lock poetry.lock
 
-RUN poetry install
+RUN bash -c "source ~/.bashrc && conda activate pytorch && poetry export -f requirements.txt --output requirements.txt"
+RUN bash -c "source ~/.bashrc && conda activate pytorch && pip install -r requirements.txt"
 
 # Copy source code
 COPY . .
