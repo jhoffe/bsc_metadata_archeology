@@ -11,6 +11,18 @@ def get_target(x):
     return x["target"]
 
 
+class WDSWithLen(wds.WebDataset):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def with_len(self, length):
+        self.length = length
+        return self
+
+    def __len__(self):
+        return self.length
+
+
 class ImageNetWDSDataModule(L.LightningDataModule):
     imagenet_train: Dataset
     imagenet_val: Dataset
@@ -65,7 +77,7 @@ class ImageNetWDSDataModule(L.LightningDataModule):
         transform = self.make_transform(mode=mode)
 
         dataset = (
-            wds.WebDataset(urls)
+            WDSWithLen(urls)
             .shuffle(shuffle)
             .decode("pil")
             .to_tuple("jpg;png;jpeg json")
@@ -73,7 +85,7 @@ class ImageNetWDSDataModule(L.LightningDataModule):
             .batched(self.batch_size, partial=False)
         )
 
-        dataset.with_length(dataset_size)
+        dataset.with_len(dataset_size)
 
         loader = wds.WebLoader(
             dataset,
