@@ -18,6 +18,8 @@ def readfile(fname):
 
 def write_sample_fn(sink, samples):
     def write_sample(indices):
+        logger.info(f"Writing {len(indices)} samples")
+        logger.debug(indices[:10])
         for i in indices:
             fname, cls = samples[i]
 
