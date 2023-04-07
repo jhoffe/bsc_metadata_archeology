@@ -82,6 +82,8 @@ class ImageNetWDSDataModule(L.LightningDataModule):
             num_workers=self.num_workers,
         )
 
+        loader.with_length(dataset_size)
+
         loader.length = dataset_size // self.batch_size
 
         return loader
