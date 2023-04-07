@@ -1,7 +1,7 @@
 import os
 from copy import deepcopy
 from multiprocessing import cpu_count
-from typing import Optional
+from typing import List, Optional
 
 import lightning as L
 import torch
@@ -80,7 +80,7 @@ class ImageNetDataModule(L.LightningDataModule):
             prefetch_factor=self.prefetch_factor,
         )
 
-    def val_dataloader(self) -> list[DataLoader]:
+    def val_dataloader(self) -> List[DataLoader]:
         """Returns the dataloader for the test set.
 
         Returns:
