@@ -1,3 +1,4 @@
+import sys
 from multiprocessing import cpu_count
 from typing import Optional
 
@@ -91,7 +92,6 @@ class ImageNetWDSDataModule(L.LightningDataModule):
             shuffle = 0
 
         num_instances = self.num_workers
-        epoch_size = dataset_size // num_instances
 
         transform = self.make_transform(mode=mode)
 
@@ -104,14 +104,15 @@ class ImageNetWDSDataModule(L.LightningDataModule):
             .batched(self.batch_size, partial=True)
         )
 
-        dataset.with_len(epoch_size)
-
         loader = wds.WebLoader(
             dataset, batch_size=None, shuffle=False, num_workers=self.num_workers
         )
 
-        loader.with_epoch(dataset_size, epoch_size // self.batch_size)
-        loader.with_length(epoch_size)
+        loader.length = dataset_size // self.batch_size
+
+        num_batches = loader.length // num_instances
+        loader.repeat(sys.maxsize).with_epoch(dataset_size)
+        loader.with_length(num_batches)
 
         loader.dataset = dataset
 
