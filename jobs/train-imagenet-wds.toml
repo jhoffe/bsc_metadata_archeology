@@ -3,7 +3,7 @@ name = "train-imagenet"
 walltime = { hours = 30, minutes = 0 }
 cpu = 32
 single_host = true
-memory = 26
+memory = 22
 standard_output = { name = "logs/train-imagenet-2x-wds.out", overwrite = true }
 error_output = { name = "logs/train-imagenet-2x-wds.err", overwrite = true }
 use_gpu = { num_of_gpus = 2 }
