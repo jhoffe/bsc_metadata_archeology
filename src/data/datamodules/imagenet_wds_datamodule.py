@@ -94,7 +94,7 @@ class ImageNetWDSDataModule(L.LightningDataModule):
         transform = self.make_transform(mode=mode)
 
         dataset = (
-            WDSWithLen(urls, length=dataset_size)
+            WDSWithLen(urls)
             .shuffle(shuffle)
             .decode("pil")
             .to_tuple("jpg;png;jpeg json")
@@ -109,6 +109,8 @@ class ImageNetWDSDataModule(L.LightningDataModule):
             batch_size=None,
             shuffle=False,
             num_workers=self.num_workers,
+            pin_memory=True,
+            prefetch_factor=4,
         )
 
         return loader
