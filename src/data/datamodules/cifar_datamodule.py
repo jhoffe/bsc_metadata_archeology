@@ -1,5 +1,6 @@
 import os
 from copy import deepcopy
+from typing import List
 
 import lightning as L
 import torch
@@ -82,7 +83,7 @@ class CIFARDataModule(L.LightningDataModule):
             pin_memory=True,
         )
 
-    def val_dataloader(self) -> list[DataLoader]:
+    def val_dataloader(self) -> List[DataLoader]:
         """Returns the dataloader for the test set.
 
         Returns:
