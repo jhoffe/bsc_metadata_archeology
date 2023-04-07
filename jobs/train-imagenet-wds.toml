@@ -1,6 +1,6 @@
 queue = "gpuv100"
 name = "train-imagenet"
-walltime = { hours = 30, minutes = 0 }
+walltime = { hours = 24, minutes = 0 }
 cpu = 32
 single_host = true
 memory = 22
