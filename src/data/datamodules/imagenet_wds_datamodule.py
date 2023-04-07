@@ -87,19 +87,9 @@ class ImageNetWDSDataModule(L.LightningDataModule):
         if mode == "train":
             dataset_size = 1281167
             shuffle = 5000
-            urls = [
-                "pipe: gsutil cat gs://bsc-dtu/imagenet_wds/imagenet_wds/imagenet-train-%06d.tar"  # noqa
-                % i
-                for i in range(1, 1281 + 1)
-            ]
         elif mode == "val":
             dataset_size = 5000
             shuffle = 0
-            urls = [
-                "pipe: gsutil cat gs://bsc-dtu/imagenet_wds/imagenet_wds/imagenet-val-%06d.tar"  # noqa
-                % i
-                for i in range(1, 6 + 1)
-            ]
 
         transform = self.make_transform(mode=mode)
 
@@ -115,12 +105,7 @@ class ImageNetWDSDataModule(L.LightningDataModule):
         dataset.with_len(dataset_size)
 
         loader = torch.utils.data.DataLoader(
-            dataset,
-            batch_size=None,
-            shuffle=False,
-            num_workers=self.num_workers,
-            pin_memory=True,
-            prefetch_factor=4,
+            dataset, batch_size=None, shuffle=False, num_workers=self.num_workers
         )
 
         return loader
