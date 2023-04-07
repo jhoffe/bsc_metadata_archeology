@@ -1,4 +1,4 @@
-queue = "gpua100"
+queue = "gpuv100"
 name = "train-imagenet"
 walltime = { hours = 30, minutes = 0 }
 cpu = 32
