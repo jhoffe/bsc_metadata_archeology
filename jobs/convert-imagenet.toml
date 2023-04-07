@@ -14,5 +14,5 @@ commands = [
        data/raw/imagenet/ILSVRC/Data/CLS-LOC/train \
        data/raw/imagenet \
        data/processed/imagenet_wds \
-       --split val"""
+       --split train"""
 ]
