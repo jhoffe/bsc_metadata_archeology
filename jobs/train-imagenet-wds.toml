@@ -6,7 +6,7 @@ single_host = true
 memory = 8
 standard_output = { name = "logs/train-imagenet-2x-wds.out", overwrite = true }
 error_output = { name = "logs/train-imagenet-2x-wds.err", overwrite = true }
-use_gpu = { num_of_gpus = 2 }
+use_gpu = { num_of_gpus = 2, memory_size=32 }
 
 commands = [
     "module load python3/3.10.7",
