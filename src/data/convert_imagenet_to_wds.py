@@ -16,9 +16,11 @@ def readfile(fname):
         return stream.read()
 
 
-def write_sample_fn(sink):
-    def write_sample(samples):
-        for fname, cls in samples:
+def write_sample_fn(sink, samples):
+    def write_sample(indices):
+        for i in indices:
+            fname, cls = samples[i]
+
             image = readfile(fname)
             fname_key = os.path.splitext(os.path.basename(fname))[0]
             sample = {"__key__": fname_key, "jpg": image, "cls": cls}
@@ -71,9 +73,9 @@ def write_to_wbs(
         with mp.Pool(workers) as pool:
             tqdm(
                 pool.imap_unordered(
-                    write_sample_fn(sink), ds.samples, chunksize=chunksize
+                    write_sample_fn(sink, ds.samples), indices, chunksize=chunksize
                 ),
-                total=len(ds.samples),
+                total=len(indices),
             )
 
     logger.info("Finished writing to webdataset")
