@@ -67,6 +67,7 @@ def write_to_wbs(
     random.shuffle(indices)
 
     with wds.ShardWriter(pattern, maxcount=maxcount, maxsize=maxsize) as sink:
+        logger.info(f"Creating pool of workers of size {workers}")
         with mp.Pool(workers) as pool:
             tqdm(
                 pool.imap_unordered(
