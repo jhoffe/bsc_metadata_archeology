@@ -94,7 +94,7 @@ class ImageNetWDSDataModule(L.LightningDataModule):
         transform = self.make_transform(mode=mode)
 
         dataset = (
-            WDSWithLen(urls)
+            WDSWithLen(urls, length=dataset_size)
             .shuffle(shuffle)
             .decode("pil")
             .to_tuple("jpg;png;jpeg json")
