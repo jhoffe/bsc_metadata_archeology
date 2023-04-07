@@ -1,5 +1,4 @@
 import logging
-import multiprocessing as mp
 import os
 import random
 
@@ -16,24 +15,6 @@ def readfile(fname):
         return stream.read()
 
 
-def write_sample_fn(sink, samples):
-    logger.info("Received sink and samples")
-    logger.info(f"Received {len(samples)} samples")
-
-    def write_sample(indices):
-        logger.info(f"Writing {len(indices)} samples")
-        logger.debug(indices[:10])
-        for i in indices:
-            fname, cls = samples[i]
-
-            image = readfile(fname)
-            fname_key = os.path.splitext(os.path.basename(fname))[0]
-            sample = {"__key__": fname_key, "jpg": image, "cls": cls}
-            sink.write(sample)
-
-    return write_sample
-
-
 @click.command()
 @click.argument("train_path", type=click.Path(exists=True))
 @click.argument("val_path", type=click.Path(exists=True))
@@ -41,17 +22,8 @@ def write_sample_fn(sink, samples):
 @click.option("--maxsize", default=1e9, help="maximum size of each shard")
 @click.option("--maxcount", default=1000, help="maximum number of samples per shard")
 @click.option("--split", default="train", help="which split to write")
-@click.option("--workers", default=mp.cpu_count(), help="number of workers")
-@click.option("--chunksize", default=128, help="number of samples per chunk")
 def write_to_wbs(
-    train_path,
-    val_path,
-    output_path,
-    maxsize: int,
-    maxcount: int,
-    split: str,
-    workers: int,
-    chunksize: int,
+    train_path, val_path, output_path, maxsize: int, maxcount: int, split: str
 ):
     logger = logging.getLogger(__name__)
 
@@ -67,6 +39,7 @@ def write_to_wbs(
     else:
         raise ValueError(f"Unknown split: {split}")
 
+    all_keys = set()
     logger.info(f"Writing {split} dataset")
     pattern = os.path.join(output_path, f"imagenet-{split}-%06d.tar")
 
@@ -74,14 +47,22 @@ def write_to_wbs(
     random.shuffle(indices)
 
     with wds.ShardWriter(pattern, maxcount=maxcount, maxsize=maxsize) as sink:
-        logger.info(f"Creating pool of workers of size {workers}")
-        with mp.Pool(workers) as pool:
-            tqdm(
-                pool.imap(
-                    write_sample_fn(sink, ds.samples), indices, chunksize=chunksize
-                ),
-                total=len(indices),
-            )
+        for i in tqdm(indices, desc=f"Writing {split}"):
+            fname, cls = ds.samples[i]
+            image = readfile(fname)
+
+            fname_key = os.path.splitext(os.path.basename(fname))[0]
+
+            assert fname_key not in all_keys
+            all_keys.add(fname_key)
+
+            sample = {
+                "__key__": fname_key,
+                "jpg": image,
+                "json": {"target": cls, "fname": fname_key, "idx": i},
+            }
+
+            sink.write(sample)
 
     logger.info("Finished writing to webdataset")
 
