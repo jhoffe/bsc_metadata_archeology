@@ -2,6 +2,7 @@ from multiprocessing import cpu_count
 from typing import Optional
 
 import lightning as L
+import torch.utils.data
 import webdataset as wds
 from torch.utils.data import Dataset
 from torchvision.transforms import transforms
@@ -103,15 +104,12 @@ class ImageNetWDSDataModule(L.LightningDataModule):
 
         dataset.with_len(dataset_size)
 
-        loader = WDSLoaderWithLenAndDataset(
+        loader = torch.utils.data.DataLoader(
             dataset,
             batch_size=None,
             shuffle=False,
             num_workers=self.num_workers,
         )
-
-        loader.with_len(dataset_size)
-        loader.with_dataset(dataset)
 
         return loader
 
