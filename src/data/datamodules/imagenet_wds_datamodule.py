@@ -2,7 +2,6 @@ from multiprocessing import cpu_count
 from typing import Optional
 
 import lightning as L
-import torch.utils.data
 import webdataset as wds
 from torch.utils.data import Dataset
 from torchvision.transforms import transforms
@@ -10,26 +9,6 @@ from torchvision.transforms import transforms
 
 def get_target(x):
     return x["target"]
-
-
-def my_worker_splitter(urls):
-    """Split urls per worker
-    Selects a subset of urls based on Torch get_worker_info.
-    Used as a shard selection function in Dataset.
-    replaces wds.split_by_worker"""
-
-    urls = [url for url in urls]
-
-    assert isinstance(urls, list)
-
-    worker_info = torch.utils.data.get_worker_info()
-    if worker_info is not None:
-        wid = worker_info.id
-        num_workers = worker_info.num_workers
-
-        return urls[wid::num_workers]
-    else:
-        return urls
 
 
 class WDSWithLen(wds.WebDataset):
@@ -117,7 +96,7 @@ class ImageNetWDSDataModule(L.LightningDataModule):
         transform = self.make_transform(mode=mode)
 
         dataset = (
-            WDSWithLen(urls, splitter=my_worker_splitter)
+            WDSWithLen(urls)
             .shuffle(shuffle)
             .decode("pil")
             .to_tuple("jpg;png;jpeg json")
