@@ -2,6 +2,7 @@ from multiprocessing import cpu_count
 from typing import Optional
 
 import lightning as L
+import torch
 import webdataset as wds
 from torch.utils.data import Dataset
 from torchvision.transforms import transforms
@@ -9,6 +10,19 @@ from torchvision.transforms import transforms
 
 def get_target(x):
     return x["target"]
+
+
+def my_node_splitter(urls):
+    """Split urls_ correctly per accelerator node
+    :param urls:
+    :return: slice of urls_
+    """
+    rank = torch.distributed.get_rank()
+    num_replicas = torch.distributed.get_world_size()
+
+    urls_this = urls[rank::num_replicas]
+
+    return urls_this
 
 
 class ImageNetWDSDataModule(L.LightningDataModule):
@@ -67,7 +81,7 @@ class ImageNetWDSDataModule(L.LightningDataModule):
         transform = self.make_transform(mode=mode)
 
         dataset = (
-            wds.WebDataset(urls)
+            wds.WebDataset(urls, nodesplitter=my_node_splitter)
             .shuffle(shuffle)
             .decode("pil")
             .to_tuple("jpg;png;jpeg json")
