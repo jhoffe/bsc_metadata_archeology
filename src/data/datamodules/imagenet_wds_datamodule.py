@@ -82,11 +82,6 @@ class ImageNetWDSDataModule(L.LightningDataModule):
 
         loader.length = dataset_size // self.batch_size
 
-        if mode == "train":
-            # ensure same number of batches in all clients
-            loader = loader.ddp_equalize(dataset_size // self.batch_size)
-            # print("# loader length", len(loader))
-
         return loader
 
     def train_dataloader(self):
