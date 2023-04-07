@@ -88,14 +88,16 @@ class ImageNetWDSDataModule(L.LightningDataModule):
             dataset_size = 1281167
             shuffle = 5000
             urls = [
-                "gs://bsc-dtu/imagenet_wds/imagenet_wds/imagenet-train-%06d.tar" % i
+                "pipe: gsutil cat gs://bsc-dtu/imagenet_wds/imagenet_wds/imagenet-train-%06d.tar"  # noqa
+                % i
                 for i in range(1, 1281 + 1)
             ]
         elif mode == "val":
             dataset_size = 5000
             shuffle = 0
             urls = [
-                "gs://bsc-dtu/imagenet_wds/imagenet_wds/imagenet-val-%06d.tar" % i
+                "pipe: gsutil cat gs://bsc-dtu/imagenet_wds/imagenet_wds/imagenet-val-%06d.tar"  # noqa
+                % i
                 for i in range(1, 6 + 1)
             ]
 
