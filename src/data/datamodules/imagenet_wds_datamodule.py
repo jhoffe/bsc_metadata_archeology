@@ -73,14 +73,14 @@ class ImageNetWDSDataModule(L.LightningDataModule):
             .batched(self.batch_size, partial=False)
         )
 
+        dataset.with_length(dataset_size)
+
         loader = wds.WebLoader(
             dataset,
             batch_size=None,
             shuffle=False,
             num_workers=self.num_workers,
         )
-
-        loader.with_length(dataset_size)
 
         loader.length = dataset_size // self.batch_size
 
