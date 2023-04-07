@@ -1,0 +1,8 @@
+defaults:
+  - default
+
+accelerator: 'tpu'
+strategy: 'ddp'
+devices: 8
+sync_batchnorm: true
+log_loss_curves: false

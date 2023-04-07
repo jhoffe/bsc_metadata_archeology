@@ -1,11 +1,16 @@
 from omegaconf import DictConfig
 
-from src.data.datamodules import CIFARDataModule, ImageNetDataModule
+from src.data.datamodules import (
+    CIFARDataModule,
+    ImageNetDataModule,
+    ImageNetWDSDataModule,
+)
 
 
 def create_datamodule(params: DictConfig):
     DATAMODULES = {
         "imagenet": ImageNetDataModule,
+        "imagenet_wds": ImageNetWDSDataModule,
         "cifar": CIFARDataModule,
     }
 
