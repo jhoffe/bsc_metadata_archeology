@@ -110,6 +110,9 @@ class ImageNetWDSDataModule(L.LightningDataModule):
             dataset, batch_size=None, shuffle=False, num_workers=self.num_workers
         )
 
+        loader.with_epoch(dataset_size, epoch_size // self.batch_size)
+        loader.with_length(epoch_size)
+
         return loader
 
     def train_dataloader(self):
