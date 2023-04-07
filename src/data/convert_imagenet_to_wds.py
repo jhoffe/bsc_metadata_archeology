@@ -17,6 +17,9 @@ def readfile(fname):
 
 
 def write_sample_fn(sink, samples):
+    logger.debug("Received sink and samples")
+    logger.debug(f"Received {len(samples)} samples")
+
     def write_sample(indices):
         logger.info(f"Writing {len(indices)} samples")
         logger.debug(indices[:10])
