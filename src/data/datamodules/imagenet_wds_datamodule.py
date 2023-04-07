@@ -12,6 +12,26 @@ def get_target(x):
     return x["target"]
 
 
+def my_worker_splitter(urls):
+    """Split urls per worker
+    Selects a subset of urls based on Torch get_worker_info.
+    Used as a shard selection function in Dataset.
+    replaces wds.split_by_worker"""
+
+    urls = [url for url in urls]
+
+    assert isinstance(urls, list)
+
+    worker_info = torch.utils.data.get_worker_info()
+    if worker_info is not None:
+        wid = worker_info.id
+        num_workers = worker_info.num_workers
+
+        return urls[wid::num_workers]
+    else:
+        return urls
+
+
 class WDSWithLen(wds.WebDataset):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -91,18 +111,21 @@ class ImageNetWDSDataModule(L.LightningDataModule):
             dataset_size = 5000
             shuffle = 0
 
+        num_instances = self.num_workers
+        epoch_size = dataset_size // num_instances
+
         transform = self.make_transform(mode=mode)
 
         dataset = (
-            WDSWithLen(urls)
+            WDSWithLen(urls, splitter=my_worker_splitter)
             .shuffle(shuffle)
             .decode("pil")
             .to_tuple("jpg;png;jpeg json")
             .map_tuple(transform, get_target)
-            .batched(self.batch_size, partial=False)
+            .batched(self.batch_size, partial=True)
         )
 
-        dataset.with_len(dataset_size)
+        dataset.with_len(epoch_size)
 
         loader = torch.utils.data.DataLoader(
             dataset, batch_size=None, shuffle=False, num_workers=self.num_workers
