@@ -1,4 +1,3 @@
-import sys
 from multiprocessing import cpu_count
 from typing import Optional
 
@@ -10,34 +9,6 @@ from torchvision.transforms import transforms
 
 def get_target(x):
     return x["target"]
-
-
-class WDSWithLen(wds.WebDataset):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def with_len(self, length):
-        self.length = length
-        return self
-
-    def __len__(self):
-        return self.length
-
-
-class WDSLoaderWithLenAndDataset(wds.WebLoader):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def with_len(self, length):
-        self.length = length
-        return self
-
-    def with_dataset(self, dataset):
-        self.dataset = dataset
-        return self
-
-    def __len__(self):
-        return self.length
 
 
 class ImageNetWDSDataModule(L.LightningDataModule):
@@ -96,7 +67,7 @@ class ImageNetWDSDataModule(L.LightningDataModule):
         transform = self.make_transform(mode=mode)
 
         dataset = (
-            WDSWithLen(urls)
+            wds.WebDataset(urls)
             .shuffle(shuffle)
             .decode("pil")
             .to_tuple("jpg;png;jpeg json")
@@ -105,19 +76,13 @@ class ImageNetWDSDataModule(L.LightningDataModule):
         )
 
         loader = wds.WebLoader(
-            dataset,
-            batch_size=None,
-            shuffle=False,
-            num_workers=self.num_workers,
-            pin_memory=True,
-            drop_last=False,
-            prefetch_factor=4,
+            dataset, batch_size=None, shuffle=False, num_workers=self.num_workers
         )
 
         loader.length = dataset_size // self.batch_size
 
         num_batches = loader.length // num_instances
-        loader.repeat(sys.maxsize).with_epoch(dataset_size)
+        loader.with_epoch(dataset_size)
         loader.with_length(num_batches)
 
         loader.dataset = dataset
