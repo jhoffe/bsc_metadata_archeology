@@ -9,19 +9,18 @@ import torch
 from src.visualization.utils.plot_utils import (
     get_indices_from_probe_suite,
     get_loss_dataset,
+    plot_dicts,
     plot_styles,
 )
 
 
-def probe_accuracy_plot(df: pd.DataFrame, output_path: str, dataset_name: str) -> None:
+def first_learned_plot(df: pd.DataFrame, output_path: str, dataset_name: str) -> None:
     """Plot the accuracy for each probe suite pr. epoch"""
 
     probe_suite = torch.load(f"data/processed/{dataset_name}/train_probe_suite.pt")
 
     df.drop_duplicates(subset=["epoch", "sample_index", "stage"], inplace=True)
-
     df["epoch"] = df["epoch"].astype(int)
-
     max_epoch = df["epoch"].max() + 1
     num_suite_samples = len(probe_suite.combined)
     num_train_samples = len(probe_suite)
@@ -47,67 +46,63 @@ def probe_accuracy_plot(df: pd.DataFrame, output_path: str, dataset_name: str) -
         df.loc[df["sample_index"].isin(val_indices), "suite"] = suite_name + " [Val]"
 
     df["suite"] = df["suite"].fillna("Train")
-    suites = sorted(df["suite"].unique())
 
     df["prediction"] = df["y"] == df["y_hat"]
 
     val_df = df[df["stage"] == "val"]
-    val_df = val_df.groupby(["epoch", "suite"]).agg({"prediction": "mean"})
-    val_df.reset_index(inplace=True)
-    val_df["prediction"] = val_df["prediction"] * 100
-
     train_df = df[df["stage"] == "train"]
-    train_df = train_df.groupby(["epoch", "suite"]).agg({"prediction": "mean"})
-    train_df.reset_index(inplace=True)
-    train_df["prediction"] = train_df["prediction"] * 100
 
-    suites = sorted(train_df["suite"].unique())
+    first_learned, learned, suite_names = plot_dicts()
+
+    temp_train = train_df[train_df["suite"] == "Train"]
+
+    for epoch in range(max_epoch):
+        epoch_train_group = temp_train.groupby(["epoch"]).get_group(epoch)
+        learned["Train"].update(
+            epoch_train_group["sample_index"][epoch_train_group["prediction"]].values
+        )
+        first_learned["Train"].append(len(learned["Train"]) / len(temp_train))
+        epoch_val_group = val_df.groupby(["epoch"]).get_group(epoch)
+        for suite in suite_names:
+            suite_group = epoch_val_group.groupby(["suite"]).get_group(suite)
+            learned[suite].update(
+                suite_group["sample_index"][suite_group["prediction"]].values
+            )
+            first_learned[suite].append(len(learned[suite]) / len(suite_group))
+
+    suites = first_learned.keys()
 
     # Plot
     line_styles, marker_list, marker_colors, plot_titles = plot_styles()
 
     plt.figure(figsize=(10, 6))
-    plt.title(f"Probe Suite Accuracy for {plot_titles['cifar10']}")
+    plt.title(f"Percent First Learned for {plot_titles['cifar10']}")
     for i, suite in enumerate(suites):
-        if "Train" in suite:
-            plt.plot(
-                train_df[train_df["suite"] == suite]["epoch"],
-                train_df[train_df["suite"] == suite]["prediction"],
-                label=suite,
-                alpha=0.75,
-                linewidth=0.5,
-                linestyle=line_styles[i % len(line_styles)],
-                marker=marker_list[i % len(marker_list)],
-                markersize=3,
-                color=marker_colors[i % len(marker_colors)],
-            )
-        else:
-            plt.plot(
-                val_df[val_df["suite"] == suite]["epoch"],
-                val_df[val_df["suite"] == suite]["prediction"],
-                label=suite,
-                alpha=0.75,
-                linewidth=0.5,
-                linestyle=line_styles[i % len(line_styles)],
-                marker=marker_list[i % len(marker_list)],
-                markersize=3,
-                color=marker_colors[i % len(marker_colors)],
-            )
+        plt.plot(
+            first_learned[suite],
+            label=suite,
+            alpha=0.75,
+            linewidth=0.5,
+            linestyle=line_styles[i % len(line_styles)],
+            marker=marker_list[i % len(marker_list)],
+            markersize=3,
+            color=marker_colors[i % len(marker_colors)],
+        )
     plt.legend(loc="lower right", fontsize="small")
     plt.xlabel("Epoch")
-    plt.ylabel("Accuracy (%)")
+    plt.ylabel("Fraction of samples learned (%)")
 
     figure_path = os.path.join(output_path, dataset_name)
 
     if not os.path.exists(figure_path):
         os.makedirs(figure_path)
 
-    plt.savefig(os.path.join(figure_path, f"{dataset_name}_probe_suite_accuracy.png"))
+    plt.savefig(os.path.join(figure_path, f"{dataset_name}_first_learned_accuracy.png"))
 
 
 def main(loss_dataset_path, output_filepath, dataset_name):
     df = get_loss_dataset(loss_dataset_path)
-    probe_accuracy_plot(df, output_filepath, dataset_name)
+    first_learned_plot(df, output_filepath, dataset_name)
 
 
 @click.command()
