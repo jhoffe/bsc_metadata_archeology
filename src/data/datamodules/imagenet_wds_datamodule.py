@@ -1,3 +1,4 @@
+import itertools
 from multiprocessing import cpu_count
 from typing import Optional
 
@@ -21,7 +22,7 @@ def my_node_splitter(urls):
     rank = torch.distributed.get_rank()
     num_replicas = torch.distributed.get_world_size()
 
-    urls_this = urls[rank::num_replicas]
+    urls_this = itertools.islice(urls, rank, None, num_replicas)
 
     return urls_this
 
