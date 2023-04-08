@@ -1,12 +1,12 @@
-queue = "gpuv100"
+queue = "gpua100"
 name = "train-imagenet"
-walltime = { hours = 24, minutes = 0 }
+walltime = { hours = 32, minutes = 0 }
 cpu = 16
 single_host = true
-memory = 8
+memory = 16
 standard_output = { name = "logs/train-imagenet-2x-wds.out", overwrite = true }
 error_output = { name = "logs/train-imagenet-2x-wds.err", overwrite = true }
-use_gpu = { num_of_gpus = 2, memory_size=32 }
+use_gpu = { num_of_gpus = 2 }
 
 commands = [
     "module load python3/3.10.7",
