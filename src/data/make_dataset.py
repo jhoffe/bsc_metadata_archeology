@@ -34,12 +34,12 @@ def main(input_filepath, output_filepath):
     imagenet_transform(input_filepath, output_filepath)
     logger.info("Transformed the ImageNet dataset")
 
-    # Generating probe suites
-    logger.info("Generating probe suites for CIFAR100")
+    # Generating probe default_suites
+    logger.info("Generating probe default_suites for CIFAR100")
     make_probe_suites("data/processed", "data/processed", "cifar100", label_count=100)
-    logger.info("Generating probe suites for CIFAR10")
+    logger.info("Generating probe default_suites for CIFAR10")
     make_probe_suites("data/processed", "data/processed", "cifar10", label_count=10)
-    logger.info("Generating probe suites for ImageNet")
+    logger.info("Generating probe default_suites for ImageNet")
     make_probe_suites("data/processed", "data/processed", "imagenet", label_count=1000)
     logger.info("Done!")
 

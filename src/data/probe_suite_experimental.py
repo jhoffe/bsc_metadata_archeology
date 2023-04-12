@@ -1,43 +1,59 @@
-from typing import Any, Callable, Dict, List, Optional, Sized, Tuple
+from typing import Any, Callable, Dict, Generator, List, Sized
 
 import numpy as np
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, Subset
+
+T_generator = Callable[[Any], Any]
+
+
+def generate_random_outputs_suite():
+    pass
+
+
+def generate_corrupted_suite():
+    pass
 
 
 class ProbeSuiteDataset(Dataset):
-    dataset: Sized[Dataset]
-    probe_generators: Dict[str, Callable[[Any], Any]]
-    probe_suite_indices: Dict[str, Tuple[List[int], List[int]]]
-    num_train_probes: int
-    num_val_probes: int
+    DEFAULT_PRE_SUITES: Dict[str, T_generator] = {
+        "random_outputs": generate_random_outputs_suite,
+        "corrupted": generate_corrupted_suite,
+    }
 
     def __init__(
         self,
         dataset: Sized[Dataset],
         num_train_probes: int,
         num_val_probes: int,
-        probe_generators: Dict[str, Callable[[Any], Any]],
-        probe_suite_indices: Optional[Dict[str, List[int]]] = None,
+        default_suites: List[str],
+        custom_suites: Dict[str, T_generator],
     ):
         self.dataset = dataset
-
         # Check that dataset has length defined
-        assert hasattr(dataset, "__len__")
+        assert hasattr(self.dataset, "__len__")
 
         self.num_train_probes = num_train_probes
         self.num_val_probes = num_val_probes
-        self.probe_generators = probe_generators
+        self.default_suites = default_suites
+        self.custom_suites = custom_suites
 
-        if probe_suite_indices is None:
-            self.probe_suite_indices = {}
+        assert (
+            len(set(default_suites).intersection(set(custom_suites.keys()))) == 0
+        )  # No overlap
 
-    def create_subset_indices(self, num_indices: int) -> List[int]:
-        all_indices = list(range(len(self.dataset)))
-        used_indices = sum(self.probe_suite_indices.values())
+        self.used_indices = set()
 
-        remaining_indices = list(set(all_indices) - set(used_indices))
+    def generate_suite(self, suite: str) -> Generator:
+        pass
 
-        return np.random.choice(remaining_indices, num_indices, replace=False)
+    @staticmethod
+    def subset(dataset: Sized[Dataset], num_probes: int) -> Subset:
+        indices = np.random.choice(len(dataset), num_probes, replace=False)
+
+        return Subset(dataset, indices)
+
+    def create(self):
+        pass
 
     def __getitem__(self, index: int):
         pass
