@@ -1,8 +1,0 @@
-defaults:
-  - default
-
-accelerator: 'tpu'
-strategy: 'auto'
-devices: 'auto'
-sync_batchnorm: true
-log_loss_curves: false

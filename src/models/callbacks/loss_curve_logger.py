@@ -69,21 +69,22 @@ class LossCurveLogger(L.Callback):
         for batch_idx, _, fns, _, _ in loss_curves:
             batch_ids.extend([batch_idx] * len(fns))
 
+        batch_ids = torch.tensor(batch_ids, dtype=torch.int64)
         losses = torch.cat([lc[1] for lc in loss_curves], 0)
 
         if not isinstance(trainer.strategy, SingleDeviceStrategy):
-            all_batch_ids = pl_module.all_gather(batch_ids)
-            all_indices = pl_module.all_gather(indices)
-            all_losses = pl_module.all_gather(losses)
-            all_y = pl_module.all_gather(y)
-            all_y_hat = pl_module.all_gather(y_hat)
+            all_batch_ids = pl_module.all_gather(batch_ids)  # W x N
+            all_indices = pl_module.all_gather(indices)  # W x N
+            all_losses = pl_module.all_gather(losses)  # W x N
+            all_y = pl_module.all_gather(y)  # W x N
+            all_y_hat = pl_module.all_gather(y_hat)  # W x N
 
             self.reset_loss_curves(stage)
 
             if pl_module.local_rank != 0:
                 return
 
-            batch_ids = torch.cat(all_batch_ids, 0).cpu().numpy()
+            batch_ids = torch.cat(all_batch_ids, 0).cpu()
             indices = torch.cat(all_indices, 0).cpu()
             losses = torch.cat(all_losses, 0).cpu()
             y = torch.cat(all_y, 0).cpu()

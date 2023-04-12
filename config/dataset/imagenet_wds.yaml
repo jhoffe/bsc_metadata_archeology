@@ -1,5 +1,0 @@
-name: "imagenet_wds"
-training_urls: "data/processed/imagenet_wds/imagenet-train-{000000..001281}.tar"
-val_urls: "data/processed/imagenet_wds/imagenet-val-{000000..000006}.tar"
-batch_size: 128
-num_workers: 24
