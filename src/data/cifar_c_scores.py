@@ -31,8 +31,8 @@ def c_scores(dataset: str, use_cscores: Optional[bool]) -> np.ndarray:
 
             scores = np.load(file, allow_pickle=True)
 
-            labels = scores["tr_labels"]
-            mem_values = scores["tr_mem"]
+            labels = scores["labels"] if use_cscores else scores["tr_labels"]
+            mem_values = scores["scores"] if use_cscores else scores["tr_mem"]
 
         else:
             file = pathlib.Path("data/external/cifar10-cscores-orig-order.npz")
