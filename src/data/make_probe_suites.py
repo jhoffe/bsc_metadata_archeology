@@ -167,7 +167,9 @@ class ProbeSuiteGenerator(Dataset):
         if index in self.used_indices:
             return self.suites[index]
 
-        return self.dataset[index], index
+        sample, target, _ = self.dataset[index]
+
+        return (sample, target), index
 
     def __len__(self):
         if self.only_probes:

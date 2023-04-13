@@ -1,6 +1,6 @@
 defaults:
     - dataset: imagenet
-    - model: resnet50
+    - model: imagenet-resnet50
     - trainer: default
     - _self_
 
