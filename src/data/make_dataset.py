@@ -29,31 +29,62 @@ def main(input_filepath, output_filepath):
     logger.info("Transforming the CIFAR10 dataset w. no c-scores")
     c_scores_dataset("cifar10", "data/raw", "data/processed")
     logger.info("Transforming the CIFAR10 dataset w. c-scores")
-    c_scores_dataset("cifar10", "data/raw", "data/processed", use_cscores=True)
+    c_scores_dataset("cifar10", "data/raw", "data/processed", use_c_scores=True)
 
     logger.info("Transforming the CIFAR100 dataset w. no c-scores")
     c_scores_dataset("cifar100", "data/raw", "data/processed")
     logger.info("Transforming the CIFAR100 dataset w. c-scores")
-    c_scores_dataset("cifar100", "data/raw", "data/processed", use_cscores=True)
+    c_scores_dataset("cifar100", "data/raw", "data/processed", use_c_scores=True)
     logger.info("Transforming the CIFAR100 dataset w. mem-scores")
-    c_scores_dataset("cifar100", "data/raw", "data/processed", use_cscores=False)
+    c_scores_dataset("cifar100", "data/raw", "data/processed", use_c_scores=False)
 
     logger.info("Transforming the ImageNet dataset w. no c-scores")
     imagenet_transform(input_filepath, output_filepath)
     logger.info("Transforming the ImageNet dataset w. c-scores")
-    imagenet_transform(input_filepath, output_filepath, use_cscores=True)
+    imagenet_transform(input_filepath, output_filepath, use_c_scores=True)
     logger.info("Transforming the ImageNet dataset w. mem-scores")
-    imagenet_transform(input_filepath, output_filepath, use_cscores=False)
-
+    imagenet_transform(input_filepath, output_filepath, use_c_scores=False)
     logger.info("Transformed the ImageNet dataset")
 
     # Generating probe default_suites
-    logger.info("Generating probe default_suites for CIFAR10")
-    make_probe_suites("data/processed", "data/processed", "cifar10", label_count=10)
-    logger.info("Generating probe default_suites for CIFAR100")
-    make_probe_suites("data/processed", "data/processed", "cifar100", label_count=100)
-    logger.info("Generating probe default_suites for ImageNet")
-    make_probe_suites("data/processed", "data/processed", "imagenet", label_count=1000)
+    logger.info("Generating probe suites for CIFAR10 w. C-scores")
+    make_probe_suites(
+        "data/processed", "data/processed", "cifar10", label_count=10, use_c_scores=True
+    )
+
+    logger.info("Generating probe suites for CIFAR100 wo. mem-scores")
+    make_probe_suites(
+        "data/processed",
+        "data/processed",
+        "cifar100",
+        label_count=100,
+        use_c_scores=False,
+    )
+    logger.info("Generating probe suites for CIFAR100 w. C-scores")
+    make_probe_suites(
+        "data/processed",
+        "data/processed",
+        "cifar100",
+        label_count=100,
+        use_c_scores=True,
+    )
+
+    logger.info("Generating probe suites for ImageNet w. C-scores")
+    make_probe_suites(
+        "data/processed",
+        "data/processed",
+        "imagenet",
+        label_count=1000,
+        use_c_scores=True,
+    )
+    logger.info("Generating probe suites for ImageNet wo. mem-scores")
+    make_probe_suites(
+        "data/processed",
+        "data/processed",
+        "imagenet",
+        label_count=1000,
+        use_c_scores=False,
+    )
 
     logger.info("Done!")
 

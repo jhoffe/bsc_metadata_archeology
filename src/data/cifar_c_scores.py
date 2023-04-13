@@ -56,7 +56,10 @@ def c_scores(dataset: str, use_cscores: Optional[bool]) -> np.ndarray:
 
 
 def c_scores_dataset(
-    dataset: str, input_filepath: str, output_filepath: str, use_cscores: Optional[bool]
+    dataset: str,
+    input_filepath: str,
+    output_filepath: str,
+    use_c_scores: Optional[bool] = None,
 ) -> None:
     data = (
         CustomCIFAR100
@@ -68,7 +71,7 @@ def c_scores_dataset(
     assert data is not None
 
     train_data = data(
-        score=c_scores(dataset, use_cscores),
+        score=c_scores(dataset, use_c_scores),
         root=path.join(input_filepath, dataset),
         train=True,
         transform=cifar_transform(train=True),
@@ -84,10 +87,10 @@ def c_scores_dataset(
     os.makedirs(output_dir, exist_ok=True)
 
     torch.save(test_data, os.path.join(output_dir, "test.pt"))
-    if use_cscores is not None:
+    if use_c_scores is not None:
         torch.save(
             train_data, os.path.join(output_dir, "train_c_scores.pt")
-        ) if use_cscores else torch.save(
+        ) if use_c_scores else torch.save(
             train_data, os.path.join(output_dir, "train_mem_scores.pt")
         )
     else:
@@ -177,5 +180,5 @@ class CustomCIFAR100(CIFAR100):
 
 
 if __name__ == "__main__":
-    c_scores_dataset("cifar10", "data/raw", "data/processed", use_cscores=True)
-    c_scores_dataset("cifar100", "data/raw", "data/processed", use_cscores=True)
+    c_scores_dataset("cifar10", "data/raw", "data/processed", use_c_scores=True)
+    c_scores_dataset("cifar100", "data/raw", "data/processed", use_c_scores=True)

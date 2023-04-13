@@ -1,6 +1,6 @@
 import os
 import random
-from typing import Dict, Optional
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import torch
@@ -36,15 +36,8 @@ class ProbeSuiteGenerator(Dataset):
     dataset_len: int
     label_count: int
 
-    typical: list
-    atypical: list
-    random_outputs: list
-    random_inputs_outputs: list
-    corrupted: list
-
-    dataset_indices_to_probe_indices: Dict[int, int] = {}
-
-    _combined: Optional[list] = None
+    suites: Dict[int, Tuple[Tuple[torch.Tensor, int], int]] = {}
+    index_to_suite: Dict[int, str] = {}
 
     only_probes: bool = False
 
@@ -58,15 +51,17 @@ class ProbeSuiteGenerator(Dataset):
         only_probes: bool = False,
     ):
         self.dataset = dataset
-        assert hasattr(self.dataset, "score")
+        assert hasattr(self.dataset, "score"), "Dataset must have a score attribute"
         self.dataset_len = dataset_len
         self.used_indices = []
         self.remaining_indices = list(range(dataset_len))
         self.label_count = label_count
         self.num_probes = num_probes
         self.corruption_std = corruption_std
-        self._combined = None
         self.only_probes = only_probes
+
+        self.suites = {}
+        self.index_to_suite = {}
 
     def generate(self):
         self.generate_atypical()
@@ -74,10 +69,6 @@ class ProbeSuiteGenerator(Dataset):
         self.generate_random_outputs()
         self.generate_random_inputs_outputs()
         self.generate_corrupted()
-
-        self.dataset_indices_to_probe_indices = {
-            ds_idx: ps_idx for ps_idx, ((_, _, _), ds_idx) in enumerate(self.combined)
-        }
 
         assert len(np.intersect1d(self.remaining_indices, self.used_indices)) == 0
         assert (
@@ -89,50 +80,52 @@ class ProbeSuiteGenerator(Dataset):
             == self.dataset_len
         )
 
+    def add_suite(
+        self, name: str, suite: List[Tuple[torch.Tensor, int, int]]
+    ) -> "ProbeSuiteGenerator":
+        for sample, target, idx in suite:
+            self.index_to_suite[idx] = name
+            self.suites[idx] = (sample, target, idx)
+
+        return self
+
     def generate_typical(self):
         sorted_indices = np.argsort(self.dataset.score)
         subset = self.get_subset(indices=sorted_indices[: self.num_probes])
-        self.typical = [
-            ((x, y, c), idx) for (x, y, c), idx in zip(subset, subset.indices)
-        ]
+        suite = [((x, y), idx) for (x, y, _), idx in zip(subset, subset.indices)]
+
+        self.add_suite("typical", suite)
 
     def generate_atypical(self):
         sorted_indices = np.argsort(self.dataset.score)
         subset = self.get_subset(
             indices=sorted_indices[-self.num_probes :]  # noqa: E203
         )  # noqa: E203
-        self.atypical = [
-            ((x, y, c), idx) for (x, y, c), idx in zip(subset, subset.indices)
-        ]
+        atypical = [((x, y), idx) for (x, y, _), idx in zip(subset, subset.indices)]
+
+        self.add_suite("atypical", atypical)
 
     def generate_random_outputs(self):
         subset = self.get_subset()
-        self.random_outputs = [
+        suite = [
             (
-                (
-                    x,
-                    random.choice([i for i in range(self.label_count) if i != y]),
-                    c,
-                ),
+                (x, random.choice([i for i in range(self.label_count) if i != y])),
                 idx,
             )
-            for (x, y, c), idx in zip(subset, subset.indices)
+            for (x, y, _), idx in zip(subset, subset.indices)
         ]
+
+        self.add_suite("random_outputs", suite)
 
     def generate_random_inputs_outputs(self):
         subset = self.get_subset()
 
-        self.random_inputs_outputs = [
-            (
-                (
-                    torch.rand_like(x),
-                    torch.randint(0, self.label_count, (1,)).item(),
-                    c,
-                ),
-                idx,
-            )
-            for (x, y, c), idx in zip(subset, subset.indices)
+        suite = [
+            ((torch.rand_like(x), torch.randint(0, self.label_count, (1,)).item()), idx)
+            for (x, y, _), idx in zip(subset, subset.indices)
         ]
+
+        self.add_suite("random_inputs_outputs", suite)
 
     def generate_corrupted(self):
         subset = self.get_subset()
@@ -140,10 +133,12 @@ class ProbeSuiteGenerator(Dataset):
             [AddGaussianNoise(mean=0.0, std=self.corruption_std), ClampRangeTransform()]
         )
 
-        self.corrupted = [
-            ((corruption_transform(x), y, c), idx)
-            for (x, y, c), idx in zip(subset, subset.indices)
+        suite = [
+            ((corruption_transform(x), y), idx)
+            for (x, y, _), idx in zip(subset, subset.indices)
         ]
+
+        self.add_suite("corrupted", suite)
 
     def get_subset(
         self,
@@ -163,30 +158,20 @@ class ProbeSuiteGenerator(Dataset):
 
         return Subset(self.dataset, subset_indices)
 
-    @property
-    def combined(self):
-        if self._combined is None:
-            self._combined = (
-                self.typical
-                + self.atypical
-                + self.random_outputs
-                + self.random_inputs_outputs
-                + self.corrupted
-            )
-
-        return self._combined
-
-    def __getitem__(self, index):
+    def __getitem__(self, index) -> Tuple[Tuple[torch.Tensor, int], int]:
         if self.only_probes:
-            return self.combined[index]
+            keys = list(self.suites.keys())
+
+            return self.suites[keys[index]]
 
         if index in self.used_indices:
-            return self.combined[self.dataset_indices_to_probe_indices[index]]
+            return self.suites[index]
+
         return self.dataset[index], index
 
     def __len__(self):
         if self.only_probes:
-            return len(self.combined)
+            return len(self.index_to_suite)
 
         return self.dataset_len
 
@@ -197,8 +182,15 @@ def make_probe_suites(
     dataset: str,
     label_count: int,
     num_probes: int = 500,
+    use_c_scores: bool = True,
 ):
-    data = torch.load(os.path.join(input_filepath, dataset, "train.pt"))
+    data = torch.load(
+        os.path.join(
+            input_filepath,
+            dataset,
+            "train_c_scores.pt" if use_c_scores else "train_mem_scores.pt",
+        )
+    )
     dataset_length = len(data)
 
     probe_suite = ProbeSuiteGenerator(
@@ -210,6 +202,10 @@ def make_probe_suites(
     )
     probe_suite.generate()
 
-    torch.save(
-        probe_suite, os.path.join(output_filepath, dataset, "train_probe_suite.pt")
+    output_name = (
+        "train_probe_suite_c_scores.pt"
+        if use_c_scores
+        else "train_probe_suite_mem_scores.pt"
     )
+
+    torch.save(probe_suite, os.path.join(output_filepath, dataset, output_name))
