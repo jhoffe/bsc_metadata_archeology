@@ -13,7 +13,7 @@ from typing import Optional
 def imagenet_transform(
         input_filepath: str,
         output_filepath: str,
-        use_cscores: Optional[bool]
+        use_c_scores: Optional[bool] = None
         ) -> None:
 
     imagenet_train_transform = transforms.Compose(
@@ -35,7 +35,7 @@ def imagenet_transform(
 
     dataset_train = ImageNetTrainingDataset(
         path.join(input_filepath, "imagenet/ILSVRC/Data/CLS-LOC/train"),
-        c_scores=imagenet_c_scores(use_cscores),
+        c_scores=imagenet_c_scores(use_c_scores),
         transform=imagenet_train_transform,
     )
     dataset_val = ImagenetValidationDataset(
@@ -46,11 +46,11 @@ def imagenet_transform(
 
     os.makedirs(path.join(output_filepath, "imagenet"), exist_ok=True)
     torch.save(dataset_val, path.join(output_filepath, "imagenet/val.pt"))
-    if use_cscores is not None:
+    if use_c_scores is not None:
         torch.save(
             dataset_train,
             path.join(output_filepath, "imagenet/train_c_scores.pt")
-        ) if use_cscores else torch.save(
+        ) if use_c_scores else torch.save(
             dataset_train,
             path.join(output_filepath, "imagenet/train_mem_scores.pt")
         )

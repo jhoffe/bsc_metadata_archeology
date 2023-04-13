@@ -1,11 +1,18 @@
 import os
 
 from torchvision.datasets import ImageFolder
+import pickle
 
 
 class ImageNetTrainingDataset(ImageFolder):
     def __init__(self, root, c_scores=None, transform=None, target_transform=None):
-        super().__init__(root, transform, target_transform)
+        cache_path = os.path.join(root, "cache.pkl")
+
+        if os.path.exists(cache_path):
+            self.load_cache(cache_path)
+        else:
+            super().__init__(root, transform, target_transform)
+            self.create_cache(cache_path)
 
         if c_scores is not None:
             path_to_scores = {
@@ -17,6 +24,34 @@ class ImageNetTrainingDataset(ImageFolder):
             ]
         else:
             self.score = None
+
+    def load_cache(self, cache_path: str):
+        with open(cache_path, "rb") as f:
+            cache = pickle.load(f)
+
+        self.class_to_idx = cache["class_to_idx"]
+        self.classes = cache["classes"]
+        self.samples = cache["samples"]
+        self.score = cache["score"]
+        self.imgs = cache["imgs"]
+        self.transform = cache["transform"]
+        self.target_transform = cache["target_transform"]
+        self.root = cache["root"]
+
+    def create_cache(self, cache_path: str):
+        cache = {
+            "class_to_idx": self.class_to_idx,
+            "classes": self.classes,
+            "samples": self.samples,
+            "score": self.score,
+            "imgs": self.imgs,
+            "transform": self.transform,
+            "target_transform": self.target_transform,
+            "root": self.root,
+        }
+
+        with open(cache_path, "wb") as f:
+            pickle.dump(cache, f)
 
     def __getitem__(self, index):
         path, target = self.samples[index]

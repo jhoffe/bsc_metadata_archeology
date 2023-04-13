@@ -42,7 +42,7 @@ class ResNet50(L.LightningModule):
         return self.model(x)
 
     def training_step(self, batch, batch_idx):
-        (x, y, _), indices = batch
+        x, y, indices = batch
 
         logits = self(x)
         loss = F.cross_entropy(logits, y, reduction="none")
@@ -63,7 +63,7 @@ class ResNet50(L.LightningModule):
             x, y = batch
             indices = None
         else:
-            (x, y, _), indices = batch
+            x, y, indices = batch
 
         logits = self(x)
         loss = F.cross_entropy(logits, y, reduction="none")
