@@ -4,3 +4,4 @@ defaults:
 accelerator: 'gpu'
 strategy: 'ddp'
 devices: 2
+sync_batchnorm: true

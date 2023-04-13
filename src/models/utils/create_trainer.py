@@ -76,6 +76,12 @@ def create_trainer(params: DictConfig):
         else None
     )
 
+    sync_batchnorm = (
+        trainer_params["sync_batchnorm"]
+        if "sync_batchnorm" in trainer_params.keys()
+        else False
+    )
+
     return L.Trainer(
         accelerator=trainer_params["accelerator"],
         devices=trainer_params["devices"],
@@ -90,4 +96,5 @@ def create_trainer(params: DictConfig):
         log_every_n_steps=log_every_n_steps,
         profiler=profiler,
         gradient_clip_val=gradient_clip_val,
+        sync_batchnorm=sync_batchnorm,
     )

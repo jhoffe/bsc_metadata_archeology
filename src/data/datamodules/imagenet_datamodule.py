@@ -1,7 +1,7 @@
 import os
 from copy import deepcopy
 from multiprocessing import cpu_count
-from typing import Optional
+from typing import List, Optional
 
 import lightning as L
 import torch
@@ -13,12 +13,14 @@ class ImageNetDataModule(L.LightningDataModule):
     imagenet_val: Dataset
     imagenet_probes: Dataset
     num_workers: int
+    prefetch_factor: Optional[int]
 
     def __init__(
         self,
         data_dir: str = "data/processed/imagenet",
         batch_size: int = 128,
         num_workers: Optional[int] = None,
+        prefetch_factor: Optional[int] = None,
     ):
         """Initializes the data module.
 
@@ -31,6 +33,7 @@ class ImageNetDataModule(L.LightningDataModule):
         self.data_dir = data_dir
         self.batch_size = batch_size
         self.num_workers = cpu_count() if num_workers is None else num_workers
+        self.prefetch_factor = prefetch_factor
 
     def setup(self, stage: str) -> None:
         """Loads the imagenet dataset from files.
@@ -60,6 +63,7 @@ class ImageNetDataModule(L.LightningDataModule):
             num_workers=self.num_workers,
             shuffle=True,
             pin_memory=True,
+            prefetch_factor=self.prefetch_factor,
         )
 
     def test_dataloader(self) -> DataLoader:
@@ -73,9 +77,10 @@ class ImageNetDataModule(L.LightningDataModule):
             batch_size=self.batch_size,
             num_workers=self.num_workers,
             pin_memory=True,
+            prefetch_factor=self.prefetch_factor,
         )
 
-    def val_dataloader(self) -> list[DataLoader]:
+    def val_dataloader(self) -> List[DataLoader]:
         """Returns the dataloader for the test set.
 
         Returns:
@@ -87,11 +92,13 @@ class ImageNetDataModule(L.LightningDataModule):
                 batch_size=self.batch_size,
                 num_workers=self.num_workers,
                 pin_memory=True,
+                prefetch_factor=self.prefetch_factor,
             ),
             DataLoader(
                 self.imagenet_probes,
                 batch_size=self.batch_size,
                 num_workers=self.num_workers,
                 pin_memory=True,
+                prefetch_factor=self.prefetch_factor,
             ),
         ]
