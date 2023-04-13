@@ -83,8 +83,15 @@ def c_scores_dataset(
     output_dir = os.path.join(output_filepath, dataset)
     os.makedirs(output_dir, exist_ok=True)
 
-    torch.save(train_data, os.path.join(output_dir, "train.pt"))
     torch.save(test_data, os.path.join(output_dir, "test.pt"))
+    if use_cscores is not None:
+        torch.save(
+            train_data, os.path.join(output_dir, "train_c_scores.pt")
+        ) if use_cscores else torch.save(
+            train_data, os.path.join(output_dir, "train_mem_scores.pt")
+        )
+    else:
+        torch.save(train_data, os.path.join(output_dir, "train.pt"))
 
 
 class CustomCIFAR10(CIFAR10):

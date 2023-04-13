@@ -45,5 +45,14 @@ def imagenet_transform(
     )
 
     os.makedirs(path.join(output_filepath, "imagenet"), exist_ok=True)
-    torch.save(dataset_train, path.join(output_filepath, "imagenet/train.pt"))
     torch.save(dataset_val, path.join(output_filepath, "imagenet/val.pt"))
+    if use_cscores is not None:
+        torch.save(
+            dataset_train,
+            path.join(output_filepath, "imagenet/train_c_scores.pt")
+        ) if use_cscores else torch.save(
+            dataset_train,
+            path.join(output_filepath, "imagenet/train_mem_scores.pt")
+        )
+    else:
+        torch.save(dataset_train, path.join(output_filepath, "imagenet/train.pt"))
