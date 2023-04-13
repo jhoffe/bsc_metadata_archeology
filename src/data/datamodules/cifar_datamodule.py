@@ -1,6 +1,6 @@
 import os
 from copy import deepcopy
-from typing import List
+from typing import List, Union, Optional
 
 import lightning as L
 import torch
@@ -19,7 +19,7 @@ class CIFARDataModule(L.LightningDataModule):
 
     cifar_train: TensorDataset
     cifar_test: TensorDataset
-    cifar_probes: Dataset
+    cifar_probes: Optional[Dataset]
     num_workers: int
 
     def __init__(
@@ -27,6 +27,7 @@ class CIFARDataModule(L.LightningDataModule):
         data_dir: str = "data/processed/cifar10",
         batch_size: int = 128,
         num_workers: int = 4,
+        c_score_type: str = "c-score"
     ):
         """Initializes the data module.
 
@@ -39,6 +40,7 @@ class CIFARDataModule(L.LightningDataModule):
         self.data_dir = data_dir
         self.batch_size = batch_size
         self.num_workers = num_workers
+        self.c_score_type = c_score_type
 
     def setup(self, stage: str) -> None:
         """Loads the CIFAR10 dataset from files.
@@ -46,14 +48,28 @@ class CIFARDataModule(L.LightningDataModule):
         Args:
             stage: str, the stage for which the setup is being run (e.g. 'fit', 'test')
         """
-        train_dataset = torch.load(os.path.join(self.data_dir, "train_probe_suite.pt"))
+
+        if self.c_score_type == "c-score":
+            train_name = "train_probe_suite_c_scores.pt"
+        elif self.c_score_type == "mem-score":
+            train_name = "train_probe_suite_mem_scores.pt"
+        elif self.c_score_type == "none":
+            train_name = "train.pt"
+        else:
+            raise ValueError(f"Invalid c_score_type: {self.c_score_type}")
+
+        train_dataset = torch.load(os.path.join(self.data_dir, train_name))
         test_dataset = torch.load(os.path.join(self.data_dir, "test.pt"))
 
-        probes_dataset = deepcopy(train_dataset)
-        probes_dataset.only_probes = True
+        if self.c_score_type != "none":
+            probes_dataset = deepcopy(train_dataset)
+            probes_dataset.only_probes = True
+
+            self.cifar_probes = probes_dataset
+        else:
+            self.cifar_probes = None
 
         self.cifar_train = train_dataset
-        self.cifar_probes = probes_dataset
         self.cifar_test = test_dataset
 
     def train_dataloader(self) -> DataLoader:
@@ -83,12 +99,21 @@ class CIFARDataModule(L.LightningDataModule):
             pin_memory=True,
         )
 
-    def val_dataloader(self) -> List[DataLoader]:
+    def val_dataloader(self) -> Union[DataLoader, List[DataLoader]]:
         """Returns the dataloader for the test set.
 
         Returns:
             DataLoader, the dataloader for the test set.
         """
+
+        if self.c_score_type == "none":
+            return DataLoader(
+                self.cifar_test,
+                batch_size=self.batch_size,
+                num_workers=self.num_workers,
+                pin_memory=True,
+            )
+
         return [
             DataLoader(
                 self.cifar_test,
