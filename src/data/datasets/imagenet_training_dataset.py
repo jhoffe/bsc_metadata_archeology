@@ -32,7 +32,6 @@ class ImageNetTrainingDataset(ImageFolder):
         self.class_to_idx = cache["class_to_idx"]
         self.classes = cache["classes"]
         self.samples = cache["samples"]
-        self.score = cache["score"]
         self.imgs = cache["imgs"]
         self.transform = cache["transform"]
         self.target_transform = cache["target_transform"]
@@ -43,7 +42,6 @@ class ImageNetTrainingDataset(ImageFolder):
             "class_to_idx": self.class_to_idx,
             "classes": self.classes,
             "samples": self.samples,
-            "score": self.score,
             "imgs": self.imgs,
             "transform": self.transform,
             "target_transform": self.target_transform,
