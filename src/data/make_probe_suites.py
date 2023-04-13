@@ -83,9 +83,9 @@ class ProbeSuiteGenerator(Dataset):
     def add_suite(
         self, name: str, suite: List[Tuple[torch.Tensor, int, int]]
     ) -> "ProbeSuiteGenerator":
-        for sample, target, idx in suite:
+        for (sample, target), idx in suite:
             self.index_to_suite[idx] = name
-            self.suites[idx] = (sample, target, idx)
+            self.suites[idx] = ((sample, target), idx)
 
         return self
 
