@@ -2,4 +2,4 @@ name: "cifar"
 data_dir: "data/processed/cifar100"
 num_workers: 16
 batch_size: 128
-c_score_type: "none"
+c_score_type: "c-score"

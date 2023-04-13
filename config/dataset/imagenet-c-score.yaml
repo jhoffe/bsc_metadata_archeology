@@ -2,4 +2,4 @@ name: "imagenet"
 num_workers: 24
 prefetch_factor: 4
 batch_size: 256
-c_score_type: "none"
+c_score_type: "c-score"
