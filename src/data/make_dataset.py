@@ -52,7 +52,7 @@ def main(input_filepath, output_filepath):
         "data/processed", "data/processed", "cifar10", label_count=10, use_c_scores=True
     )
 
-    logger.info("Generating probe suites for CIFAR100 wo. mem-scores")
+    logger.info("Generating probe suites for CIFAR100 w. mem-scores")
     make_probe_suites(
         "data/processed",
         "data/processed",
@@ -77,7 +77,7 @@ def main(input_filepath, output_filepath):
         label_count=1000,
         use_c_scores=True,
     )
-    logger.info("Generating probe suites for ImageNet wo. mem-scores")
+    logger.info("Generating probe suites for ImageNet w. mem-scores")
     make_probe_suites(
         "data/processed",
         "data/processed",
