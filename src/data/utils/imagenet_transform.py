@@ -7,8 +7,15 @@ from torchvision import transforms
 from src.data.datasets import ImageNetTrainingDataset, ImagenetValidationDataset
 from src.data.imagenet_c_scores import imagenet_c_scores
 
+from typing import Optional
 
-def imagenet_transform(input_filepath: str, output_filepath: str) -> None:
+
+def imagenet_transform(
+        input_filepath: str,
+        output_filepath: str,
+        use_cscores: Optional[bool]
+        ) -> None:
+
     imagenet_train_transform = transforms.Compose(
         [
             transforms.RandomResizedCrop(224),
@@ -28,7 +35,7 @@ def imagenet_transform(input_filepath: str, output_filepath: str) -> None:
 
     dataset_train = ImageNetTrainingDataset(
         path.join(input_filepath, "imagenet/ILSVRC/Data/CLS-LOC/train"),
-        c_scores=imagenet_c_scores(use_cscores=False),
+        c_scores=imagenet_c_scores(use_cscores),
         transform=imagenet_train_transform,
     )
     dataset_val = ImagenetValidationDataset(
@@ -38,5 +45,14 @@ def imagenet_transform(input_filepath: str, output_filepath: str) -> None:
     )
 
     os.makedirs(path.join(output_filepath, "imagenet"), exist_ok=True)
-    torch.save(dataset_train, path.join(output_filepath, "imagenet/train.pt"))
     torch.save(dataset_val, path.join(output_filepath, "imagenet/val.pt"))
+    if use_cscores is not None:
+        torch.save(
+            dataset_train,
+            path.join(output_filepath, "imagenet/train_c_scores.pt")
+        ) if use_cscores else torch.save(
+            dataset_train,
+            path.join(output_filepath, "imagenet/train_mem_scores.pt")
+        )
+    else:
+        torch.save(dataset_train, path.join(output_filepath, "imagenet/train.pt"))

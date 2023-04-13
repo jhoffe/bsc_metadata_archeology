@@ -11,42 +11,53 @@ from src.data.utils.c_score_downloader import downloader
 from src.data.utils.cifar_transform import cifar_transform
 
 
-def c_scores(dataset: str, use_cscores: bool = False) -> np.ndarray:
-    if "cifar100" in dataset:
-        file = (
-            pathlib.Path("data/external/cifar100-cscores-orig-order.npz")
-            if use_cscores
-            else pathlib.Path("data/external/cifar100_infl_matrix.npz")
-        )
+def c_scores(dataset: str, use_cscores: Optional[bool]) -> np.ndarray:
+    """Get cifar c-scores."""
+    if dataset in "cifar10":
+        assert (
+            use_cscores is not False
+        ), "Memorization scores are not available for CIFAR10."
 
-        if not file.exists():
-            downloader()
+    if use_cscores is not None:
+        if "cifar100" in dataset:
+            file = (
+                pathlib.Path("data/external/cifar100-cscores-orig-order.npz")
+                if use_cscores
+                else pathlib.Path("data/external/cifar100_infl_matrix.npz")
+            )
 
-        scores = np.load(file, allow_pickle=True)
+            if not file.exists():
+                downloader()
 
-        labels = scores["tr_labels"]
-        mem_values = scores["tr_mem"]
+            scores = np.load(file, allow_pickle=True)
 
-    else:
-        file = pathlib.Path("data/external/cifar10-cscores-orig-order.npz")
-        if not file.exists():
-            downloader()
+            labels = scores["tr_labels"]
+            mem_values = scores["tr_mem"]
 
-        cscores = np.load(file, allow_pickle=True)
+        else:
+            file = pathlib.Path("data/external/cifar10-cscores-orig-order.npz")
+            if not file.exists():
+                downloader()
 
-        labels = cscores["labels"]
-        scores = cscores["scores"]
+            cscores = np.load(file, allow_pickle=True)
 
-        mem_values = 1.0 - scores
+            labels = cscores["labels"]
+            scores = cscores["scores"]
 
-    data = CIFAR100 if dataset == "cifar100" else CIFAR10
-    data = data(root=f"data/raw/{dataset}", train=True, download=False)
-    assert np.all(data.targets == labels), "The labels are not the same."
+            mem_values = 1.0 - scores
 
-    return mem_values
+        data = CIFAR100 if dataset == "cifar100" else CIFAR10
+        data = data(root=f"data/raw/{dataset}", train=True, download=False)
+        assert np.all(data.targets == labels), "The labels are not the same."
+
+        return mem_values
+
+    return None
 
 
-def c_scores_dataset(dataset: str, input_filepath: str, output_filepath: str) -> None:
+def c_scores_dataset(
+    dataset: str, input_filepath: str, output_filepath: str, use_cscores: Optional[bool]
+) -> None:
     data = (
         CustomCIFAR100
         if dataset == "cifar100"
@@ -57,7 +68,7 @@ def c_scores_dataset(dataset: str, input_filepath: str, output_filepath: str) ->
     assert data is not None
 
     train_data = data(
-        score=c_scores(dataset),
+        score=c_scores(dataset, use_cscores),
         root=path.join(input_filepath, dataset),
         train=True,
         transform=cifar_transform(train=True),
@@ -72,12 +83,19 @@ def c_scores_dataset(dataset: str, input_filepath: str, output_filepath: str) ->
     output_dir = os.path.join(output_filepath, dataset)
     os.makedirs(output_dir, exist_ok=True)
 
-    torch.save(train_data, os.path.join(output_dir, "train.pt"))
     torch.save(test_data, os.path.join(output_dir, "test.pt"))
+    if use_cscores is not None:
+        torch.save(
+            train_data, os.path.join(output_dir, "train_c_scores.pt")
+        ) if use_cscores else torch.save(
+            train_data, os.path.join(output_dir, "train_mem_scores.pt")
+        )
+    else:
+        torch.save(train_data, os.path.join(output_dir, "train.pt"))
 
 
 class CustomCIFAR10(CIFAR10):
-    """CIFAR10 dataset with memory scores."""
+    """CIFAR10 dataset with C-scores."""
 
     def __init__(
         self,
@@ -108,6 +126,9 @@ class CustomCIFAR10(CIFAR10):
 
         img, target = super().__getitem__(index)
         if not self.train:
+            return img, target
+
+        if self.score is None:
             return img, target
 
         score = self.score[index]
@@ -115,7 +136,7 @@ class CustomCIFAR10(CIFAR10):
 
 
 class CustomCIFAR100(CIFAR100):
-    """CIFAR100 dataset with memory scores."""
+    """CIFAR100 dataset with C-scores."""
 
     def __init__(
         self,
@@ -148,10 +169,13 @@ class CustomCIFAR100(CIFAR100):
         if not self.train:
             return img, target
 
+        if self.score is None:
+            return img, target
+
         score = self.score[index]
         return img, target, score
 
 
 if __name__ == "__main__":
-    c_scores_dataset("cifar10", "data/raw", "data/processed")
-    c_scores_dataset("cifar100", "data/raw", "data/processed")
+    c_scores_dataset("cifar10", "data/raw", "data/processed", use_cscores=True)
+    c_scores_dataset("cifar100", "data/raw", "data/processed", use_cscores=True)
