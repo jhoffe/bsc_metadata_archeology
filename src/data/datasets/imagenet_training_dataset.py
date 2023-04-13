@@ -36,6 +36,7 @@ class ImageNetTrainingDataset(ImageFolder):
         self.transform = cache["transform"]
         self.target_transform = cache["target_transform"]
         self.root = cache["root"]
+        self.loader = cache["loader"]
 
     def create_cache(self, cache_path: str):
         cache = {
@@ -46,6 +47,7 @@ class ImageNetTrainingDataset(ImageFolder):
             "transform": self.transform,
             "target_transform": self.target_transform,
             "root": self.root,
+            "loader": self.loader
         }
 
         with open(cache_path, "wb") as f:
