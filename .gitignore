@@ -115,3 +115,4 @@ lightning_logs/
 /reports/figures/**/*.png
 
 /checkpoints/
+/cache.pkl

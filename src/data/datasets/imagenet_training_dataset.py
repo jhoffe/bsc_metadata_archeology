@@ -6,7 +6,7 @@ import pickle
 
 class ImageNetTrainingDataset(ImageFolder):
     def __init__(self, root, c_scores=None, transform=None, target_transform=None):
-        cache_path = os.path.join(root, "cache.pkl")
+        cache_path = "cache.pkl"
 
         if os.path.exists(cache_path):
             self.load_cache(cache_path)
