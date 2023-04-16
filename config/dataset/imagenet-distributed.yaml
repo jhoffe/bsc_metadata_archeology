@@ -1,0 +1,4 @@
+name: "imagenet"
+num_workers: 24
+prefetch_factor: 4
+batch_size: 128

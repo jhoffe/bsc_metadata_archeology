@@ -1,7 +1,9 @@
-name: "imagenet-resnet50"
+name: "resnet50"
 lr: 0.1
 momentum: 0.9
-weight_decay: 0.0005
+weight_decay: 0.0001
 max_epochs: 100
 sync_dist_train: false
-sync_dist_val: true
+sync_dist_val: false
+resize_conv1: false
+should_compile: true

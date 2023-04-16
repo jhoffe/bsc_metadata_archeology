@@ -5,10 +5,10 @@ import click
 import pytorch_lightning as pl
 from dotenv import find_dotenv, load_dotenv
 
-from src.data.c_scores import c_scores_dataset
+from src.data.cifar_c_scores import c_scores_dataset
 from src.data.download import download_dataset
 from src.data.make_probe_suites import make_probe_suites
-from src.data.transform import dataset_transform
+from src.data.utils.imagenet_transform import imagenet_transform
 
 
 @click.command()
@@ -26,21 +26,66 @@ def main(input_filepath, output_filepath):
     download_dataset(input_filepath, "cifar10")
     download_dataset(input_filepath, "cifar100")
 
-    logger.info("Transforming the CIFAR10 dataset")
+    logger.info("Transforming the CIFAR10 dataset w. no c-scores")
     c_scores_dataset("cifar10", "data/raw", "data/processed")
-    logger.info("Transforming the CIFAR100 dataset")
+    logger.info("Transforming the CIFAR10 dataset w. c-scores")
+    c_scores_dataset("cifar10", "data/raw", "data/processed", use_c_scores=True)
+
+    logger.info("Transforming the CIFAR100 dataset w. no c-scores")
     c_scores_dataset("cifar100", "data/raw", "data/processed")
-    logger.info("Transforming the ImageNet dataset")
-    dataset_transform(input_filepath, output_filepath, "imagenet")
+    logger.info("Transforming the CIFAR100 dataset w. c-scores")
+    c_scores_dataset("cifar100", "data/raw", "data/processed", use_c_scores=True)
+    logger.info("Transforming the CIFAR100 dataset w. mem-scores")
+    c_scores_dataset("cifar100", "data/raw", "data/processed", use_c_scores=False)
+
+    logger.info("Transforming the ImageNet dataset w. no c-scores")
+    imagenet_transform(input_filepath, output_filepath)
+    logger.info("Transforming the ImageNet dataset w. c-scores")
+    imagenet_transform(input_filepath, output_filepath, use_c_scores=True)
+    logger.info("Transforming the ImageNet dataset w. mem-scores")
+    imagenet_transform(input_filepath, output_filepath, use_c_scores=False)
     logger.info("Transformed the ImageNet dataset")
 
-    # Generating probe suites
-    logger.info("Generating probe suites for CIFAR100")
-    make_probe_suites("data/processed", "data/processed", "cifar100", label_count=100)
-    logger.info("Generating probe suites for CIFAR10")
-    make_probe_suites("data/processed", "data/processed", "cifar10", label_count=10)
-    logger.info("Generating probe suites for ImageNet")
-    make_probe_suites("data/processed", "data/processed", "imagenet", label_count=1000)
+    # Generating probe default_suites
+    logger.info("Generating probe suites for CIFAR10 w. C-scores")
+    make_probe_suites(
+        "data/processed", "data/processed", "cifar10", label_count=10, use_c_scores=True
+    )
+
+    logger.info("Generating probe suites for CIFAR100 w. mem-scores")
+    make_probe_suites(
+        "data/processed",
+        "data/processed",
+        "cifar100",
+        label_count=100,
+        use_c_scores=False,
+    )
+    logger.info("Generating probe suites for CIFAR100 w. C-scores")
+    make_probe_suites(
+        "data/processed",
+        "data/processed",
+        "cifar100",
+        label_count=100,
+        use_c_scores=True,
+    )
+
+    logger.info("Generating probe suites for ImageNet w. C-scores")
+    make_probe_suites(
+        "data/processed",
+        "data/processed",
+        "imagenet",
+        label_count=1000,
+        use_c_scores=True,
+    )
+    logger.info("Generating probe suites for ImageNet w. mem-scores")
+    make_probe_suites(
+        "data/processed",
+        "data/processed",
+        "imagenet",
+        label_count=1000,
+        use_c_scores=False,
+    )
+
     logger.info("Done!")
 
 
