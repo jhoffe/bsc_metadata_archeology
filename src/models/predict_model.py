@@ -1,7 +1,7 @@
 import os
 
 import hydra
-import pytorch_lightning as pl
+import lightning as L
 from dotenv import find_dotenv, load_dotenv
 from omegaconf import DictConfig, OmegaConf
 
@@ -18,7 +18,7 @@ from src.models.create_trainer import create_trainer
 def predict(config: DictConfig):
     print(f"configuration: \n {OmegaConf.to_yaml(config)}")
 
-    pl.seed_everything(config["seed"])
+    L.seed_everything(config["seed"])
 
     dotenv_path = find_dotenv()
     load_dotenv(dotenv_path)

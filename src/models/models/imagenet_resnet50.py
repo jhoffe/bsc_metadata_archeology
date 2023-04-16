@@ -1,4 +1,5 @@
-import pytorch_lightning as pl
+import lightning as L
+import torch
 from torch.nn import functional as F
 from torch.optim import SGD
 from torch.optim.lr_scheduler import CosineAnnealingLR
@@ -6,7 +7,7 @@ from torchmetrics.classification import Accuracy
 from torchvision.models.resnet import resnet50
 
 
-class ImageNetResNet50(pl.LightningModule):
+class ImageNetResNet50(L.LightningModule):
     def __init__(
         self,
         max_epochs: int = 100,
@@ -17,7 +18,7 @@ class ImageNetResNet50(pl.LightningModule):
         sync_dist_val: bool = False,
     ):
         super().__init__()
-        self.model = resnet50(weights=None)
+        self.model = torch.compile(resnet50(weights=None))
 
         self.max_epochs = max_epochs
         self.lr = lr
@@ -58,11 +59,16 @@ class ImageNetResNet50(pl.LightningModule):
             "y_hat": y_pred,
         }
 
-    def validation_step(self, batch, batch_idx):
-        x, y = batch
+    def validation_step(self, batch, batch_idx, dataloader_idx=0):
+        if dataloader_idx == 0:
+            x, y = batch
+            indices = None
+        else:
+            (x, y, _), indices = batch
 
         y_hat = self(x)
         loss = F.cross_entropy(y_hat, y, reduction="none")
+        mean_loss = loss.mean()
 
         self.val_accuracy(y_hat, y)
         self.log(
@@ -74,11 +80,20 @@ class ImageNetResNet50(pl.LightningModule):
         )
         self.log(
             "validation/loss",
-            loss.mean(),
+            mean_loss,
             on_step=False,
             on_epoch=True,
             sync_dist=self.sync_dist_val,
         )
+
+        y_pred = y_hat.argmax(dim=1)
+        return {
+            "loss": mean_loss,
+            "unreduced_loss": loss,
+            "indices": indices,
+            "y": y,
+            "y_hat": y_pred,
+        }
 
     def test_step(self, batch, batch_idx):
         x, y = batch
@@ -115,6 +130,3 @@ class ImageNetResNet50(pl.LightningModule):
         }
 
         return {"optimizer": optimizer, "lr_scheduler": scheduler_dict}
-
-    def optimizer_zero_grad(self, epoch, batch_idx, optimizer, optimizer_idx):
-        optimizer.zero_grad(set_to_none=True)

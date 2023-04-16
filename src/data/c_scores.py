@@ -7,17 +7,30 @@ import numpy as np
 import torch
 from torchvision.datasets import CIFAR10, CIFAR100
 
-from src.data.utils.c_score_downloader import c_score_downloader
+from src.data.utils.c_score_downloader import downloader
 from src.data.utils.cifar_transform import cifar_transform
 
 
-def c_scores(dataset: str) -> np.ndarray:
-    mem_values = None
+def c_scores(dataset: str, use_cscores: bool = False) -> np.ndarray:
+    if "cifar100" in dataset:
+        file = (
+            pathlib.Path("data/external/cifar100-cscores-orig-order.npz")
+            if use_cscores
+            else pathlib.Path("data/external/cifar100_infl_matrix.npz")
+        )
 
-    if "cifar" in dataset:
-        file = pathlib.Path(f"data/external/{dataset}-cscores-orig-order.npz")
         if not file.exists():
-            c_score_downloader()
+            downloader()
+
+        scores = np.load(file, allow_pickle=True)
+
+        labels = scores["tr_labels"]
+        mem_values = scores["tr_mem"]
+
+    else:
+        file = pathlib.Path("data/external/cifar10-cscores-orig-order.npz")
+        if not file.exists():
+            downloader()
 
         cscores = np.load(file, allow_pickle=True)
 
@@ -25,9 +38,10 @@ def c_scores(dataset: str) -> np.ndarray:
         scores = cscores["scores"]
 
         mem_values = 1.0 - scores
-        data = CIFAR100 if dataset == "cifar100" else CIFAR10
-        data = data(root=f"data/raw/{dataset}", train=True, download=False)
-        assert np.all(data.targets == labels), "The labels are not the same."
+
+    data = CIFAR100 if dataset == "cifar100" else CIFAR10
+    data = data(root=f"data/raw/{dataset}", train=True, download=False)
+    assert np.all(data.targets == labels), "The labels are not the same."
 
     return mem_values
 
