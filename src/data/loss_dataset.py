@@ -68,18 +68,13 @@ class LossDataset:
         assert self.df is not None
         assert self.probe_suite is not None
 
-        (
-            index_to_probe_suite_type_dict,
-            index_to_label_name,
-        ) = self.probe_suite.index_to_probe_suite_type_dict()
+        probe_suite_indices = self.probe_suite.index_to_suite
 
-        df = self.df[
-            ~self.df["sample_index"].isin(self.probe_suite.used_indices)
-        ].copy()
+        df = self.df[self.df["stage"] == "train"]
+        df = df[~df["sample_index"].isin(probe_suite_indices.keys())].copy()
 
-        # Convert to int from categorrical
+        # Convert to int from categorical
         df["epoch"] = df["epoch"].astype(int)
-
         df.sort_values(["sample_index", "epoch"], inplace=True)
         sample_groups = df.groupby("sample_index", sort=False)
 
@@ -87,6 +82,9 @@ class LossDataset:
         original_classes = sample_groups["y"].first().values
         sample_indices = losses.index
 
-        X = np.asarray(losses.to_list())
+        X = np.array(losses.to_list())
+
+        names = set(self.probe_suite.index_to_suite.values())
+        index_to_label_name = {idx: label_name for idx, label_name in enumerate(names)}
 
         return X, original_classes, sample_indices, index_to_label_name

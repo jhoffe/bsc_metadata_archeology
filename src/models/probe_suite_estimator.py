@@ -3,7 +3,7 @@ import numpy as np
 import pyarrow as pa
 import pyarrow.parquet as pq
 from sklearn.base import BaseEstimator, is_classifier
-from sklearn.ensemble import RandomForestClassifier
+from xgboost import XGBClassifier
 
 from src.data.loss_dataset import LossDataset
 
@@ -44,21 +44,22 @@ def main(loss_dataset_path, probe_suite_path, output_path):
         index_to_label_name,
     ) = loss_dataset.to_sklearn_predict_matrix()
 
-    rf_classifier = RandomForestClassifier(n_estimators=100, n_jobs=-1)
+    classifier = XGBClassifier(n_estimators=100)
     print("Training model...")
-    rf_classifier = train_metadata_model(rf_classifier, X_train, y_train)
+    print(X_predict.shape)
+    classifier = train_metadata_model(classifier, X_train, y_train)
 
     print("Predicting...")
-    y_pred = rf_classifier.predict(X_predict)
+    y_pred = classifier.predict(X_predict)
     print("Predicting probabilities...")
-    y_prob = rf_classifier.predict_proba(X_predict)
+    y_prob = classifier.predict_proba(X_predict)
 
     table = pa.Table.from_arrays(
         arrays=[
             pa.array(sample_indices),
             pa.array(y_pred),
             pa.array(original_class),
-            pa.array(np.argmax(y_prob, axis=1)),
+            pa.array(np.max(y_prob, axis=1)),
             pa.array([index_to_label_name[idx] for idx in y_pred]),
         ],
         names=["sample_index", "label", "original_class", "probs", "label_name"],
