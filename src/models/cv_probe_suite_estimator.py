@@ -1,5 +1,8 @@
+import os
+
 import click
 import numpy as np
+import pandas as pd
 from lightning import seed_everything
 from sklearn.base import BaseEstimator, is_classifier
 from sklearn.ensemble import AdaBoostClassifier, RandomForestClassifier
@@ -41,8 +44,14 @@ def cv_metadata_model(classifier: BaseEstimator, X: np.array, y: np.array) -> np
 @click.argument(
     "probe_suite_path", type=click.Path(exists=True, dir_okay=False, file_okay=True)
 )
+@click.option(
+    "-r",
+    "--results-dir",
+    type=click.Path(dir_okay=False, file_okay=True),
+    default="results/tables/",
+)
 @click.option("--seed", type=int, default=42)
-def main(loss_dataset_path, probe_suite_path, seed):
+def main(loss_dataset_path, probe_suite_path, results_dir, seed):
     seed_everything(seed)
 
     loss_dataset = LossDataset(loss_dataset_path)
@@ -64,11 +73,26 @@ def main(loss_dataset_path, probe_suite_path, seed):
         "XGBoost RF": XGBRFClassifier(n_estimators=100),
     }
 
+    results_table = []
+
     for name, classifier in classifiers.items():
         print(f"Running {name}")
         test_score, gen_score = cv_metadata_model(classifier, X, y)
         print(f"Gen score={np.mean(gen_score)}")
         print(f"Test score={np.mean(test_score)}")
+
+        results_table.append([name, gen_score, test_score])
+
+    results_table = pd.DataFrame(
+        results_table, columns=["Classifier", "Gen Score", "Test Score"]
+    )
+    print(results_table)
+
+    os.makedirs(results_dir, exist_ok=True)
+    results_table.to_csv(os.path.join(results_dir, "results_table.csv"), index=False)
+    results_table.to_latex(
+        os.path.join(results_dir, "results_table.tex"), index=False, float_format="%.3f"
+    )
 
 
 if __name__ == "__main__":

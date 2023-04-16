@@ -32,15 +32,20 @@ class LossDataset:
         assert self.df is not None
         assert self.probe_suite is not None
 
-        (
-            index_to_probe_suite_type_dict,
-            index_to_label_name,
-        ) = self.probe_suite.index_to_probe_suite_type_dict()
+        probe_suite_indices = self.probe_suite.index_to_suite
 
-        df = self.df[self.df["sample_index"].isin(self.probe_suite.used_indices)].copy()
+        df = self.df[self.df["stage"] == "val"]
+        df = df[df["sample_index"].isin(probe_suite_indices.keys())].copy()
 
         # Convert to int from categorical
         df["epoch"] = df["epoch"].astype(int)
+
+        probe_count = len(probe_suite_indices)
+        # Remove the probe samples from the sanity check
+        sanity_check_count = len(df[df["epoch"] == 0]) - probe_count
+        if sanity_check_count > 0:
+            indices_to_drop = df[df["epoch"] == 0].index[:sanity_check_count]
+            df = df.drop(indices_to_drop)
 
         df.sort_values(["sample_index", "epoch"], inplace=True)
         sample_groups = df.groupby("sample_index", sort=False)
@@ -48,8 +53,14 @@ class LossDataset:
         losses = sample_groups["loss"].agg(list)
         losses_indices = losses.index
 
-        X = np.asarray(losses.to_list())
-        y = np.array([index_to_probe_suite_type_dict[idx] for idx in losses_indices])
+        X = np.array(losses.to_list())
+
+        ps_indices_to_int = {
+            key: idx for idx, key in enumerate(set(probe_suite_indices.values()))
+        }
+        y = np.array(
+            [ps_indices_to_int[probe_suite_indices[idx]] for idx in losses_indices]
+        )
 
         return X, y
 
