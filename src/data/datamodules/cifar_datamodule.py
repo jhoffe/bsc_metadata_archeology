@@ -1,6 +1,6 @@
 import os
 from copy import deepcopy
-from typing import List, Union, Optional
+from typing import List, Optional, Union
 
 import lightning as L
 import torch
@@ -27,7 +27,7 @@ class CIFARDataModule(L.LightningDataModule):
         data_dir: str = "data/processed/cifar10",
         batch_size: int = 128,
         num_workers: int = 4,
-        c_score_type: str = "c-score"
+        c_score_type: str = "c-score",
     ):
         """Initializes the data module.
 

@@ -2,6 +2,7 @@ from time import gmtime, strftime
 
 import lightning as L
 import torch
+from lightning.pytorch.callbacks import EarlyStopping, LearningRateMonitor
 from lightning.pytorch.loggers import WandbLogger
 from lightning.pytorch.strategies import DDPStrategy
 from omegaconf import DictConfig
@@ -81,6 +82,24 @@ def create_trainer(params: DictConfig):
         if "sync_batchnorm" in trainer_params.keys()
         else False
     )
+
+    if (
+        "early_stopping" in trainer_params.keys()
+        and trainer_params["early_stopping"]["enable"]
+    ):
+        early_stopping_params = trainer_params["early_stopping"]
+        # Ignore enable key
+        early_stopping_params = {
+            k: v for k, v in early_stopping_params.items() if k != "enable"
+        }
+
+        callbacks.append(EarlyStopping(**early_stopping_params))
+
+    if (
+        "monitor_learning_rate" in trainer_params.keys()
+        and trainer_params["monitor_learning_rate"]
+    ):
+        callbacks.append(LearningRateMonitor())
 
     return L.Trainer(
         accelerator=trainer_params["accelerator"],

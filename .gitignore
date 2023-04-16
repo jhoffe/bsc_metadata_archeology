@@ -116,3 +116,4 @@ lightning_logs/
 
 /checkpoints/
 /cache.pkl
+/reports/tables
