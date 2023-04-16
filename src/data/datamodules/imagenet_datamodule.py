@@ -21,7 +21,7 @@ class ImageNetDataModule(L.LightningDataModule):
         batch_size: int = 128,
         num_workers: Optional[int] = None,
         prefetch_factor: Optional[int] = None,
-        c_score_type: str = "c-score"
+        c_score_type: str = "c-score",
     ):
         """Initializes the data module.
 

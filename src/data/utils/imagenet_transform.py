@@ -1,5 +1,6 @@
 import os
 from os import path
+from typing import Optional
 
 import torch
 from torchvision import transforms
@@ -7,15 +8,10 @@ from torchvision import transforms
 from src.data.datasets import ImageNetTrainingDataset, ImagenetValidationDataset
 from src.data.imagenet_c_scores import imagenet_c_scores
 
-from typing import Optional
-
 
 def imagenet_transform(
-        input_filepath: str,
-        output_filepath: str,
-        use_c_scores: Optional[bool] = None
-        ) -> None:
-
+    input_filepath: str, output_filepath: str, use_c_scores: Optional[bool] = None
+) -> None:
     imagenet_train_transform = transforms.Compose(
         [
             transforms.RandomResizedCrop(224),
@@ -48,11 +44,9 @@ def imagenet_transform(
     torch.save(dataset_val, path.join(output_filepath, "imagenet/val.pt"))
     if use_c_scores is not None:
         torch.save(
-            dataset_train,
-            path.join(output_filepath, "imagenet/train_c_scores.pt")
+            dataset_train, path.join(output_filepath, "imagenet/train_c_scores.pt")
         ) if use_c_scores else torch.save(
-            dataset_train,
-            path.join(output_filepath, "imagenet/train_mem_scores.pt")
+            dataset_train, path.join(output_filepath, "imagenet/train_mem_scores.pt")
         )
     else:
         torch.save(dataset_train, path.join(output_filepath, "imagenet/train.pt"))

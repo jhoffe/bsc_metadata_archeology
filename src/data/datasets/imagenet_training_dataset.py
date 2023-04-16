@@ -1,7 +1,7 @@
 import os
+import pickle
 
 from torchvision.datasets import ImageFolder
-import pickle
 
 
 class ImageNetTrainingDataset(ImageFolder):
@@ -47,7 +47,7 @@ class ImageNetTrainingDataset(ImageFolder):
             "transform": self.transform,
             "target_transform": self.target_transform,
             "root": self.root,
-            "loader": self.loader
+            "loader": self.loader,
         }
 
         with open(cache_path, "wb") as f:

@@ -39,7 +39,10 @@ class ViT(L.LightningModule):
 
         self.save_hyperparameters(ignore=["model"])
 
-        self.val_accuracy = Accuracy(task="multiclass", num_classes=num_classes)
+        self.val_accuracy_top1 = Accuracy(task="multiclass", num_classes=num_classes)
+        self.val_accuracy_top5 = Accuracy(
+            task="multiclass", num_classes=num_classes, top_k=5
+        )
         self.test_accuracy = Accuracy(task="multiclass", num_classes=num_classes)
 
         self.criterion = nn.CrossEntropyLoss(
@@ -50,7 +53,7 @@ class ViT(L.LightningModule):
         return self.model(x)
 
     def training_step(self, batch, batch_idx):
-        (x, y, _), indices = batch
+        (x, y), indices = batch
 
         logits = self(x)
         loss = self.criterion(logits, y)
@@ -71,16 +74,24 @@ class ViT(L.LightningModule):
             x, y = batch
             indices = None
         else:
-            (x, y, _), indices = batch
+            (x, y), indices = batch
 
         logits = self(x)
         loss = self.criterion(logits, y)
         mean_loss = loss.mean()
 
-        self.val_accuracy(logits, y)
+        self.val_accuracy_top1(logits, y)
         self.log(
-            "val/accuracy",
-            self.val_accuracy,
+            "validation/accuracy_top1",
+            self.val_accuracy_top1,
+            on_step=True,
+            on_epoch=True,
+            sync_dist=self.sync_dist_val,
+        )
+        self.val_accuracy_top5(logits, y)
+        self.log(
+            "validation/accuracy_top5",
+            self.val_accuracy_top5,
             on_step=True,
             on_epoch=True,
             sync_dist=self.sync_dist_val,
