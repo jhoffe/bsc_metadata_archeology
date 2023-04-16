@@ -10,7 +10,7 @@ monitor_learning_rate: true
 
 early_stopping:
   enable: true
-  monitor: "validation/loss"
+  monitor: "validation/loss/dataloader_idx_0"
   patience: 10
   mode: "min"
   min_delta: 0.025
