@@ -87,11 +87,13 @@ def create_trainer(params: DictConfig):
         "early_stopping" in trainer_params.keys()
         and trainer_params["early_stopping"]["enable"]
     ):
-        early_stopping = trainer_params["early_stopping"]
-        # Remove enable
-        del early_stopping["enable"]
+        early_stopping_params = trainer_params["early_stopping"]
+        # Ignore enable key
+        early_stopping_params = {
+            k: v for k, v in early_stopping_params.items() if k != "enable"
+        }
 
-        callbacks.append(EarlyStopping(**trainer_params))
+        callbacks.append(EarlyStopping(**early_stopping_params))
 
     if (
         "monitor_learning_rate" in trainer_params.keys()
