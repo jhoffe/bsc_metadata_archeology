@@ -129,7 +129,7 @@ def main(name, probe_suite_path, loss_dataset_path, output_filepath):
 @click.command()
 @click.option("--name", type=str, required=True)
 @click.argument(
-    "probe_suite_path", type=click.Path(exists=True, dir_okay=True, file_okay=False)
+    "probe_suite_path", type=click.Path(exists=True, dir_okay=False, file_okay=True)
 )
 @click.argument(
     "loss_dataset_path", type=click.Path(exists=True, dir_okay=True, file_okay=False)
