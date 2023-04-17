@@ -5,7 +5,6 @@ import click
 import matplotlib.pyplot as plt
 
 from src.visualization.utils.plot_utils import (
-    get_indices_from_probe_suite,
     load_loss_dataset,
     load_probe_suite,
     plot_styles,
@@ -41,8 +40,7 @@ def probe_accuracy_plot(
     }
 
     for suite_attr, suite_name in suite_names.items():
-        suite = getattr(probe_suite, suite_attr)
-        indices = get_indices_from_probe_suite(suite)
+        indices = [idx for idx, suite in suite_indices.items() if suite == suite_attr]
         random.shuffle(indices)
         train_indices = indices[:250]
         val_indices = indices[250:]

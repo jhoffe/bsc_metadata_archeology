@@ -4,9 +4,9 @@ import warnings
 
 import click
 import matplotlib.pyplot as plt
+import numpy as np
 
 from src.visualization.utils.plot_utils import (
-    get_indices_from_probe_suite,
     load_loss_dataset,
     load_probe_suite,
     plot_styles,
@@ -63,8 +63,7 @@ def loss_curve_plot(
     i = 0
 
     for suite_attr, suite_name in suite_names.items():
-        suite = getattr(probe_suite, suite_attr)
-        indices = get_indices_from_probe_suite(suite)
+        indices = [idx for idx, suite in suite_indices.items() if suite == suite_attr]
         random.shuffle(indices)
 
         rand_indices = indices[250:]
@@ -82,8 +81,8 @@ def loss_curve_plot(
 
         # plot aggregated loss for each suite over all samples
         plt.plot(
-            val_df.loc[val_df["suite"] == suite_name].groupby(["epoch"]).mean().index,
-            val_df.loc[val_df["suite"] == suite_name].groupby(["epoch"]).mean()["loss"],
+            np.arange(max_epoch),
+            val_df.loc[val_df["suite"] == suite_name].groupby(["epoch"])["loss"].mean(),
             label=suite_name,
             linewidth=1,
             color=marker_colors[i],

@@ -13,7 +13,7 @@ from src.visualization.plots.probe_accuracy_val import main as probe_accuracy_va
 @click.command()
 @click.option("--name", type=str, required=True)
 @click.argument(
-    "probe_suite_path", type=click.Path(exists=True, dir_okay=True, file_okay=False)
+    "probe_suite_path", type=click.Path(exists=True, dir_okay=False, file_okay=True)
 )
 @click.argument(
     "loss_dataset_path", type=click.Path(exists=True, dir_okay=True, file_okay=False)
@@ -21,7 +21,6 @@ from src.visualization.plots.probe_accuracy_val import main as probe_accuracy_va
 @click.argument(
     "output_filepath", type=click.Path(exists=True, dir_okay=True, file_okay=False)
 )
-@click.option("--rio", is_flag=True, default=False)
 def plots(name, probe_suite_path, loss_dataset_path, output_filepath, rio):
     probe_accuracy_plot(name, probe_suite_path, loss_dataset_path, output_filepath)
     probe_accuracy_val(name, probe_suite_path, loss_dataset_path, output_filepath)
@@ -29,7 +28,8 @@ def plots(name, probe_suite_path, loss_dataset_path, output_filepath, rio):
     consistently_learned_plot(
         name, probe_suite_path, loss_dataset_path, output_filepath
     )
-    loss_curve_plot(name, probe_suite_path, loss_dataset_path, output_filepath, rio)
+    loss_curve_plot(name, probe_suite_path, loss_dataset_path, output_filepath, False)
+    loss_curve_plot(name, probe_suite_path, loss_dataset_path, output_filepath, True)
 
 
 if __name__ == "__main__":

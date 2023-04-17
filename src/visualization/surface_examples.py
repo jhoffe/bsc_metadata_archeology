@@ -1,6 +1,7 @@
 import os
 
 import click
+import numpy as np
 import pyarrow.parquet as pq
 import torch
 from matplotlib import pyplot as plt
@@ -29,7 +30,7 @@ def main(surfaced_examples_path, probe_suite_path, output_path, classes):
     print("Loading probe suite...")
     probe_suite = torch.load(probe_suite_path)
 
-    idx_to_label = get_idx_to_label_names()
+    idx_to_label = get_idx_to_label_names("imagenet")
 
     NROWS, NCOLUMNS = 4, 4
 
@@ -45,7 +46,7 @@ def main(surfaced_examples_path, probe_suite_path, output_path, classes):
         for suite in suites:
             suite_sample_indices = df[
                 (df["label_name"] == suite) & (df["original_class"] == cls)
-            ]["sample_index"]
+            ].sort_values("probs")["sample_index"]
 
             if (
                 len(suite_sample_indices) == 0
@@ -53,16 +54,21 @@ def main(surfaced_examples_path, probe_suite_path, output_path, classes):
             ):
                 continue
 
-            sample_indices = suite_sample_indices.sample(
-                n=NROWS * NCOLUMNS, random_state=123
-            ).values
+            # sample_indices = suite_sample_indices.sample(
+            #     n=NROWS * NCOLUMNS, random_state=123
+            # ).values
+
+            sample_indices = suite_sample_indices.values[: NROWS * NCOLUMNS * 4]
+            sample_indices = np.random.choice(
+                sample_indices, size=NROWS * NCOLUMNS, replace=False
+            )
 
             samples = [probe_suite[index] for index in sample_indices]
 
             fig, axs = plt.subplots(NROWS, NCOLUMNS, figsize=(20, 20))
             fig.tight_layout()
 
-            for i, (((sample, y, _), sample_idx), ax) in enumerate(
+            for i, (((sample, y), sample_idx), ax) in enumerate(
                 zip(samples, axs.flatten())
             ):
                 ax.imshow(sample.permute(1, 2, 0))

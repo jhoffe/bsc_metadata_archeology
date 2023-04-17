@@ -1,18 +1,15 @@
 import click
-import pyarrow.parquet as pq
+import pandas as pd
 from matplotlib import pyplot as plt
 
 
 @click.command()
 @click.argument(
     "surfaced_examples_path",
-    type=click.Path(exists=True, dir_okay=True, file_okay=False),
+    type=click.Path(exists=True, dir_okay=False, file_okay=True),
 )
 def main(surfaced_examples_path):
-    surfaced_examples = pq.ParquetDataset(
-        surfaced_examples_path, use_legacy_dataset=False
-    )
-    df = surfaced_examples.read().to_pandas()
+    df = pd.read_parquet(surfaced_examples_path)
 
     plt.figure(figsize=(10, 10))
 
