@@ -22,7 +22,8 @@ def consistently_learned_plot(
     df.drop_duplicates(subset=["epoch", "sample_index", "stage"], inplace=True)
     df["epoch"] = df["epoch"].astype(int)
     max_epoch = df["epoch"].max() + 1
-    num_suite_samples = len(probe_suite.combined)
+    suite_indices = probe_suite.index_to_suite
+    num_suite_samples = len(suite_indices)
     num_train_samples = len(probe_suite)
 
     assert df["stage"][df["stage"] == "val"].count() == max_epoch * num_suite_samples
