@@ -96,7 +96,7 @@ def consistently_learned_plot(
     line_styles, marker_list, marker_colors, plot_titles = plot_styles()
 
     plt.figure(figsize=(10, 6))
-    plt.title(f"Percent Consistently Learned for {plot_titles['cifar10']}")
+    plt.title(f"Percent Consistently Learned for {plot_titles[name]}")
     for i, suite in enumerate(suites):
         plt.plot(
             consistently_learned[suite],

@@ -77,7 +77,7 @@ def first_learned_plot(
     line_styles, marker_list, marker_colors, plot_titles = plot_styles()
 
     plt.figure(figsize=(10, 6))
-    plt.title(f"Percent First Learned for {plot_titles['cifar10']}")
+    plt.title(f"Percent First Learned for {plot_titles[name]}")
     for i, suite in enumerate(suites):
         plt.plot(
             first_learned[suite],

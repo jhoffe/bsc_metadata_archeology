@@ -68,7 +68,7 @@ def probe_accuracy_plot(
     line_styles, marker_list, marker_colors, plot_titles = plot_styles()
 
     plt.figure(figsize=(10, 6))
-    plt.title(f"Probe Suite Accuracy for {plot_titles['cifar10']}")
+    plt.title(f"Probe Suite Accuracy for {plot_titles[name]}")
     for i, suite in enumerate(suites):
         if "Train" in suite:
             plt.plot(
