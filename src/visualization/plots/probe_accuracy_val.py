@@ -1,33 +1,15 @@
+import os
 import random
-import sys
 
 import click
 import matplotlib.pyplot as plt
-import torch
 
-from src.data.loss_dataset import LossDataset
-
-
-def load_probe_suite(probe_suite_path: str):
-    """Load the probe suite from the given path"""
-    probe_suite = torch.load(probe_suite_path)
-    return probe_suite
+from src.visualization.utils.plot_utils import load_loss_dataset, load_probe_suite
 
 
-def load_loss_dataset(loss_dataset_path: str):
-    """Load the loss dataset from the given path"""
-    dataset = LossDataset(loss_dataset_path)
-    dataset.load()
-
-    df = dataset.df
-
-    print(f"Loaded {len(df)} samples from {loss_dataset_path}")
-    print("Size in GB: ", sys.getsizeof(df) / 1024 / 1024 / 1024)
-
-    return df
-
-
-def plot_probe_accuracies(name: str, probe_suite_path: str, loss_dataset_path: str):
+def plot_probe_accuracies(
+    name: str, probe_suite_path: str, loss_dataset_path: str, output_path: str
+) -> None:
     """Plot the probe accuracies for the given probe suite and loss dataset"""
     ps = load_probe_suite(probe_suite_path)
     ld_df = load_loss_dataset(loss_dataset_path)
@@ -168,19 +150,32 @@ def plot_probe_accuracies(name: str, probe_suite_path: str, loss_dataset_path: s
     ax.set_title(f"Mean Accuracy for each suite for each epoch ({name})")
 
     filename = name.replace(" ", "_").lower()
-    fig.savefig(f"suite_accuracy_{filename}.png")
+
+    figure_path = os.path.join(output_path, name)
+
+    if not os.path.exists(figure_path):
+        os.makedirs(figure_path)
+
+    fig.savefig(os.path.join(figure_path, f"suite_accuracy_{filename}.png"))
+
+
+def main(name, probe_suite_path, loss_dataset_path, output_filepath):
+    plot_probe_accuracies(name, probe_suite_path, loss_dataset_path, output_filepath)
 
 
 @click.command()
 @click.option("--name", type=str, required=True)
 @click.argument(
-    "probe_suite_path", type=click.Path(exists=True, dir_okay=False), required=True
+    "probe_suite_path", type=click.Path(exists=True, dir_okay=True, file_okay=False)
 )
 @click.argument(
-    "loss_dataset_path", type=click.Path(exists=True, file_okay=False), required=True
+    "loss_dataset_path", type=click.Path(exists=True, dir_okay=True, file_okay=False)
 )
-def main(name: str, probe_suite_path: str, loss_dataset_path: str):
-    plot_probe_accuracies(name, probe_suite_path, loss_dataset_path)
+@click.argument(
+    "output_filepath", type=click.Path(exists=True, dir_okay=True, file_okay=False)
+)
+def main_click(name, probe_suite_path, loss_dataset_path, output_filepath):
+    main(name, probe_suite_path, loss_dataset_path, output_filepath)
 
 
 if __name__ == "__main__":
