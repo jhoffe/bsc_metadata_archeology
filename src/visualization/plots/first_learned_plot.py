@@ -3,26 +3,29 @@ import random
 
 import click
 import matplotlib.pyplot as plt
-import pandas as pd
-import torch
 
 from src.visualization.utils.plot_utils import (
     get_indices_from_probe_suite,
-    get_loss_dataset,
+    load_loss_dataset,
+    load_probe_suite,
     plot_dicts,
     plot_styles,
 )
 
 
-def first_learned_plot(df: pd.DataFrame, output_path: str, dataset_name: str) -> None:
+def first_learned_plot(
+    name: str, probe_suite_path: str, loss_dataset_path: str, output_path: str
+) -> None:
     """Plot the accuracy for each probe suite pr. epoch"""
 
-    probe_suite = torch.load(f"data/processed/{dataset_name}/train_probe_suite.pt")
+    probe_suite = load_probe_suite(probe_suite_path=probe_suite_path)
+    df = load_loss_dataset(loss_dataset_path=loss_dataset_path)
 
     df.drop_duplicates(subset=["epoch", "sample_index", "stage"], inplace=True)
     df["epoch"] = df["epoch"].astype(int)
     max_epoch = df["epoch"].max() + 1
-    num_suite_samples = len(probe_suite.combined)
+    suite_indices = probe_suite.index_to_suite
+    num_suite_samples = len(suite_indices)
     num_train_samples = len(probe_suite)
 
     assert df["stage"][df["stage"] == "val"].count() == max_epoch * num_suite_samples
@@ -92,29 +95,31 @@ def first_learned_plot(df: pd.DataFrame, output_path: str, dataset_name: str) ->
     plt.xlabel("Epoch")
     plt.ylabel("Fraction of samples learned (%)")
 
-    figure_path = os.path.join(output_path, dataset_name)
+    figure_path = os.path.join(output_path, name)
 
     if not os.path.exists(figure_path):
         os.makedirs(figure_path)
 
-    plt.savefig(os.path.join(figure_path, f"{dataset_name}_first_learned_accuracy.png"))
+    plt.savefig(os.path.join(figure_path, f"{name}_first_learned_accuracy.png"))
 
 
-def main(loss_dataset_path, output_filepath, dataset_name):
-    df = get_loss_dataset(loss_dataset_path)
-    first_learned_plot(df, output_filepath, dataset_name)
+def main(name, probe_suite_path, loss_dataset_path, output_filepath):
+    first_learned_plot(name, probe_suite_path, loss_dataset_path, output_filepath)
 
 
 @click.command()
+@click.option("--name", type=str, required=True)
+@click.argument(
+    "probe_suite_path", type=click.Path(exists=True, dir_okay=True, file_okay=False)
+)
 @click.argument(
     "loss_dataset_path", type=click.Path(exists=True, dir_okay=True, file_okay=False)
 )
 @click.argument(
     "output_filepath", type=click.Path(exists=True, dir_okay=True, file_okay=False)
 )
-@click.argument("dataset_name", type=str)
-def main_click(loss_dataset_path, output_filepath, dataset_name):
-    main(loss_dataset_path, output_filepath, dataset_name)
+def main_click(name, probe_suite_path, loss_dataset_path, output_filepath):
+    main(name, probe_suite_path, loss_dataset_path, output_filepath)
 
 
 if __name__ == "__main__":

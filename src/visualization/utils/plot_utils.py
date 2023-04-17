@@ -1,14 +1,36 @@
 # imports
+import sys
+
 import pandas as pd
+import torch
 from src.data.loss_dataset import LossDataset
 
 
-def get_loss_dataset(dataset_path: str) -> pd.DataFrame:
+def get_loss_dataset(loss_dataset_path: str) -> pd.DataFrame:
     """Load the loss dataset"""
-    dataset = LossDataset(dataset_path)
+    dataset = LossDataset(loss_dataset_path)
     dataset.load()
     df = dataset.df
     return df
+
+
+def load_loss_dataset(loss_dataset_path: str):
+    """Load the loss dataset from the given path"""
+    dataset = LossDataset(loss_dataset_path)
+    dataset.load()
+
+    df = dataset.df
+
+    print(f"Loaded {len(df)} samples from {loss_dataset_path}")
+    print("Size in GB: ", sys.getsizeof(df) / 1024 / 1024 / 1024)
+
+    return df
+
+
+def load_probe_suite(probe_suite_path: str):
+    """Load the probe suite from the given path"""
+    probe_suite = torch.load(probe_suite_path)
+    return probe_suite
 
 
 def get_indices_from_probe_suite(suite: list) -> list[int]:
