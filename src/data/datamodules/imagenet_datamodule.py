@@ -7,6 +7,8 @@ import lightning as L
 import torch
 from torch.utils.data import DataLoader, Dataset
 
+from src.data.utils import IDXDataset
+
 
 class ImageNetDataModule(L.LightningDataModule):
     imagenet_train: Dataset
@@ -59,10 +61,11 @@ class ImageNetDataModule(L.LightningDataModule):
             probes_dataset = deepcopy(train_dataset)
             probes_dataset.only_probes = True
             self.imagenet_probes = probes_dataset
+            self.imagenet_train = train_dataset
         else:
             self.imagenet_probes = None
+            self.imagenet_train = IDXDataset(train_dataset)
 
-        self.imagenet_train = train_dataset
         self.imagenet_val = val_dataset
 
     def train_dataloader(self) -> DataLoader:

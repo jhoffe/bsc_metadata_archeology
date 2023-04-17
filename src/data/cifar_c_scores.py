@@ -118,6 +118,8 @@ class CustomCIFAR10(CIFAR10):
 
         if score is not None:
             self.score = score
+        else:
+            self.score = None
 
     def __getitem__(self, index):
         """
@@ -159,6 +161,8 @@ class CustomCIFAR100(CIFAR100):
 
         if score is not None:
             self.score = score
+        else:
+            self.score = None
 
     def __getitem__(self, index):
         """

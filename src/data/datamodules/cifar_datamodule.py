@@ -4,7 +4,9 @@ from typing import List, Optional, Union
 
 import lightning as L
 import torch
-from torch.utils.data import DataLoader, Dataset, TensorDataset
+from torch.utils.data import DataLoader, Dataset
+
+from src.data.utils import IDXDataset
 
 
 class CIFARDataModule(L.LightningDataModule):
@@ -17,8 +19,8 @@ class CIFARDataModule(L.LightningDataModule):
         num_workers: int, number of worker to use for data loading
     """
 
-    cifar_train: TensorDataset
-    cifar_test: TensorDataset
+    cifar_train: Dataset
+    cifar_test: Dataset
     cifar_probes: Optional[Dataset]
     num_workers: int
 
@@ -66,10 +68,11 @@ class CIFARDataModule(L.LightningDataModule):
             probes_dataset.only_probes = True
 
             self.cifar_probes = probes_dataset
+            self.cifar_train = train_dataset
         else:
             self.cifar_probes = None
+            self.cifar_train = IDXDataset(train_dataset)
 
-        self.cifar_train = train_dataset
         self.cifar_test = test_dataset
 
     def train_dataloader(self) -> DataLoader:

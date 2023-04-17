@@ -7,7 +7,7 @@ from lightning.pytorch.loggers import WandbLogger
 from lightning.pytorch.strategies import DDPStrategy
 from omegaconf import DictConfig
 
-from src.models.callbacks import LossCurveLogger
+from src.models.callbacks import LossCurveLogger, ProxyLogger
 
 
 def create_trainer(params: DictConfig):
@@ -100,6 +100,11 @@ def create_trainer(params: DictConfig):
         and trainer_params["monitor_learning_rate"]
     ):
         callbacks.append(LearningRateMonitor())
+
+    # Check if proxy logger is activated
+    if "proxy_logger" in trainer_params.keys() and trainer_params["proxy_logger"]:
+        proxy_logger = ProxyLogger(f"models/proxies/{run_name}", time_dir)
+        callbacks.append(proxy_logger)
 
     return L.Trainer(
         accelerator=trainer_params["accelerator"],

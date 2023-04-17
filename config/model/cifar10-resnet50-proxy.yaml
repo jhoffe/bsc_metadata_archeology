@@ -1,0 +1,5 @@
+defaults:
+  - cifar-resnet50-defaults
+
+num_classes: 10
+use_proxy_logger: true

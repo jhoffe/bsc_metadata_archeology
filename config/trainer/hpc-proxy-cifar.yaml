@@ -1,0 +1,8 @@
+defaults:
+  - default-cifar
+
+accelerator: 'gpu'
+strategy: 'ddp'
+devices: 1
+log_loss_curves: false
+proxy_logger: true

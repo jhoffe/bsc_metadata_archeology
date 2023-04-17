@@ -6,6 +6,7 @@ from torchmetrics.classification import Accuracy
 
 from src.models.utils.create_model import create_resnet50_model
 from src.models.utils.loss_curve import LossCurve
+from src.models.utils.proxy_output import ProxyOutput
 
 
 class ResNet50(L.LightningModule):
@@ -20,6 +21,7 @@ class ResNet50(L.LightningModule):
         num_classes=1000,
         resize_conv1=False,
         should_compile: bool = True,
+        use_proxy_logger: bool = False,
     ):
         super().__init__()
         self.model = create_resnet50_model(
@@ -32,6 +34,7 @@ class ResNet50(L.LightningModule):
         self.weight_decay = weight_decay
         self.sync_dist_train = sync_dist_train
         self.sync_dist_val = sync_dist_val
+        self.use_proxy_logger = use_proxy_logger
 
         self.save_hyperparameters(ignore=["model"])
 
@@ -55,6 +58,9 @@ class ResNet50(L.LightningModule):
             on_epoch=False,
             sync_dist=self.sync_dist_train,
         )
+
+        if self.use_proxy_logger:
+            return ProxyOutput.create(mean_loss, indices, y, logits)
 
         return LossCurve.create(loss, indices, y, logits)
 
@@ -84,6 +90,9 @@ class ResNet50(L.LightningModule):
             on_epoch=True,
             sync_dist=self.sync_dist_val,
         )
+
+        if self.use_proxy_logger:
+            return ProxyOutput.create(mean_loss, indices, y, logits)
 
         return LossCurve.create(loss, indices, y, logits)
 
