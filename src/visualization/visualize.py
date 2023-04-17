@@ -21,7 +21,7 @@ from src.visualization.plots.probe_accuracy_val import main as probe_accuracy_va
 @click.argument(
     "output_filepath", type=click.Path(exists=True, dir_okay=True, file_okay=False)
 )
-def plots(name, probe_suite_path, loss_dataset_path, output_filepath, rio):
+def plots(name, probe_suite_path, loss_dataset_path, output_filepath):
     probe_accuracy_plot(name, probe_suite_path, loss_dataset_path, output_filepath)
     probe_accuracy_val(name, probe_suite_path, loss_dataset_path, output_filepath)
     first_learned_plot(name, probe_suite_path, loss_dataset_path, output_filepath)
