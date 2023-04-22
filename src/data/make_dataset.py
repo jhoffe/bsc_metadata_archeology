@@ -5,7 +5,8 @@ import click
 import pytorch_lightning as pl
 from dotenv import find_dotenv, load_dotenv
 
-from src.data.cifar_c_scores import c_scores_dataset
+from src.data.cifar_c_scores import c_scores_dataset as cifar_c_scores_dataset
+from src.data.audio_c_scores import c_scores_dataset as audio_c_scores_dataset
 from src.data.download import download_dataset
 from src.data.make_probe_suites import make_probe_suites
 from src.data.utils.imagenet_transform import imagenet_transform
@@ -28,16 +29,16 @@ def main(input_filepath, output_filepath):
     download_dataset(input_filepath, "speechcommands")
 
     logger.info("Transforming the CIFAR10 dataset w. no c-scores")
-    c_scores_dataset("cifar10", "data/raw", "data/processed")
+    cifar_c_scores_dataset("cifar10", "data/raw", "data/processed")
     logger.info("Transforming the CIFAR10 dataset w. c-scores")
-    c_scores_dataset("cifar10", "data/raw", "data/processed", use_c_scores=True)
+    cifar_c_scores_dataset("cifar10", "data/raw", "data/processed", use_c_scores=True)
 
     logger.info("Transforming the CIFAR100 dataset w. no c-scores")
-    c_scores_dataset("cifar100", "data/raw", "data/processed")
+    cifar_c_scores_dataset("cifar100", "data/raw", "data/processed")
     logger.info("Transforming the CIFAR100 dataset w. c-scores")
-    c_scores_dataset("cifar100", "data/raw", "data/processed", use_c_scores=True)
+    cifar_c_scores_dataset("cifar100", "data/raw", "data/processed", use_c_scores=True)
     logger.info("Transforming the CIFAR100 dataset w. mem-scores")
-    c_scores_dataset("cifar100", "data/raw", "data/processed", use_c_scores=False)
+    cifar_c_scores_dataset("cifar100", "data/raw", "data/processed", use_c_scores=False)
 
     logger.info("Transforming the ImageNet dataset w. no c-scores")
     imagenet_transform(input_filepath, output_filepath)
@@ -48,7 +49,7 @@ def main(input_filepath, output_filepath):
     logger.info("Transformed the ImageNet dataset")
 
     logger.info("Transforming the SpeechCommands dataset w. no c-scores")
-    c_scores_dataset("speechcommands", "data/raw", "data/processed")
+    audio_c_scores_dataset("speechcommands", "data/raw", "data/processed")
     # logger.info("Transforming the SpeechCommands dataset w. c-scores")
     # c_scores_dataset("speechcommands", "data/raw", "data/processed", use_c_scores=True) # noqa: E501
 

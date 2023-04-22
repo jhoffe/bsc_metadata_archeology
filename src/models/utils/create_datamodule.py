@@ -1,12 +1,13 @@
 from omegaconf import DictConfig
 
-from src.data.datamodules import CIFARDataModule, ImageNetDataModule
+from src.data.datamodules import CIFARDataModule, ImageNetDataModule, SCDataModule
 
 
 def create_datamodule(params: DictConfig):
     DATAMODULES = {
         "imagenet": ImageNetDataModule,
         "cifar": CIFARDataModule,
+        "speechcommands": SCDataModule,
     }
 
     data_params = params.dataset

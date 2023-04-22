@@ -1,0 +1,5 @@
+name: "speechcommands"
+data_dir: "data/processed/speechcommands"
+num_workers: 16
+batch_size: 256
+c_score_type: "none"

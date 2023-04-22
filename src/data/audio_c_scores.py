@@ -55,9 +55,6 @@ def c_scores_dataset(
         torch.save(train_data, os.path.join(output_dir, "train.pt"))
 
 
-test = SPEECHCOMMANDS
-
-
 class CustomSC(SPEECHCOMMANDS):
     """SPEECHCOMMANDS dataset with C-scores."""
 
