@@ -25,6 +25,7 @@ def main(input_filepath, output_filepath):
     logger.info("Downloading the CIFAR10 and CIFAR100 datasets.")
     download_dataset(input_filepath, "cifar10")
     download_dataset(input_filepath, "cifar100")
+    download_dataset(input_filepath, "speechcommands")
 
     logger.info("Transforming the CIFAR10 dataset w. no c-scores")
     c_scores_dataset("cifar10", "data/raw", "data/processed")
@@ -45,6 +46,11 @@ def main(input_filepath, output_filepath):
     logger.info("Transforming the ImageNet dataset w. mem-scores")
     imagenet_transform(input_filepath, output_filepath, use_c_scores=False)
     logger.info("Transformed the ImageNet dataset")
+
+    logger.info("Transforming the SpeechCommands dataset w. no c-scores")
+    c_scores_dataset("speechcommands", "data/raw", "data/processed")
+    # logger.info("Transforming the SpeechCommands dataset w. c-scores")
+    # c_scores_dataset("speechcommands", "data/raw", "data/processed", use_c_scores=True) # noqa: E501
 
     # Generating probe default_suites
     logger.info("Generating probe suites for CIFAR10 w. C-scores")

@@ -40,6 +40,7 @@ lightning = "^2.0.0"
 pydantic = "^1.10.6"
 fastapi = ">=0.80"
 xgboost = "^1.7.4"
+torchaudio = "^2.0.1"
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "^6.0.0"
