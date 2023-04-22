@@ -29,16 +29,16 @@ def main(input_filepath, output_filepath):
     download_dataset(input_filepath, "speechcommands")
 
     logger.info("Transforming the CIFAR10 dataset w. no c-scores")
-    cifar_c_scores_dataset("cifar10", "data/raw", "data/processed")
+    cifar_c_scores_dataset("cifar10", input_filepath, output_filepath)
     logger.info("Transforming the CIFAR10 dataset w. c-scores")
-    cifar_c_scores_dataset("cifar10", "data/raw", "data/processed", use_c_scores=True)
+    cifar_c_scores_dataset("cifar10", input_filepath, output_filepath, use_c_scores=True)
 
     logger.info("Transforming the CIFAR100 dataset w. no c-scores")
-    cifar_c_scores_dataset("cifar100", "data/raw", "data/processed")
+    cifar_c_scores_dataset("cifar100", input_filepath, output_filepath)
     logger.info("Transforming the CIFAR100 dataset w. c-scores")
-    cifar_c_scores_dataset("cifar100", "data/raw", "data/processed", use_c_scores=True)
+    cifar_c_scores_dataset("cifar100", input_filepath, output_filepath, use_c_scores=True)
     logger.info("Transforming the CIFAR100 dataset w. mem-scores")
-    cifar_c_scores_dataset("cifar100", "data/raw", "data/processed", use_c_scores=False)
+    cifar_c_scores_dataset("cifar100", input_filepath, output_filepath, use_c_scores=False)
 
     logger.info("Transforming the ImageNet dataset w. no c-scores")
     imagenet_transform(input_filepath, output_filepath)
@@ -49,7 +49,7 @@ def main(input_filepath, output_filepath):
     logger.info("Transformed the ImageNet dataset")
 
     logger.info("Transforming the SpeechCommands dataset w. no c-scores")
-    audio_c_scores_dataset("speechcommands", "data/raw", "data/processed")
+    audio_c_scores_dataset("speechcommands", input_filepath, output_filepath)
     # logger.info("Transforming the SpeechCommands dataset w. c-scores")
     # c_scores_dataset("speechcommands", "data/raw", "data/processed", use_c_scores=True) # noqa: E501
 
