@@ -5,8 +5,8 @@ import click
 import pytorch_lightning as pl
 from dotenv import find_dotenv, load_dotenv
 
-from src.data.cifar_c_scores import c_scores_dataset as cifar_c_scores_dataset
 from src.data.audio_c_scores import c_scores_dataset as audio_c_scores_dataset
+from src.data.cifar_c_scores import c_scores_dataset as cifar_c_scores_dataset
 from src.data.download import download_dataset
 from src.data.make_probe_suites import make_probe_suites
 from src.data.utils.imagenet_transform import imagenet_transform
@@ -31,14 +31,20 @@ def main(input_filepath, output_filepath):
     logger.info("Transforming the CIFAR10 dataset w. no c-scores")
     cifar_c_scores_dataset("cifar10", input_filepath, output_filepath)
     logger.info("Transforming the CIFAR10 dataset w. c-scores")
-    cifar_c_scores_dataset("cifar10", input_filepath, output_filepath, use_c_scores=True)
+    cifar_c_scores_dataset(
+        "cifar10", input_filepath, output_filepath, use_c_scores=True
+    )
 
     logger.info("Transforming the CIFAR100 dataset w. no c-scores")
     cifar_c_scores_dataset("cifar100", input_filepath, output_filepath)
     logger.info("Transforming the CIFAR100 dataset w. c-scores")
-    cifar_c_scores_dataset("cifar100", input_filepath, output_filepath, use_c_scores=True)
+    cifar_c_scores_dataset(
+        "cifar100", input_filepath, output_filepath, use_c_scores=True
+    )
     logger.info("Transforming the CIFAR100 dataset w. mem-scores")
-    cifar_c_scores_dataset("cifar100", input_filepath, output_filepath, use_c_scores=False)
+    cifar_c_scores_dataset(
+        "cifar100", input_filepath, output_filepath, use_c_scores=False
+    )
 
     logger.info("Transforming the ImageNet dataset w. no c-scores")
     imagenet_transform(input_filepath, output_filepath)

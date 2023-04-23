@@ -22,7 +22,6 @@ class M5(L.LightningModule):
         num_classes: int = 35,
         sync_dist_train: bool = False,
         sync_dist_val: bool = False,
-
     ):
         super().__init__()
         self.model = create_m5_model(
@@ -44,40 +43,38 @@ class M5(L.LightningModule):
         self.test_accuracy = Accuracy(task="multiclass", num_classes=num_classes)
 
     def forward(self, x):
-        return self.model(x)
+        return self.model(x).squeeze(1)
 
     def training_step(self, batch, batch_idx):
-        (x, y), indices = batch
+        x, y, indices = batch
 
-        output = self(x)
-        loss = F.nll_loss(output.squeeze(), y)
+        logits = self(x)
+        loss = F.nll_loss(logits, y, reduction="none")
+        mean_loss = loss.mean()
 
         self.log(
             "train/loss",
-            loss.mean(),
+            mean_loss,
             on_step=True,
             on_epoch=False,
             sync_dist=self.sync_dist_train,
         )
 
         if self.use_proxy_logger:
-            return ProxyOutput.create(loss, indices, y, x)
+            return ProxyOutput.create(mean_loss, indices, y, logits)
 
         return LossCurve.create(loss, indices, y, x)
 
     def validation_step(self, batch, batch_idx, dataloader_idx=0):
-        if dataloader_idx == 0:
-            x, y = batch
-            indices = None
-        else:
-            (x, y), indices = batch
+        x, y, indices = batch
 
         logits = self(x)
-        loss = F.nll_loss(logits.squeeze(), y)
+        loss = F.nll_loss(logits, y, reduction="none")
+        mean_loss = loss.mean()
 
         self.val_accuracy(logits, y)
         self.log(
-            "val/accuracy",
+            "validation/accuracy",
             self.val_accuracy,
             on_step=True,
             on_epoch=True,
@@ -85,26 +82,26 @@ class M5(L.LightningModule):
         )
         self.log(
             "validation/loss",
-            loss.mean(),
+            mean_loss,
             on_step=False,
             on_epoch=True,
             sync_dist=self.sync_dist_val,
         )
 
         if self.use_proxy_logger:
-            return ProxyOutput.create(loss, indices, y, logits)
+            return ProxyOutput.create(mean_loss, indices, y, logits)
 
         return LossCurve.create(loss, indices, y, logits)
 
     def test_step(self, batch, batch_idx):
-        x, y = batch
+        x, y, indices = batch
 
         y_hat = self(x)
-        loss = F.nll_loss(y_hat.squeeze(), y)
+        loss = F.nll_loss(y_hat, y)
         self.test_accuracy.update(y_hat, y)
         self.log(
             "test/loss",
-            loss.mean(),
+            loss,
             on_step=False,
             on_epoch=True,
             sync_dist=self.sync_dist_val,

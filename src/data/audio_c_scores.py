@@ -85,16 +85,18 @@ class CustomSC(SPEECHCOMMANDS):
         Returns:
             tuple: (image, target, score) where target is index of the target class.
         """
-
-        img, target = super().__getitem__(index)
-        if not self.train:
-            return img, target
-
-        if self.score is None:
-            return img, target
+        (
+            waveform,
+            _sample_rate,
+            target,
+            _speaker_id,
+            _utterance_number,
+        ) = super().__getitem__(index)
+        if not self.train or self.score is None:
+            return waveform, target
 
         score = self.score[index]
-        return img, target, score
+        return waveform, target, score
 
 
 if __name__ == "__main__":

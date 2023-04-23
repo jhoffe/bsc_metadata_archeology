@@ -5,11 +5,8 @@ import click
 import pytorch_lightning as pl
 from dotenv import find_dotenv, load_dotenv
 
-from src.data.cifar_c_scores import c_scores_dataset as cifar_c_scores_dataset
 from src.data.audio_c_scores import c_scores_dataset as audio_c_scores_dataset
 from src.data.download import download_dataset
-from src.data.make_probe_suites import make_probe_suites
-from src.data.utils.imagenet_transform import imagenet_transform
 
 
 @click.command()
@@ -27,7 +24,6 @@ def main(input_filepath, output_filepath):
 
     logger.info("Transforming the SpeechCommands dataset w. no c-scores")
     audio_c_scores_dataset("speechcommands", "data/raw", "data/processed")
-   
 
     logger.info("Done!")
 

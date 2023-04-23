@@ -2,4 +2,4 @@ name: "m5"
 sync_dist_train: false
 sync_dist_val: false
 should_compile: true
-
+use_proxy_logger: true

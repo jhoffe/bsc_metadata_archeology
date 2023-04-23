@@ -7,7 +7,6 @@ import torch
 from torch.utils.data import DataLoader, Dataset
 
 from src.data.utils import IDXDataset
-
 from src.data.utils.idx_to_label_names import get_idx_to_label_names_speechcommands
 
 
@@ -33,6 +32,7 @@ class SCDataModule(L.LightningDataModule):
         batch_size: int = 128,
         num_workers: int = 4,
         c_score_type: str = "c-score",
+        prefetch_factor: int = 2,
     ):
         """Initializes the data module.
 
@@ -48,6 +48,7 @@ class SCDataModule(L.LightningDataModule):
         self.c_score_type = c_score_type
         self.idx_to_label_names = get_idx_to_label_names_speechcommands()
         self.label_to_idx = {v: k for k, v in self.idx_to_label_names.items()}
+        self.prefetch_factor = prefetch_factor
 
     def setup(self, stage: str) -> None:
         """Loads the CIFAR10 dataset from files.
@@ -79,8 +80,8 @@ class SCDataModule(L.LightningDataModule):
             self.sc_probes = None
             self.sc_train = IDXDataset(train_dataset)
 
-        self.sc_test = test_dataset
-        self.sc_validation = validation_dataset
+        self.sc_test = IDXDataset(test_dataset)
+        self.sc_validation = IDXDataset(validation_dataset)
 
     def pad_sequence(self, batch):
         """Pads the sequences in the batch.
@@ -93,31 +94,27 @@ class SCDataModule(L.LightningDataModule):
         """
         batch = [item.t() for item in batch]
         batch = torch.nn.utils.rnn.pad_sequence(
-            batch,
-            batch_first=True,
-            padding_value=0.
+            batch, batch_first=True, padding_value=0.0
         )
         return batch.permute(0, 2, 1)
 
     def collate_fn(self, batch):
-
         # A data tuple has the form:
         # waveform, sample_rate, label, speaker_id, utterance_number, index
-
-        tensors, targets, indexes = [], [], []
+        tensors, targets, indices = [], [], []
 
         # Gather in lists, and encode labels as indices
-        for waveform, _, label, _, _, index in batch:
-            tensors += [waveform]
-            targets += [self.label_to_idx[label]]
-            indexes += [index]
+        for (waveform, label), index in batch:
+            tensors.append(waveform)
+            targets.append(self.label_to_idx[label])
+            indices.append(index)
 
         # Group the list of tensors into a batched tensor
         tensors = self.pad_sequence(tensors)
-        targets = torch.stack(targets)
-        indexes = torch.stack(indexes)
+        targets = torch.tensor(targets)
+        indices = torch.tensor(indices)
 
-        return tensors, targets, indexes
+        return tensors, targets, indices
 
     def train_dataloader(self) -> DataLoader:
         """Returns the dataloader for the validation set.
@@ -131,7 +128,8 @@ class SCDataModule(L.LightningDataModule):
             num_workers=self.num_workers,
             shuffle=True,
             pin_memory=True,
-            collate_fn=self.collate_fn
+            collate_fn=self.collate_fn,
+            prefetch_factor=self.prefetch_factor,
         )
 
     def test_dataloader(self) -> DataLoader:
@@ -148,6 +146,7 @@ class SCDataModule(L.LightningDataModule):
             collate_fn=self.collate_fn,
             num_workers=self.num_workers,
             pin_memory=True,
+            prefetch_factor=self.prefetch_factor,
         )
 
     def val_dataloader(self) -> Union[DataLoader, List[DataLoader]]:
@@ -166,6 +165,7 @@ class SCDataModule(L.LightningDataModule):
                 collate_fn=self.collate_fn,
                 num_workers=self.num_workers,
                 pin_memory=True,
+                prefetch_factor=self.prefetch_factor,
             )
 
         return [
@@ -177,11 +177,13 @@ class SCDataModule(L.LightningDataModule):
                 collate_fn=self.collate_fn,
                 num_workers=self.num_workers,
                 pin_memory=True,
+                prefetch_factor=self.prefetch_factor,
             ),
             DataLoader(
                 self.sc_probes,
                 batch_size=self.batch_size,
                 num_workers=self.num_workers,
                 pin_memory=True,
+                collate_fn=self.collate_fn,
             ),
         ]
