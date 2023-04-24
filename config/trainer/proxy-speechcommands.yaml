@@ -1,0 +1,9 @@
+defaults:
+  - proxy
+
+early_stopping:
+  enable: true
+  monitor: "validation/accuracy_epoch"
+  patience: 10
+  mode: "max"
+  min_delta: 0.0

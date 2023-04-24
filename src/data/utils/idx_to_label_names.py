@@ -150,3 +150,46 @@ def get_idx_to_label_names_cifar10() -> Dict[int, str]:
     classes.sort()
     label2name = {k: v for k, v in enumerate(classes)}
     return label2name
+
+
+def get_idx_to_label_names_speechcommands() -> Dict[int, str]:
+    classes = [
+        "backward",
+        "bed",
+        "bird",
+        "cat",
+        "dog",
+        "down",
+        "eight",
+        "five",
+        "follow",
+        "forward",
+        "four",
+        "go",
+        "happy",
+        "house",
+        "learn",
+        "left",
+        "marvin",
+        "nine",
+        "no",
+        "off",
+        "on",
+        "one",
+        "right",
+        "seven",
+        "sheila",
+        "six",
+        "stop",
+        "three",
+        "tree",
+        "two",
+        "up",
+        "visual",
+        "wow",
+        "yes",
+        "zero",
+    ]
+    classes.sort()
+    label2name = {k: v for k, v in enumerate(classes)}
+    return label2name

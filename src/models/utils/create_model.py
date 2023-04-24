@@ -1,6 +1,8 @@
 import torch
 import torchvision
 
+from src.models.utils.audio_model import M5
+
 
 def create_resnet50_model(
     num_classes: int, resize_conv1: bool = False, should_compile: bool = True
@@ -53,4 +55,15 @@ def create_vit_model(
     else:
         raise ValueError(f"ViT version '{version}' not supported")
 
+    return torch.compile(model, disable=not should_compile, mode="max-autotune")
+
+
+def create_m5_model(
+    n_input: int = 1,
+    n_output: int = 35,
+    stride: int = 16,
+    n_channel: int = 32,
+    should_compile: bool = True,
+):
+    model = M5(n_input, n_output, stride, n_channel)
     return torch.compile(model, disable=not should_compile, mode="max-autotune")

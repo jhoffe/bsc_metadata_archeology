@@ -1,20 +1,22 @@
 import logging
-from os import makedirs, path
+import os
+from os import makedirs
 from pathlib import Path
 
 import click
 from dotenv import find_dotenv, load_dotenv
+from torchaudio.datasets import SPEECHCOMMANDS
 from torchvision.datasets import CIFAR10, CIFAR100
+
+datasets = {"cifar10": CIFAR10, "cifar100": CIFAR100, "speechcommands": SPEECHCOMMANDS}
 
 
 def download_dataset(input_filepath: str, dataset: str) -> None:
     """Downloads the dataset to the chosen filepath."""
-    data = (
-        CIFAR100 if dataset == "cifar100" else CIFAR10 if dataset == "cifar10" else None
-    )
+    data = datasets[dataset]
     assert data is not None
-    makedirs(path.join(input_filepath, dataset), exist_ok=True)
-    data(path.join(input_filepath, dataset), download=True)
+    makedirs(os.path.join(input_filepath, dataset), exist_ok=True)
+    data(os.path.join(input_filepath, dataset), download=True)
 
 
 @click.command()
