@@ -1,6 +1,6 @@
 import os
 import random
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import torch
@@ -47,7 +47,7 @@ class ProbeSuiteGenerator(Dataset):
         dataset_len: int,
         label_count: int,
         num_probes: int = 500,
-        corruption_std: float = 0.1,
+        corruption_module: Optional[Union[torch.nn.Module, transforms.Compose]] = None,
         only_probes: bool = False,
     ):
         self.dataset = dataset
@@ -57,7 +57,16 @@ class ProbeSuiteGenerator(Dataset):
         self.remaining_indices = list(range(dataset_len))
         self.label_count = label_count
         self.num_probes = num_probes
-        self.corruption_std = corruption_std
+
+        if corruption_module is None:
+            self.corruption_module = transforms.Compose(
+                [
+                    AddGaussianNoise(mean=0.0, std=0.1),
+                    ClampRangeTransform(),
+                ]
+            )
+
+        self.corruption_module = corruption_module
         self.only_probes = only_probes
 
         self.suites = {}
@@ -129,12 +138,9 @@ class ProbeSuiteGenerator(Dataset):
 
     def generate_corrupted(self):
         subset = self.get_subset()
-        corruption_transform = transforms.Compose(
-            [AddGaussianNoise(mean=0.0, std=self.corruption_std), ClampRangeTransform()]
-        )
 
         suite = [
-            ((corruption_transform(x), y), idx)
+            ((self.corruption_module(x), y), idx)
             for (x, y, _), idx in zip(subset, subset.indices)
         ]
 
@@ -185,6 +191,7 @@ def make_probe_suites(
     label_count: int,
     num_probes: int = 500,
     use_c_scores: bool = True,
+    corruption_module: Optional[Union[torch.nn.Module, transforms.Compose]] = None,
 ):
     data = torch.load(
         os.path.join(
@@ -195,12 +202,23 @@ def make_probe_suites(
     )
     dataset_length = len(data)
 
+    corruption_module = (
+        corruption_module
+        if corruption_module is not None
+        else transforms.Compose(
+            [
+                AddGaussianNoise(mean=0.0, std=0.1 if "cifar" in dataset else 0.25),
+                ClampRangeTransform(),
+            ]
+        )
+    )
+
     probe_suite = ProbeSuiteGenerator(
         data,
         dataset_length,
         label_count,
         num_probes=num_probes,
-        corruption_std=0.1 if "cifar" in dataset else 0.25,
+        corruption_module=corruption_module,
     )
     probe_suite.generate()
 

@@ -1,25 +1,25 @@
 import os
 from os import path
-from typing import Optional
+from typing import Dict, Optional
 
-import numpy as np
 import torch
 from torchaudio.datasets import SPEECHCOMMANDS
 
+from src.data.proxy_calculator import ProxyCalculator
 
-def c_scores(dataset: str, use_cscores: Optional[bool]) -> np.ndarray:
-    """Get cifar c-scores."""
-    if use_cscores:
-        pass
 
-    return None
+def load_proxy_scores(proxy_dataset_path: str) -> Dict[int, float]:
+    proxy_calculator = ProxyCalculator(proxy_dataset_path)
+    proxy_calculator.load()
+
+    return proxy_calculator.calculate_proxy_scores("p_L")
 
 
 def c_scores_dataset(
     dataset: str,
     input_filepath: str,
     output_filepath: str,
-    use_c_scores: Optional[bool] = None,
+    proxy_dataset: Optional[str] = None,
 ) -> None:
     data = CustomSC if dataset == "speechcommands" else None
     assert data is not None
@@ -27,7 +27,7 @@ def c_scores_dataset(
     train_data = data(
         root=path.join(input_filepath, dataset),
         subset="training",
-        score=c_scores(dataset, use_c_scores),
+        score=load_proxy_scores(proxy_dataset),
     )
 
     test_data = data(
@@ -45,12 +45,8 @@ def c_scores_dataset(
 
     torch.save(test_data, os.path.join(output_dir, "test.pt"))
     torch.save(validation_data, os.path.join(output_dir, "validation.pt"))
-    if use_c_scores is not None:
-        torch.save(
-            train_data, os.path.join(output_dir, "train_c_scores.pt")
-        ) if use_c_scores else torch.save(
-            train_data, os.path.join(output_dir, "train_mem_scores.pt")
-        )
+    if proxy_dataset is not None:
+        torch.save(train_data, os.path.join(output_dir, "train_c_scores.pt"))
     else:
         torch.save(train_data, os.path.join(output_dir, "train.pt"))
 
@@ -62,7 +58,7 @@ class CustomSC(SPEECHCOMMANDS):
         self,
         root: str,
         subset: str = "training",
-        score: Optional[list] = None,
+        score: Optional[Dict[int, float]] = None,
     ) -> None:
         super().__init__(
             root=root,

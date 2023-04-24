@@ -12,4 +12,4 @@ class ProxyDataset(Dataset):
         sample, target = self.dataset[index]
         score = self.proxy_scores[index]
 
-        return sample, target, score
+        return sample, target, 1 - score
