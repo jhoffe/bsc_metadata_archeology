@@ -6,9 +6,13 @@ import torch
 from torchaudio.datasets import SPEECHCOMMANDS
 
 from src.data.proxy_calculator import ProxyCalculator
+from src.data.utils.idx_to_label_names import get_idx_to_label_names_speechcommands
 
 
-def load_proxy_scores(proxy_dataset_path: str) -> Dict[int, float]:
+def load_proxy_scores(proxy_dataset_path: Optional[str]) -> Optional[Dict[int, float]]:
+    if proxy_dataset_path is None:
+        return None
+
     proxy_calculator = ProxyCalculator(proxy_dataset_path)
     proxy_calculator.load()
 
@@ -67,7 +71,9 @@ class CustomSC(SPEECHCOMMANDS):
         )
 
         self.subset = subset
-        self.train = self.subset == "train"
+        self.train = self.subset == "training"
+        self.idx_to_label_names = get_idx_to_label_names_speechcommands()
+        self.label_to_index = {v: k for k, v in self.idx_to_label_names.items()}
 
         if score is not None:
             self.score = score
@@ -89,10 +95,10 @@ class CustomSC(SPEECHCOMMANDS):
             _utterance_number,
         ) = super().__getitem__(index)
         if not self.train or self.score is None:
-            return waveform, target
+            return waveform, self.label_to_index[target]
 
         score = self.score[index]
-        return waveform, target, score
+        return waveform, self.label_to_index[target], score
 
 
 if __name__ == "__main__":

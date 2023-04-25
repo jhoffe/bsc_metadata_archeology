@@ -9,7 +9,6 @@ from src.data.audio_c_scores import c_scores_dataset as audio_c_scores_dataset
 from src.data.cifar_c_scores import c_scores_dataset as cifar_c_scores_dataset
 from src.data.download import download_dataset
 from src.data.make_probe_suites import make_probe_suites
-from src.data.utils.imagenet_transform import imagenet_transform
 
 
 @click.command()
@@ -47,17 +46,15 @@ def main(input_filepath, output_filepath):
     )
 
     logger.info("Transforming the ImageNet dataset w. no c-scores")
-    imagenet_transform(input_filepath, output_filepath)
+    # imagenet_transform(input_filepath, output_filepath)
     logger.info("Transforming the ImageNet dataset w. c-scores")
-    imagenet_transform(input_filepath, output_filepath, use_c_scores=True)
+    # imagenet_transform(input_filepath, output_filepath, use_c_scores=True)
     logger.info("Transforming the ImageNet dataset w. mem-scores")
-    imagenet_transform(input_filepath, output_filepath, use_c_scores=False)
+    # imagenet_transform(input_filepath, output_filepath, use_c_scores=False)
     logger.info("Transformed the ImageNet dataset")
 
     logger.info("Transforming the SpeechCommands dataset w. no c-scores")
     audio_c_scores_dataset("speechcommands", input_filepath, output_filepath)
-    # logger.info("Transforming the SpeechCommands dataset w. c-scores")
-    # c_scores_dataset("speechcommands", "data/raw", "data/processed", use_c_scores=True) # noqa: E501
 
     # Generating probe default_suites
     logger.info("Generating probe suites for CIFAR10 w. C-scores")

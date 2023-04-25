@@ -63,7 +63,7 @@ class M5(L.LightningModule):
         if self.use_proxy_logger:
             return ProxyOutput.create(mean_loss, indices, y, logits)
 
-        return LossCurve.create(loss, indices, y, x)
+        return LossCurve.create(loss, indices, y, logits)
 
     def validation_step(self, batch, batch_idx, dataloader_idx=0):
         x, y, indices = batch
@@ -91,7 +91,9 @@ class M5(L.LightningModule):
         if self.use_proxy_logger:
             return ProxyOutput.create(mean_loss, indices, y, logits)
 
-        return LossCurve.create(loss, indices, y, logits)
+        return LossCurve.create(
+            loss, indices if dataloader_idx == 1 else None, y, logits
+        )
 
     def test_step(self, batch, batch_idx):
         x, y, indices = batch

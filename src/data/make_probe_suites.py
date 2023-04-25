@@ -99,14 +99,26 @@ class ProbeSuiteGenerator(Dataset):
         return self
 
     def generate_typical(self):
-        sorted_indices = np.argsort(self.dataset.score)
+        if isinstance(self.dataset.score, dict):
+            sorted_indices = sorted(
+                self.dataset.score, key=self.dataset.score.get, reverse=True
+            )
+        else:
+            sorted_indices = np.argsort(self.dataset.score)
+
         subset = self.get_subset(indices=sorted_indices[: self.num_probes])
         suite = [((x, y), idx) for (x, y, _), idx in zip(subset, subset.indices)]
 
         self.add_suite("typical", suite)
 
     def generate_atypical(self):
-        sorted_indices = np.argsort(self.dataset.score)
+        if isinstance(self.dataset.score, dict):
+            sorted_indices = sorted(
+                self.dataset.score, key=self.dataset.score.get, reverse=True
+            )
+        else:
+            sorted_indices = np.argsort(self.dataset.score)
+
         subset = self.get_subset(
             indices=sorted_indices[-self.num_probes :]  # noqa: E203
         )  # noqa: E203
@@ -143,6 +155,8 @@ class ProbeSuiteGenerator(Dataset):
             ((self.corruption_module(x), y), idx)
             for (x, y, _), idx in zip(subset, subset.indices)
         ]
+
+        del self.corruption_module
 
         self.add_suite("corrupted", suite)
 

@@ -2,8 +2,8 @@ import click
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.base import BaseEstimator, is_classifier
-from sklearn.decomposition import PCA
 from sklearn.inspection import DecisionBoundaryDisplay
+from sklearn.manifold import TSNE
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 
@@ -22,12 +22,12 @@ def train_metadata_model(
 
 @click.command()
 @click.argument(
-    "loss_dataset_path", type=click.Path(exists=True, dir_okay=True, file_okay=False)
-)
-@click.argument(
     "probe_suite_path", type=click.Path(exists=True, dir_okay=False, file_okay=True)
 )
-def main(loss_dataset_path, probe_suite_path):
+@click.argument(
+    "loss_dataset_path", type=click.Path(exists=True, dir_okay=True, file_okay=False)
+)
+def main(probe_suite_path, loss_dataset_path):
     loss_dataset = LossDataset(loss_dataset_path)
 
     print("Loading loss dataset...")
@@ -43,10 +43,10 @@ def main(loss_dataset_path, probe_suite_path):
     X_train = scaler.fit_transform(X_train)
 
     print("PCA...")
-    pca = PCA(n_components=2)
+    pca = TSNE(n_components=2, n_jobs=-1)
     X_train = pca.fit_transform(X_train)
 
-    print("Explained variance ratio: ", pca.explained_variance_ratio_)
+    # print("Explained variance ratio: ", pca.explained_variance_ratio_)
 
     # classifier = XGBClassifier(n_estimators=100)
     classifier = SVC()

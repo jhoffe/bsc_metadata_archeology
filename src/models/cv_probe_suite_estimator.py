@@ -39,10 +39,10 @@ def cv_metadata_model(classifier: BaseEstimator, X: np.array, y: np.array) -> np
 
 @click.command()
 @click.argument(
-    "loss_dataset_path", type=click.Path(exists=True, dir_okay=True, file_okay=False)
+    "probe_suite_path", type=click.Path(exists=True, dir_okay=False, file_okay=True)
 )
 @click.argument(
-    "probe_suite_path", type=click.Path(exists=True, dir_okay=False, file_okay=True)
+    "loss_dataset_path", type=click.Path(exists=True, dir_okay=True, file_okay=False)
 )
 @click.option(
     "-r",
@@ -51,7 +51,7 @@ def cv_metadata_model(classifier: BaseEstimator, X: np.array, y: np.array) -> np
     default="results/tables/",
 )
 @click.option("--seed", type=int, default=42)
-def main(loss_dataset_path, probe_suite_path, results_dir, seed):
+def main(probe_suite_path, loss_dataset_path, results_dir, seed):
     seed_everything(seed)
 
     loss_dataset = LossDataset(loss_dataset_path)

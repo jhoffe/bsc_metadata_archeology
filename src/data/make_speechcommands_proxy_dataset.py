@@ -6,7 +6,7 @@ import pytorch_lightning as pl
 import torch.nn
 import torchaudio
 import torchaudio.functional as F
-# import torchaudio.transforms as T
+import torchaudio.transforms as T
 from dotenv import find_dotenv, load_dotenv
 from torchaudio.utils import download_asset
 
@@ -25,9 +25,11 @@ class AudioCorrupter(torch.nn.Module):
 
     def forward(self, x):
         noise = self.noise[:, : x.shape[1]]
-        snr_dbs = torch.tensor([20, 10, 3])
+        snr_dbs = torch.tensor([2])
 
-        return F.add_noise(x, noise, snr_dbs)
+        vol = T.Vol(gain=0.5, gain_type="amplitude")
+
+        return vol(F.add_noise(x, noise, snr_dbs))
 
 
 @click.command()
@@ -52,7 +54,7 @@ def main(input_filepath, proxy_filepath, output_filepath):
     corruption_module = AudioCorrupter()
 
     make_probe_suites(
-        input_filepath,
+        output_filepath,
         output_filepath,
         "speechcommands",
         label_count=35,

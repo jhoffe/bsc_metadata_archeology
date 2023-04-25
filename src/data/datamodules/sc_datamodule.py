@@ -106,7 +106,7 @@ class SCDataModule(L.LightningDataModule):
         # Gather in lists, and encode labels as indices
         for (waveform, label), index in batch:
             tensors.append(waveform)
-            targets.append(self.label_to_idx[label])
+            targets.append(label)
             indices.append(index)
 
         # Group the list of tensors into a batched tensor
@@ -185,5 +185,6 @@ class SCDataModule(L.LightningDataModule):
                 num_workers=self.num_workers,
                 pin_memory=True,
                 collate_fn=self.collate_fn,
+                drop_last=False,
             ),
         ]
