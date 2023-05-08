@@ -99,7 +99,7 @@ class ProxyLogger(L.Callback):
         os.makedirs(self.dir, exist_ok=True)
 
         # Create pyarrow arrays
-        all_y = pa.array(all_y.cpu().numpy(), type=pa.uint8())
+        all_y = pa.array(all_y.cpu().numpy(), type=pa.uint32())
         all_sample_indices = pa.array(
             all_sample_indices.cpu().numpy(), type=pa.uint32()
         )
