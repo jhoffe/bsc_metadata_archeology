@@ -6,7 +6,7 @@ single_host = true
 memory = 30
 standard_output = { name = "logs/train-imagenet-vit-c-score.out", overwrite = true }
 error_output = { name = "logs/train-imagenet-vit-c-score.err", overwrite = true }
-use_gpu = { num_of_gpus = 1 }
+use_gpu = { num_of_gpus = 1, memory_size = 80 }
 
 commands = [
     "module load python3/3.10.7",
