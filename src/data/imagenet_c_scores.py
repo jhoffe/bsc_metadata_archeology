@@ -6,8 +6,11 @@ import numpy as np
 from src.data.utils.c_score_downloader import downloader
 
 
-def imagenet_c_scores(use_cscores: Optional[bool]):
+def imagenet_c_scores(use_cscores: Optional[bool] = None):
     """Get imagenet c-scores."""
+    if use_cscores is None:
+        return None
+
     if not use_cscores:
         file = pathlib.Path("data/external/imagenet_index.npz")
 
