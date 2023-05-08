@@ -15,7 +15,7 @@ commands = [
     """python3 src/models/train_model.py \
        trainer=hpc-vit \
        model=imagenet-vit \
-       dataset=imagenet-c-score \
+       dataset=imagenet-c-score-vit \
        name=imagenet-vit-c-score \
        dataset.batch_size=512
     """

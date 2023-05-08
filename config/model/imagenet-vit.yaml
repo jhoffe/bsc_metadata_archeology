@@ -1,0 +1,5 @@
+name: "vit"
+max_epochs: 200
+sync_dist_train: false
+sync_dist_val: false
+should_compile: true

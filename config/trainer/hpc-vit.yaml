@@ -5,12 +5,5 @@ accelerator: 'gpu'
 strategy: "auto"
 devices: 1
 gradient_clip_val: 1.0
-n_epochs: 300
+n_epochs: 200
 monitor_learning_rate: true
-
-early_stopping:
-  enable: true
-  monitor: "validation/loss/dataloader_idx_0"
-  patience: 10
-  mode: "min"
-  min_delta: 0.0

@@ -1,0 +1,5 @@
+name: "imagenet"
+num_workers: 16
+prefetch_factor: 4
+batch_size: 512
+c_score_type: "c-score"
