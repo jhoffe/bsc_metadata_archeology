@@ -1,5 +1,5 @@
 queue = "gpua100"
-name = "train-cifar10-proxy"
+name = "train-cifar100-proxy"
 walltime = { hours = 3, minutes = 0 }
 cpu = 16
 single_host = true
