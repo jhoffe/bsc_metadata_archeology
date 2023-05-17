@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import os
 import torch
 from scipy.stats import spearmanr
+import click
 
 from src.visualization.utils.proxy_score_dataset import (
     ProxyDataset,
@@ -11,7 +12,7 @@ from src.visualization.utils.proxy_score_dataset import (
 )
 
 
-def proxy_correlation_plot(ds: os.PathLike, orig_dataset: str, save_path: os.PathLike):
+def proxy_correlation_plot(ds: os.PathLike, orig_dataset: str):
     proxy_dataset = ProxyDataset(ds)
     proxy_df = proxy_dataset.load()
 
@@ -55,4 +56,19 @@ def proxy_correlation_plot(ds: os.PathLike, orig_dataset: str, save_path: os.Pat
     plt.title(
         f"Correlation between different proxy metrics and C-scores for {orig_dataset}"
     )
+    save_path = f"reports/figures/{orig_dataset}/proxy_correlation_plot.png"
     plt.savefig(save_path)
+
+def main(ds: os.PathLike, orig_dataset: str):
+    proxy_correlation_plot(ds, orig_dataset)
+
+
+@click.command()
+@click.argument("ds", type=click.Path(exists=True))
+@click.argument("orig_dataset", type=str)
+def main_click(ds: os.PathLike, orig_dataset: str):
+    main(ds, orig_dataset)
+
+
+if __name__ == "__main__":
+    main_click()
