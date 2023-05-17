@@ -3,6 +3,7 @@ import os
 import click
 import numpy as np
 import pandas as pd
+import time
 from lightning import seed_everything
 from sklearn.base import BaseEstimator, is_classifier
 from sklearn.ensemble import AdaBoostClassifier, RandomForestClassifier
@@ -77,14 +78,18 @@ def main(loss_dataset_path, probe_suite_path, results_dir, seed):
 
     for name, classifier in classifiers.items():
         print(f"Running {name}")
+        start = time.time()
         test_score, gen_score = cv_metadata_model(classifier, X, y)
+        end = time.time()
+        total_time = end - start
         print(f"Gen score={np.mean(gen_score)}")
         print(f"Test score={np.mean(test_score)}")
+        print(f"Total time={total_time}")
 
-        results_table.append([name, gen_score, test_score])
+        results_table.append([name, gen_score, test_score, total_time])
 
     results_table = pd.DataFrame(
-        results_table, columns=["Classifier", "Gen Score", "Test Score"]
+        results_table, columns=["Classifier", "Gen Score", "Test Score", "Time"]
     )
     print(results_table)
 
