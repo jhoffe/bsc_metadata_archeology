@@ -33,13 +33,13 @@ class ProxyLogger(L.Callback):
     @staticmethod
     def calculate_metrics(logits: torch.Tensor, y: torch.Tensor):
         smax = F.softmax(logits, dim=1)
-
         correctly_predicted = (logits.argmax(1) == y).float()
         p_L = smax[torch.arange(len(logits)), y]
         p_max = smax.max(1).values
         H = -torch.sum(smax * torch.log(smax + 1e-6), dim=1)
+        loss = F.cross_entropy(logits, y, reduction="none")
 
-        return correctly_predicted, p_L, p_max, H
+        return correctly_predicted, p_L, p_max, H, loss
 
     def get_path(self, version: int) -> str:
         return os.path.join(self.dir, f"losses_v{version}.pt")
@@ -56,14 +56,16 @@ class ProxyLogger(L.Callback):
         all_p_L = []
         all_p_max = []
         all_H = []
+        all_loss = []
 
-        for indices, y, (correctly_predicted, p_L, p_max, H) in proxy_samples:
+        for indices, y, (correctly_predicted, p_L, p_max, H, loss) in proxy_samples:
             all_y.append(y)
             all_sample_indices.append(indices)
             all_correctly_predicted.append(correctly_predicted)
             all_p_L.append(p_L)
             all_p_max.append(p_max)
             all_H.append(H)
+            all_loss.append(loss)
 
         # Concatenate all the tensors into torch tensors
         all_y = torch.cat(all_y, 0).to(pl_module.dtype)
@@ -74,6 +76,7 @@ class ProxyLogger(L.Callback):
         all_p_L = torch.cat(all_p_L, 0).to(pl_module.dtype)
         all_p_max = torch.cat(all_p_max, 0).to(pl_module.dtype)
         all_H = torch.cat(all_H, 0).to(pl_module.dtype)
+        all_loss = torch.cat(all_loss, 0).to(pl_module.dtype)
 
         self.write_to_dataset(
             all_y,
@@ -82,6 +85,7 @@ class ProxyLogger(L.Callback):
             all_p_L,
             all_p_max,
             all_H,
+            all_loss,
             pl_module,
         )
         self.reset_proxy_samples()
@@ -94,6 +98,7 @@ class ProxyLogger(L.Callback):
         all_p_L,
         all_p_max,
         all_H,
+        all_loss,
         pl_module,
     ):
         os.makedirs(self.dir, exist_ok=True)
@@ -109,6 +114,7 @@ class ProxyLogger(L.Callback):
         all_p_L = pa.array(all_p_L.cpu().numpy(), type=pa.float32())
         all_p_max = pa.array(all_p_max.cpu().numpy(), type=pa.float32())
         all_H = pa.array(all_H.cpu().numpy(), type=pa.float32())
+        all_loss = pa.array(all_loss.cpu().numpy(), type=pa.float32())
         epochs = pa.array([pl_module.current_epoch] * len(all_y), type=pa.uint16())
 
         # Create a pyarrow table
@@ -120,6 +126,7 @@ class ProxyLogger(L.Callback):
                 all_p_L,
                 all_p_max,
                 all_H,
+                all_loss,
                 epochs,
             ],
             names=[
@@ -129,6 +136,7 @@ class ProxyLogger(L.Callback):
                 "p_L",
                 "p_max",
                 "H",
+                "loss",
                 "epoch",
             ],
         )
