@@ -27,7 +27,7 @@ def c_scores_dataset(
     train_data = data(
         root=path.join(input_filepath, dataset),
         subset="training",
-        score=load_proxy_scores(proxy_dataset),
+        score=load_proxy_scores(proxy_dataset) if proxy_dataset is not None else None,
     )
 
     test_data = data(
