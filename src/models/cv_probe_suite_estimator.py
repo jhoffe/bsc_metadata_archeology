@@ -48,7 +48,7 @@ def cv_metadata_model(classifier: BaseEstimator, X: np.array, y: np.array) -> np
 @click.option(
     "-r",
     "--results-dir",
-    type=click.Path(dir_okay=False, file_okay=True),
+    type=click.Path(dir_okay=True, file_okay=False),
     default="results/tables/",
 )
 @click.option("--seed", type=int, default=42)
@@ -82,15 +82,16 @@ def main(loss_dataset_path, probe_suite_path, results_dir, seed):
         test_score, gen_score = cv_metadata_model(classifier, X, y)
         end = time.time()
         total_time = end - start
-        print(f"Gen score={np.mean(gen_score)}")
-        print(f"Test score={np.mean(test_score)}")
-        print(f"Total time={total_time}")
+        print(f"Gen score={np.mean(gen_score):.3f}")
+        print(f"Test score={np.mean(test_score):.3f}")
+        print(f"Time={total_time:.2f} seconds")
 
         results_table.append([name, gen_score, test_score, total_time])
 
     results_table = pd.DataFrame(
         results_table, columns=["Classifier", "Gen Score", "Test Score", "Time"]
     )
+    results_table.sort_values(by="Test Score", ascending=False, inplace=True)
     print(results_table)
 
     os.makedirs(results_dir, exist_ok=True)
