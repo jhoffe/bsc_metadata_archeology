@@ -24,7 +24,7 @@ from src.models.models import ResNet50MAPD
 @click.option("--compile", default=False, is_flag=True)
 def main(train_suite, compile):
     NUM_WORKERS = 16
-    BATCH_SIZE = 256
+    BATCH_SIZE = 512
     PREFETCH_FACTOR = 4
     PROXY_EPOCHS = 100
     PROBE_EPOCHS = 100
@@ -97,7 +97,7 @@ def main(train_suite, compile):
         accelerator="gpu",
         max_epochs=PROXY_EPOCHS,
         logger=wandb_logger,
-        precision=16,
+        precision="16-mixed",
         callbacks=[LearningRateMonitor()],
     )
 
@@ -139,7 +139,7 @@ def main(train_suite, compile):
         accelerator="gpu",
         max_epochs=PROBE_EPOCHS,
         logger=wandb_logger,
-        precision=16,
+        precision="16-mixed",
         callbacks=[LearningRateMonitor()],
     )
 
