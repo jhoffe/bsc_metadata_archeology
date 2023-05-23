@@ -1,5 +1,5 @@
 queue = "epyc"
-name = "make_proxy_plot"
+name = "make_proxy_plots"
 walltime = { hours = 12, minutes = 0 }
 single_host = true
 cpu = 16
@@ -10,5 +10,6 @@ error_output =  { name = "logs/proxy_plot.err", overwrite = true }
 commands = [
     "module load python3/3.10.7",
     "source venv/bin/activate",
+    "python src/visualization/plots/proxy_correlation_plot.py models/proxies/imagenet-resnet-50-proxy-20230517_1150 imagenet false"
     "python src/visualization/plots/proxy_correlation_plot.py models/proxies/imagenet-resnet-50-proxy-20230517_1150 imagenet"
 ]
