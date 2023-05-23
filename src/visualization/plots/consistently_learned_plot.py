@@ -78,7 +78,7 @@ def consistently_learned_plot(
         epoch_train_group = epoch_train_group[
             epoch_train_group["sample_index"].isin(learned["Train"])
         ]
-        consistently_learned["Train"].insert(0, len(learned["Train"]) / train_size)
+        consistently_learned["Train"].insert(0, 100*len(learned["Train"]) / train_size)
         learned["Train"] = set(
             epoch_train_group["sample_index"][epoch_train_group["prediction"]].values
         )
@@ -89,7 +89,7 @@ def consistently_learned_plot(
             learned[suite] = set(
                 suite_group["sample_index"][suite_group["prediction"]].values
             )
-            consistently_learned[suite].insert(0, len(learned[suite]) / suite_size)
+            consistently_learned[suite].insert(0, 100*len(learned[suite]) / suite_size)
 
     suites = consistently_learned.keys()
 

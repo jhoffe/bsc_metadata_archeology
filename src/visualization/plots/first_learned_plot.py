@@ -62,14 +62,14 @@ def first_learned_plot(
         learned["Train"].update(
             epoch_train_group["sample_index"][epoch_train_group["prediction"]].values
         )
-        first_learned["Train"].append(len(learned["Train"]) / len(temp_train))
+        first_learned["Train"].append(100*len(learned["Train"]) / len(epoch_train_group))
         epoch_val_group = val_df.groupby(["epoch"]).get_group(epoch)
         for suite in suite_names:
             suite_group = epoch_val_group.groupby(["suite"]).get_group(suite)
             learned[suite].update(
                 suite_group["sample_index"][suite_group["prediction"]].values
             )
-            first_learned[suite].append(len(learned[suite]) / len(suite_group))
+            first_learned[suite].append(100*len(learned[suite]) / len(suite_group))
 
     suites = first_learned.keys()
 
