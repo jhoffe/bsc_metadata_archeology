@@ -98,8 +98,6 @@ def main(train_suite, compile):
         max_epochs=PROXY_EPOCHS,
         logger=wandb_logger,
         precision=16,
-        limit_train_batches=10,
-        limit_val_batches=10,
         callbacks=[LearningRateMonitor()],
     )
 
@@ -142,8 +140,6 @@ def main(train_suite, compile):
         max_epochs=PROBE_EPOCHS,
         logger=wandb_logger,
         precision=16,
-        limit_train_batches=10,
-        limit_val_batches=10,
         callbacks=[LearningRateMonitor()],
     )
 
