@@ -5,6 +5,7 @@ from time import gmtime, strftime
 import click
 import lightning as L
 import torch
+from dotenv import find_dotenv, load_dotenv
 from lightning.pytorch.callbacks import LearningRateMonitor
 from lightning.pytorch.loggers import WandbLogger
 from mapd.utils.make_dataloaders import make_dataloaders
@@ -236,5 +237,8 @@ def main(train_suite, compile):
 if __name__ == "__main__":
     log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     logging.basicConfig(level=logging.INFO, format=log_fmt)
+
+    dotenv_path = find_dotenv()
+    load_dotenv(dotenv_path)
 
     main()
