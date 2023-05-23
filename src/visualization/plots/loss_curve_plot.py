@@ -92,7 +92,6 @@ def loss_curve_plot(
         i += 1
 
     plt.ylim(0, 10) if name == "cifar10" else plt.ylim(0, 14)
-    plt.xlim(0, 120) if name == "cifar10" else plt.xlim(0, max_epoch)
 
     plt.legend(loc="upper right", fontsize="small")
     plt.xlabel("Epoch")
