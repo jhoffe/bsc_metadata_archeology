@@ -83,7 +83,7 @@ def main(ds: os.PathLike, orig_dataset: str, include_loss: bool = True):
 @click.command()
 @click.argument("ds", type=click.Path(exists=True))
 @click.argument("orig_dataset", type=str)
-@click.argument("include_loss", type=bool, default=True)
+@click.option("--include-loss", is_flag=True)
 def main_click(ds: os.PathLike, orig_dataset: str, include_loss: bool):
     main(ds, orig_dataset, include_loss)
 
