@@ -90,8 +90,6 @@ def run_proxies(train_dataloader, val_dataloader, epochs: int, should_compile: b
         logger=[wandb_logger] if wandb_logger else None,
         precision="16-mixed",
         callbacks=[LearningRateMonitor()],
-        limit_train_batches=5,
-        limit_val_batches=5,
     )
 
     logger.info("training proxies")
@@ -122,8 +120,6 @@ def run_probes(train_dataloader, validation_dataloaders, epochs: int, should_com
         logger=[wandb_logger] if wandb_logger is not None else None,
         precision="16-mixed",
         callbacks=[LearningRateMonitor()],
-        limit_train_batches=5,
-        limit_val_batches=5,
     )
 
     logger.info("training probes")
@@ -234,10 +230,10 @@ def plot(train_probes_dataset, train_suite):
 @click.option("--compile", default=False, is_flag=True)
 def main(train_suite, compile):
     NUM_WORKERS = 16
-    BATCH_SIZE = 64
-    PREFETCH_FACTOR = 2
-    PROXY_EPOCHS = 3
-    PROBE_EPOCHS = 3
+    BATCH_SIZE = 512
+    PREFETCH_FACTOR = 4
+    PROXY_EPOCHS = 100
+    PROBE_EPOCHS = 100
 
     logger = logging.getLogger(__name__)
 
