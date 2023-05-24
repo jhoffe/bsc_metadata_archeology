@@ -75,7 +75,8 @@ def get_dataloaders(train_dataset, val_dataset, batch_size, num_workers, prefetc
     return train_dataloader, val_dataloader
 
 
-def run_proxies(train_dataloader, val_dataloader, epochs: int, should_compile: bool, wandb_logger: WandbLogger = None):
+def run_proxies(train_dataloader, val_dataloader, epochs: int, should_compile: bool, wandb_logger: WandbLogger = None,
+                barebones=False):
     logger = logging.getLogger(__name__)
 
     torch.set_float32_matmul_precision("high")
@@ -89,7 +90,8 @@ def run_proxies(train_dataloader, val_dataloader, epochs: int, should_compile: b
         max_epochs=epochs,
         logger=[wandb_logger] if wandb_logger else None,
         precision="16-mixed",
-        callbacks=[LearningRateMonitor()],
+        callbacks=[LearningRateMonitor()] if wandb_logger else None,
+        barebones=barebones,
     )
 
     logger.info("training proxies")
@@ -104,11 +106,7 @@ def run_proxies(train_dataloader, val_dataloader, epochs: int, should_compile: b
 
 
 def run_probes(train_dataloader, validation_dataloaders, epochs: int, should_compile: bool,
-               train_suite: bool, wandb_logger: WandbLogger = None):
-    TIME_STR = strftime("%Y%m%d_%H%M", gmtime())
-    run_name = (
-            "imagenet-probes-e2e" + ("-with-train" if train_suite else "") + "-" + TIME_STR
-    )
+               train_suite: bool, wandb_logger: WandbLogger = None, barebones=False):
     logger = logging.getLogger(__name__)
 
     probes_module = ResNet50MAPD(
@@ -119,7 +117,8 @@ def run_probes(train_dataloader, validation_dataloaders, epochs: int, should_com
         max_epochs=epochs,
         logger=[wandb_logger] if wandb_logger is not None else None,
         precision="16-mixed",
-        callbacks=[LearningRateMonitor()],
+        callbacks=[LearningRateMonitor()] if wandb_logger else None,
+        barebones=barebones,
     )
 
     logger.info("training probes")
@@ -127,6 +126,27 @@ def run_probes(train_dataloader, validation_dataloaders, epochs: int, should_com
         probes_module,
         train_dataloaders=train_dataloader,
         val_dataloaders=validation_dataloaders,
+    )
+
+    del probes_module
+    gc.collect()
+
+
+def run_without(train_dataloader, val_dataloader, epochs):
+    probes_module = ResNet50MAPD(
+        max_epochs=epochs, should_compile=False
+    ).disable_mapd()
+    probes_trainer = L.Trainer(
+        accelerator="gpu",
+        max_epochs=epochs,
+        precision="16-mixed",
+        barebones=True
+    )
+
+    probes_trainer.fit(
+        probes_module,
+        train_dataloaders=train_dataloader,
+        val_dataloaders=val_dataloader,
     )
 
     del probes_module
@@ -250,7 +270,7 @@ def main(train_suite, compile):
 
     proxy_train_dataloader, validation_dataloader = get_dataloaders(idx_train_dataset, idx_val_dataset, BATCH_SIZE,
                                                                     NUM_WORKERS, PREFETCH_FACTOR)
-    #run_proxies(proxy_train_dataloader, validation_dataloader, PROXY_EPOCHS, compile, wandb_logger=wandb_logger)
+    # run_proxies(proxy_train_dataloader, validation_dataloader, PROXY_EPOCHS, compile, wandb_logger=wandb_logger)
 
     del proxy_train_dataloader, validation_dataloader
     gc.collect()
