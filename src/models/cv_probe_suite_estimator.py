@@ -51,8 +51,9 @@ def cv_metadata_model(classifier: BaseEstimator, X: np.array, y: np.array) -> np
     type=click.Path(dir_okay=True, file_okay=False),
     default="results/tables/",
 )
+@click.option("--name", type=str, required=True)
 @click.option("--seed", type=int, default=42)
-def main(loss_dataset_path, probe_suite_path, results_dir, seed):
+def main(loss_dataset_path, probe_suite_path, results_dir, seed, name):
     seed_everything(seed)
 
     loss_dataset = LossDataset(loss_dataset_path)
@@ -76,8 +77,8 @@ def main(loss_dataset_path, probe_suite_path, results_dir, seed):
 
     results_table = []
 
-    for name, classifier in classifiers.items():
-        print(f"Running {name}")
+    for clf_name, classifier in classifiers.items():
+        print(f"Running {clf_name}")
         start = time.time()
         test_score, gen_score = cv_metadata_model(classifier, X, y)
         end = time.time()
@@ -86,7 +87,7 @@ def main(loss_dataset_path, probe_suite_path, results_dir, seed):
         print(f"Test score={np.mean(test_score):.3f}")
         print(f"Time={total_time:.2f} seconds")
 
-        results_table.append([name, gen_score, test_score, total_time])
+        results_table.append([clf_name, gen_score, test_score, total_time])
 
     results_table = pd.DataFrame(
         results_table, columns=["Classifier", "Gen Score", "Test Score", "Time"]
@@ -95,9 +96,9 @@ def main(loss_dataset_path, probe_suite_path, results_dir, seed):
     print(results_table)
 
     os.makedirs(results_dir, exist_ok=True)
-    results_table.to_csv(os.path.join(results_dir, "results_table.csv"), index=False)
+    results_table.to_csv(os.path.join(results_dir, f"results_table_{name}.csv"), index=False)
     results_table.to_latex(
-        os.path.join(results_dir, "results_table.tex"), index=False, float_format="%.3f"
+        os.path.join(results_dir, f"results_table_{name}.tex"), index=False, float_format="%.3f"
     )
 
 
