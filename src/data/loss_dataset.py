@@ -1,9 +1,10 @@
-from typing import Optional
+from typing import Optional, Union, Tuple
 
 import numpy as np
 import pandas as pd
 import pyarrow.parquet as pq
 import torch
+from sklearn.preprocessing import LabelEncoder
 
 from src.data.make_probe_suites import ProbeSuiteGenerator
 
@@ -28,7 +29,8 @@ class LossDataset:
 
         return self
 
-    def to_sklearn_train_matrix(self) -> tuple[np.array, np.array]:
+    def to_sklearn_train_matrix(self, with_label_encoder: bool = False) -> Union[
+        Tuple[np.array, np.array], Tuple[np.array, np.array, np.array]]:
         assert self.df is not None
         assert self.probe_suite is not None
 
@@ -55,12 +57,16 @@ class LossDataset:
 
         X = np.array(losses.to_list())
 
-        ps_indices_to_int = {
-            key: idx for idx, key in enumerate(set(probe_suite_indices.values()))
-        }
+        label_encoder = LabelEncoder()
+
         y = np.array(
-            [ps_indices_to_int[probe_suite_indices[idx]] for idx in losses_indices]
+            [probe_suite_indices[idx] for idx in losses_indices]
         )
+
+        y = label_encoder.fit_transform(y)
+
+        if with_label_encoder:
+            return X, y, label_encoder
 
         return X, y
 

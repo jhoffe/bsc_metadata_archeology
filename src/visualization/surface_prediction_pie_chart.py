@@ -8,7 +8,8 @@ from matplotlib import pyplot as plt
     "surfaced_examples_path",
     type=click.Path(exists=True, dir_okay=False, file_okay=True),
 )
-def main(surfaced_examples_path):
+@click.argument("name", type=str, required=True)
+def main(surfaced_examples_path, name):
     df = pd.read_parquet(surfaced_examples_path)
 
     plt.figure(figsize=(10, 10))
@@ -25,7 +26,8 @@ def main(surfaced_examples_path):
     ]
 
     plt.legend(labels)
-    plt.show()
+    plt.tight_layout()
+    plt.savefig(f"reports/figures/surfacing/{name}-suite_distribution.png", bbox_inches="tight")
 
 
 if __name__ == "__main__":

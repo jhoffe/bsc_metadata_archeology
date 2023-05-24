@@ -35,13 +35,13 @@ def main(loss_dataset_path, probe_suite_path, output_path):
     loss_dataset.load_probe_suite(probe_suite_path)
 
     print("Creating train matrix...")
-    X_train, y_train = loss_dataset.to_sklearn_train_matrix()
+    X_train, y_train, label_encoder = loss_dataset.to_sklearn_train_matrix(with_label_encoder=True)
     print("Creating predict matrix...")
     (
         X_predict,
         original_class,
         sample_indices,
-        index_to_label_name,
+        _,
     ) = loss_dataset.to_sklearn_predict_matrix()
 
     classifier = XGBClassifier(n_estimators=100)
@@ -60,7 +60,7 @@ def main(loss_dataset_path, probe_suite_path, output_path):
             pa.array(y_pred),
             pa.array(original_class),
             pa.array(np.max(y_prob, axis=1)),
-            pa.array([index_to_label_name[idx] for idx in y_pred]),
+            pa.array([label_encoder.classes_[idx] for idx in y_pred]),
         ],
         names=["sample_index", "label", "original_class", "probs", "label_name"],
     )
