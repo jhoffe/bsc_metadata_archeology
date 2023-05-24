@@ -59,6 +59,7 @@ def plot_styles():
         "cifar10": "CIFAR-10",
         "cifar100": "CIFAR-100",
         "imagenet": "ImageNet",
+        "imagenet-vit": "ImageNet-ViT",
         "speechcommands": "SpeechCommands"
     }
 

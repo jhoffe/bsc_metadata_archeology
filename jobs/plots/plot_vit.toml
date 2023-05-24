@@ -1,0 +1,19 @@
+queue = "rome"
+name = "vit-plots"
+walltime = { hours = 24, minutes = 0 }
+single_host = true
+cpu = 15
+memory = 62
+standard_output =  { name = "logs/vit-plot.out", overwrite = true }
+error_output =  { name = "logs/vit-plot.err", overwrite = true }
+
+commands = [
+    "module load python3/3.10.7",
+    "source venv/bin/activate",
+    """python src/visualization/visualize.py \
+        data/processed/imagenet/train_probe_suite_c_scores.pt \
+        models/losses/imagenet-vit-c-score-20230517_2032 \
+        reports/figures \
+        --name=imagenet-vit
+    """
+]
