@@ -1,4 +1,4 @@
-queue = "epyc"
+queue = "hpc"
 name = "make_proxy_plots"
 walltime = { hours = 12, minutes = 0 }
 single_host = true
