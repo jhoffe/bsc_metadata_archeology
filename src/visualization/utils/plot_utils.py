@@ -26,6 +26,22 @@ def load_loss_dataset(loss_dataset_path: str):
 
     return df
 
+def load_loss_by_epoch(loss_dataset_path: str, epoch=None, stage=None):
+    filters = []
+
+    if epoch is not None:
+        filters.append(("epoch", "=", epoch))
+
+    if stage is not None:
+        filters.append(("stage", "=", stage))
+
+    dataset = LossDataset(loss_dataset_path, filters=filters if len(filters) > 0 else None)
+    dataset.load()
+
+    df = dataset.df
+
+    return df
+
 
 def load_probe_suite(probe_suite_path: str):
     """Load the probe suite from the given path"""

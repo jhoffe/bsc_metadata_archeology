@@ -3,13 +3,12 @@ import random
 
 import click
 import matplotlib.pyplot as plt
-from tqdm import tqdm
 
 from src.visualization.utils.plot_utils import (
     load_loss_dataset,
     load_probe_suite,
     plot_dicts,
-    plot_styles, load_loss_by_epoch,
+    plot_styles,
 )
 
 
@@ -19,7 +18,17 @@ def first_learned_plot(
     """Plot the accuracy for each probe suite pr. epoch"""
 
     probe_suite = load_probe_suite(probe_suite_path=probe_suite_path)
+    df = load_loss_dataset(loss_dataset_path=loss_dataset_path)
+
+    df.drop_duplicates(subset=["epoch", "sample_index", "stage"], inplace=True)
+    df["epoch"] = df["epoch"].astype(int)
+    max_epoch = df["epoch"].max() + 1
     suite_indices = probe_suite.index_to_suite
+    num_suite_samples = len(suite_indices)
+    num_train_samples = len(probe_suite)
+
+    assert df["stage"][df["stage"] == "val"].count() == max_epoch * num_suite_samples
+    assert df["stage"][df["stage"] == "train"].count() == max_epoch * num_train_samples
 
     suite_names = {
         "typical": "Typical",
@@ -29,48 +38,47 @@ def first_learned_plot(
         "corrupted": "Corrupted",
     }
 
-    suite_to_indices = {}
-
     for suite_attr, suite_name in suite_names.items():
         indices = [idx for idx, suite in suite_indices.items() if suite == suite_attr]
         random.shuffle(indices)
         train_indices = indices[:250]
         val_indices = indices[250:]
+        df.loc[df["sample_index"].isin(train_indices), "suite"] = suite_name
+        df.loc[df["sample_index"].isin(val_indices), "suite"] = suite_name + " [Val]"
 
-        suite_to_indices[suite_name] = train_indices
-        suite_to_indices[suite_name + " [Val]"] = val_indices
+    df["suite"] = df["suite"].fillna("Train")
+
+    df["prediction"] = df["y"] == df["y_hat"]
+
+    val_df = df[df["stage"] == "val"].copy()
+    train_df = df[df["stage"] == "train"].copy()
+
+    del df
 
     first_learned, learned, suite_names = plot_dicts()
 
-    epoch = 0
-    while True:
-        val_df = load_loss_by_epoch(loss_dataset_path, epoch, "val")
-        if val_df.empty:
-            break
+    temp_train = train_df[train_df["suite"] == "Train"]
 
-        val_df.drop_duplicates(subset=["sample_index"], inplace=True)
-        val_df["prediction"] = (val_df["y"] == val_df["y_hat"]).astype(int)
-
-        # Loop over the different suites and count which has been learned
-        for suite, indices in suite_to_indices.items():
-            samples = val_df[(val_df["sample_index"].isin(indices)) & (val_df["prediction"] == 1)]
-            learned[suite].update(samples["sample_index"].values)
-            first_learned[suite].append(100*len(learned[suite]) / len(indices))
-
-        train_df = load_loss_by_epoch(loss_dataset_path, epoch, "train")
-        train_df["prediction"] = (train_df["y"] == train_df["y_hat"]).astype(int)
-        samples = train_df[train_df["prediction"] == 1]
-        learned["Train"].update(samples["sample_index"].values)
-
-        first_learned["Train"].append(100*len(learned["Train"]) / len(train_df))
-        epoch += 1
+    for epoch in range(max_epoch):
+        epoch_train_group = temp_train.groupby(["epoch"]).get_group(epoch)
+        learned["Train"].update(
+            epoch_train_group["sample_index"][epoch_train_group["prediction"]].values
+        )
+        first_learned["Train"].append(100*len(learned["Train"]) / len(epoch_train_group))
+        epoch_val_group = val_df.groupby(["epoch"]).get_group(epoch)
+        for suite in suite_names:
+            suite_group = epoch_val_group.groupby(["suite"]).get_group(suite)
+            learned[suite].update(
+                suite_group["sample_index"][suite_group["prediction"]].values
+            )
+            first_learned[suite].append(100*len(learned[suite]) / len(suite_group))
 
     suites = first_learned.keys()
+
     # Plot
     line_styles, marker_list, marker_colors, plot_titles = plot_styles()
 
     plt.figure(figsize=(10, 6))
-    plt.tight_layout()
     plt.title(f"Percent First Learned for {plot_titles[name]}")
     for i, suite in enumerate(suites):
         plt.plot(

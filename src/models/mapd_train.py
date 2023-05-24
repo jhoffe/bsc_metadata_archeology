@@ -24,7 +24,7 @@ from src.models.models import ResNet50MAPD
 @click.option("--compile", default=False, is_flag=True)
 def main(train_suite, compile):
     NUM_WORKERS = 16
-    BATCH_SIZE = 512
+    BATCH_SIZE = 256
     PREFETCH_FACTOR = 4
     PROXY_EPOCHS = 100
     PROBE_EPOCHS = 100

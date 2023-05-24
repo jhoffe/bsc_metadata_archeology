@@ -57,6 +57,7 @@ def loss_curve_plot(
     _, _, marker_colors, plot_titles = plot_styles()
 
     plt.figure(figsize=(10, 6))
+    plt.tight_layout()
     plt.title(f"Loss curves for {plot_titles[name]}") if not rio else plt.title(
         f"Loss curves for {plot_titles[name]} w. RIO"
     )

@@ -14,9 +14,9 @@ class LossDataset:
     df: Optional[pd.DataFrame]
     probe_suite: Optional[ProbeSuiteGenerator]
 
-    def __init__(self, dataset_path: str):
+    def __init__(self, dataset_path: str, filters=None):
         self.dataset_path = dataset_path
-        self.dataset = pq.ParquetDataset(dataset_path)
+        self.dataset = pq.ParquetDataset(dataset_path, filters=filters)
 
     def load(self) -> "LossDataset":
         self.df = self.dataset.read().to_pandas()

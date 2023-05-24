@@ -6,7 +6,6 @@ from src.visualization.plots.consistently_learned_plot import (
 from src.visualization.plots.first_learned_plot import main as first_learned_plot
 from src.visualization.plots.loss_curve_plot import main as loss_curve_plot
 from src.visualization.plots.probe_accuracy_plot import main as probe_accuracy_plot
-from src.visualization.plots.probe_accuracy_val import main as probe_accuracy_val
 
 
 # add click options here
@@ -23,7 +22,6 @@ from src.visualization.plots.probe_accuracy_val import main as probe_accuracy_va
 )
 def plots(name, probe_suite_path, loss_dataset_path, output_filepath):
     probe_accuracy_plot(name, probe_suite_path, loss_dataset_path, output_filepath)
-    probe_accuracy_val(name, probe_suite_path, loss_dataset_path, output_filepath)
     first_learned_plot(name, probe_suite_path, loss_dataset_path, output_filepath)
     consistently_learned_plot(
         name, probe_suite_path, loss_dataset_path, output_filepath
