@@ -1,0 +1,11 @@
+Classifier,Gen Score,Test Score
+KNN,0.824,0.7984
+SVM,0.8768,0.868
+Naive Bayes,0.8096,0.7984
+Decision Tree,0.812,0.796
+Logistic Regression,0.8544,0.8224
+Random Forest,0.8704,0.8632
+AdaBoost,0.7264,0.6224000000000001
+MLP,0.856,0.8304
+XGBoost,0.884,0.8872
+XGBoost RF,0.8648,0.8720000000000001
