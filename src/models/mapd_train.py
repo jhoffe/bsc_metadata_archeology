@@ -76,14 +76,14 @@ def get_dataloaders(train_dataset, val_dataset, batch_size, num_workers, prefetc
 
 
 def run_proxies(train_dataloader, val_dataloader, epochs: int, should_compile: bool, wandb_logger: WandbLogger = None,
-                barebones=False):
+                barebones=False, proxy_output_path="models/proxies_e2e"):
     logger = logging.getLogger(__name__)
 
     torch.set_float32_matmul_precision("high")
     logger.info("loading datasets")
 
     proxy_module = ResNet50MAPD(
-        max_epochs=epochs, should_compile=should_compile
+        max_epochs=epochs, should_compile=should_compile, proxies_output_path=proxy_output_path
     ).as_proxies()
     proxy_trainer = L.Trainer(
         accelerator="gpu",
@@ -101,16 +101,14 @@ def run_proxies(train_dataloader, val_dataloader, epochs: int, should_compile: b
         val_dataloaders=val_dataloader,
     )
 
-    del proxy_module
-    gc.collect()
-
 
 def run_probes(train_dataloader, validation_dataloaders, epochs: int, should_compile: bool,
-               train_suite: bool, wandb_logger: WandbLogger = None, barebones=False):
+               train_suite: bool, wandb_logger: WandbLogger = None, barebones=False,
+               probe_output_path: str = "models/probes_e2e"):
     logger = logging.getLogger(__name__)
 
     probes_module = ResNet50MAPD(
-        max_epochs=epochs, should_compile=should_compile
+        max_epochs=epochs, should_compile=should_compile, probes_output_path=probe_output_path
     ).as_probes()
     probes_trainer = L.Trainer(
         accelerator="gpu",
@@ -148,9 +146,6 @@ def run_without(train_dataloader, val_dataloader, epochs):
         train_dataloaders=train_dataloader,
         val_dataloaders=val_dataloader,
     )
-
-    del probes_module
-    gc.collect()
 
 
 def plot(train_probes_dataset, train_suite):
@@ -271,9 +266,6 @@ def main(train_suite, compile):
     proxy_train_dataloader, validation_dataloader = get_dataloaders(idx_train_dataset, idx_val_dataset, BATCH_SIZE,
                                                                     NUM_WORKERS, PREFETCH_FACTOR)
     # run_proxies(proxy_train_dataloader, validation_dataloader, PROXY_EPOCHS, compile, wandb_logger=wandb_logger)
-
-    del proxy_train_dataloader, validation_dataloader
-    gc.collect()
 
     logger.info("creating probes")
     train_probes_dataset = make_probe_suites(
