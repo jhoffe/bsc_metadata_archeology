@@ -124,9 +124,6 @@ def run_probes(train_dataloader, validation_dataloaders, epochs: int, should_com
         val_dataloaders=validation_dataloaders,
     )
 
-    del probes_module
-    gc.collect()
-
 
 def run_without(train_dataloader, val_dataloader, epochs):
     probes_module = ResNet50MAPD(
@@ -263,7 +260,9 @@ def main(train_suite, compile):
 
     proxy_train_dataloader, validation_dataloader = get_dataloaders(idx_train_dataset, idx_val_dataset, BATCH_SIZE,
                                                                     NUM_WORKERS, PREFETCH_FACTOR)
-    # run_proxies(proxy_train_dataloader, validation_dataloader, PROXY_EPOCHS, compile, wandb_logger=wandb_logger)
+    run_proxies(proxy_train_dataloader, validation_dataloader, PROXY_EPOCHS, compile, wandb_logger=wandb_logger)
+
+    gc.collect()
 
     logger.info("creating probes")
     train_probes_dataset = make_probe_suites(
