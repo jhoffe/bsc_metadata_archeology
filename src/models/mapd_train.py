@@ -60,7 +60,6 @@ def get_dataloaders(train_dataset, val_dataset, batch_size, num_workers, prefetc
         batch_size=batch_size,
         shuffle=True,
         num_workers=num_workers,
-        pin_memory=True,
         prefetch_factor=prefetch_factor,
     )
     val_dataloader = DataLoader(
@@ -68,7 +67,6 @@ def get_dataloaders(train_dataset, val_dataset, batch_size, num_workers, prefetc
         batch_size=batch_size,
         shuffle=False,
         num_workers=num_workers,
-        pin_memory=True,
         prefetch_factor=prefetch_factor,
     )
 
