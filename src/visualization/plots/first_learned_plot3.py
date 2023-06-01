@@ -64,7 +64,9 @@ def first_learned_plot(
         learned["Train"].update(
             epoch_train_group["sample_index"][epoch_train_group["prediction"]].values
         )
-        first_learned["Train"].append(100*len(learned["Train"]) / len(epoch_train_group))
+        first_learned["Train"].append(
+            100 * len(learned["Train"]) / len(epoch_train_group)
+        )
         epoch_val_group = val_df.groupby(["epoch"]).get_group(epoch)
         for suite in suite_names:
             suite_group = epoch_val_group.groupby(["suite"]).get_group(suite)
@@ -79,7 +81,7 @@ def first_learned_plot(
     line_styles, marker_list, marker_colors, plot_titles = plot_styles()
 
     plt.figure(figsize=(10, 6))
-    plt.title(f"Percent First Learned for {plot_titles[name]}")
+    plt.title(f"Percent First Learned for {plot_titles[name]}", fontsize="large")
     for i, suite in enumerate(suites):
         plt.plot(
             first_learned[suite],
@@ -91,9 +93,9 @@ def first_learned_plot(
             markersize=3,
             color=marker_colors[i % len(marker_colors)],
         )
-    plt.legend(loc="lower right", fontsize="small")
-    plt.xlabel("Epoch")
-    plt.ylabel("Fraction of samples learned (%)")
+    plt.legend(loc="lower right", fontsize="medium")
+    plt.xlabel("Epoch", fontsize="medium")
+    plt.ylabel("Fraction of samples learned (%)", fontsize="medium")
 
     figure_path = os.path.join(output_path, name)
 

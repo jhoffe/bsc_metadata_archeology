@@ -14,7 +14,7 @@ from src.visualization.utils.plot_utils import plot_styles
 
 
 def proxy_correlation_plot(
-    ds: os.PathLike, orig_dataset: str, include_loss: bool = True
+        ds: os.PathLike, orig_dataset: str, include_loss: bool = True
 ):
     proxy_dataset = ProxyDataset(ds)
     proxy_df = proxy_dataset.load()
@@ -57,7 +57,6 @@ def proxy_correlation_plot(
             [abs(calculate_spearmanr(proxy_df, epoch, proxy)) for epoch in epoch_range]
         )
         ax.plot(epoch_range, corrs, label=proxy)
-
 
     plt.legend()
     plt.xlabel("Epoch")

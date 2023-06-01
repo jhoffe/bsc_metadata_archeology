@@ -9,10 +9,18 @@ from mapd.probes.make_probe_suites import make_probe_suites
 from mapd.utils.make_dataloaders import make_dataloaders
 from mapd.utils.wrap_dataset import wrap_dataset
 
-from src.models.mapd_train import get_datasets, get_dataloaders, run_proxies, run_probes, run_without
+from src.models.mapd_train import (
+    get_dataloaders,
+    get_datasets,
+    run_probes,
+    run_proxies,
+    run_without,
+)
 
 
-def benchmark_proxy(num_workers: int, batch_size: int, prefetch_factor: int, epochs: int, n: int):
+def benchmark_proxy(
+    num_workers: int, batch_size: int, prefetch_factor: int, epochs: int, n: int
+):
     logger = logging.getLogger(__name__)
 
     proxy_times = []
@@ -25,15 +33,24 @@ def benchmark_proxy(num_workers: int, batch_size: int, prefetch_factor: int, epo
 
         logger.info("Starting benchmarking")
 
-        proxy_train_dataloader, validation_dataloader = get_dataloaders(idx_train_dataset, idx_val_dataset, batch_size,
-                                                                        num_workers, prefetch_factor)
+        proxy_train_dataloader, validation_dataloader = get_dataloaders(
+            idx_train_dataset, idx_val_dataset, batch_size, num_workers, prefetch_factor
+        )
 
         start = time.perf_counter()
-        run_proxies(proxy_train_dataloader, validation_dataloader, epochs, False, barebones=True,
-                    proxy_output_path="models/benchmark_proxies_e2e")
+        run_proxies(
+            proxy_train_dataloader,
+            validation_dataloader,
+            epochs,
+            False,
+            barebones=True,
+            proxy_output_path="models/benchmark_proxies_e2e",
+        )
         end = time.perf_counter()
 
-        logger.info(f"Finished benchmarking iteration {i} in {end - start:0.4f} seconds")
+        logger.info(
+            f"Finished benchmarking iteration {i} in {end - start:0.4f} seconds"
+        )
         proxy_times.append(end - start)
 
     logger.info(f"Proxies: {np.mean(proxy_times):.5f} +/- {np.std(proxy_times):.5f}")
@@ -42,7 +59,9 @@ def benchmark_proxy(num_workers: int, batch_size: int, prefetch_factor: int, epo
         pickle.dump(proxy_times, f)
 
 
-def benchmark_probes(num_workers: int, batch_size: int, prefetch_factor: int, epochs: int, n: int):
+def benchmark_probes(
+    num_workers: int, batch_size: int, prefetch_factor: int, epochs: int, n: int
+):
     logger = logging.getLogger(__name__)
 
     probe_times = []
@@ -58,9 +77,13 @@ def benchmark_probes(num_workers: int, batch_size: int, prefetch_factor: int, ep
             idx_train_dataset, proxy_calculator="models/proxies_e2e", label_count=1000
         )
 
-        probe_train_dataloader, validation_dataloader = get_dataloaders(train_probes_dataset, idx_val_dataset,
-                                                                        batch_size,
-                                                                        num_workers, prefetch_factor)
+        probe_train_dataloader, validation_dataloader = get_dataloaders(
+            train_probes_dataset,
+            idx_val_dataset,
+            batch_size,
+            num_workers,
+            prefetch_factor,
+        )
         mapd_validation_dataloaders = make_dataloaders(
             [validation_dataloader],
             train_probes_dataset,
@@ -72,11 +95,19 @@ def benchmark_probes(num_workers: int, batch_size: int, prefetch_factor: int, ep
         )
 
         start = time.perf_counter()
-        run_probes(probe_train_dataloader, mapd_validation_dataloaders, epochs, False, barebones=True,
-                   probe_output_path="models/benchmark_probes_e2e")
+        run_probes(
+            probe_train_dataloader,
+            mapd_validation_dataloaders,
+            epochs,
+            False,
+            barebones=True,
+            probe_output_path="models/benchmark_probes_e2e",
+        )
         end = time.perf_counter()
 
-        logger.info(f"Finished benchmarking iteration {i} in {end - start:0.4f} seconds")
+        logger.info(
+            f"Finished benchmarking iteration {i} in {end - start:0.4f} seconds"
+        )
         probe_times.append(end - start)
 
     logger.info(f"Probes: {np.mean(probe_times):.5f} +/- {np.std(probe_times):.5f}")
@@ -85,7 +116,9 @@ def benchmark_probes(num_workers: int, batch_size: int, prefetch_factor: int, ep
         pickle.dump(probe_times, f)
 
 
-def benchmark_without(num_workers: int, batch_size: int, prefetch_factor: int, epochs: int, n: int):
+def benchmark_without(
+    num_workers: int, batch_size: int, prefetch_factor: int, epochs: int, n: int
+):
     logger = logging.getLogger(__name__)
     without_times = []
     for i in range(n):
@@ -93,18 +126,23 @@ def benchmark_without(num_workers: int, batch_size: int, prefetch_factor: int, e
 
         train_dataset, val_dataset = get_datasets()
 
-        train_dataloader, validation_dataloader = get_dataloaders(train_dataset, val_dataset, batch_size,
-                                                                  num_workers, prefetch_factor)
+        train_dataloader, validation_dataloader = get_dataloaders(
+            train_dataset, val_dataset, batch_size, num_workers, prefetch_factor
+        )
 
         start = time.perf_counter()
         run_without(train_dataloader, validation_dataloader, epochs)
         end = time.perf_counter()
         gc.collect()
 
-        logger.info(f"Finished benchmarking iteration {i} in {end - start:0.4f} seconds")
+        logger.info(
+            f"Finished benchmarking iteration {i} in {end - start:0.4f} seconds"
+        )
         without_times.append(end - start)
 
-    logger.info(f"Without: {np.mean(without_times):.5f} +/- {np.std(without_times):.5f}")
+    logger.info(
+        f"Without: {np.mean(without_times):.5f} +/- {np.std(without_times):.5f}"
+    )
 
     with open("models/without-benchmarks.pkl", "wb") as f:
         pickle.dump(without_times, f)
@@ -117,7 +155,7 @@ def benchmark():
     EPOCHS = 5
     N = 10
 
-    torch.set_float32_matmul_precision('high')
+    torch.set_float32_matmul_precision("high")
 
     benchmark_proxy(NUM_WORKERS, BATCH_SIZE, PREFETCH_FACTOR, EPOCHS, N)
     benchmark_probes(NUM_WORKERS, BATCH_SIZE, PREFETCH_FACTOR, EPOCHS, N)

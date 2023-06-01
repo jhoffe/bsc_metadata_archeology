@@ -3,10 +3,8 @@ import random
 
 import click
 import matplotlib.pyplot as plt
-from tqdm import tqdm
 
 from src.visualization.utils.plot_utils import (
-    load_loss_dataset,
     load_probe_suite,
     plot_dicts,
     plot_styles, load_loss_by_epoch,
@@ -53,7 +51,8 @@ def first_learned_plot(
 
         # Loop over the different suites and count which has been learned
         for suite, indices in suite_to_indices.items():
-            samples = val_df[(val_df["sample_index"].isin(indices)) & (val_df["prediction"] == 1)]
+            samples = val_df[(val_df["sample_index"].isin(indices))
+                             & (val_df["prediction"] == 1)]
             learned[suite].update(samples["sample_index"].values)
             first_learned[suite].append(100*len(learned[suite]) / len(indices))
 
@@ -71,7 +70,6 @@ def first_learned_plot(
 
     plt.figure(figsize=(10, 6))
     plt.tight_layout()
-    plt.title(f"Percent First Learned for {plot_titles[name]}")
     for i, suite in enumerate(suites):
         plt.plot(
             first_learned[suite],
@@ -83,16 +81,24 @@ def first_learned_plot(
             markersize=3,
             color=marker_colors[i % len(marker_colors)],
         )
-    plt.legend(loc="lower right", fontsize="small")
-    plt.xlabel("Epoch")
-    plt.ylabel("Fraction of samples learned (%)")
+    plt.legend(loc="lower right", fontsize=12, fancybox=True, framealpha=0.4)
+    plt.xticks(fontsize=14)
+    plt.yticks(fontsize=14)
+    plt.xlabel("Epoch", fontsize=16)
+    plt.ylabel("Fraction of samples learned (%)", fontsize=16)
 
     figure_path = os.path.join(output_path, name)
 
     if not os.path.exists(figure_path):
         os.makedirs(figure_path)
 
-    plt.savefig(os.path.join(figure_path, f"{name}_first_learned_accuracy.png"))
+    plt.savefig(
+        os.path.join(
+            figure_path,
+            f"{name}_first_learned_accuracy.png"
+        ),
+        bbox_inches="tight"
+    )
 
 
 def main(name, probe_suite_path, loss_dataset_path, output_filepath):

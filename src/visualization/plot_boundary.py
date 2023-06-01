@@ -44,12 +44,12 @@ def main(loss_dataset_path, probe_suite_path):
     plt.tight_layout()
 
     for i, label in idx_to_label.items():
-        ax.scatter(
-            X_train[y_train == i, 0], X_train[y_train == i, 1], label=label
-        )
-    plt.legend()
+        ax.scatter(X_train[y_train == i, 0], X_train[y_train == i, 1], label=label)
+    plt.legend(fontsize=24, fancybox=True, framealpha=0.4)
+    plt.xticks(fontsize=20)
+    plt.yticks(fontsize=20)
 
-    fig.savefig("reports/figures/tsne/tsne.png")
+    fig.savefig("reports/figures/tsne/tsne.png", bbox_inches="tight")
 
 
 if __name__ == "__main__":

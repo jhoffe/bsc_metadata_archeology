@@ -67,9 +67,9 @@ def probe_accuracy_plot(
     # Plot
     line_styles, marker_list, marker_colors, plot_titles = plot_styles()
 
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(12, 6))
     plt.tight_layout()
-    plt.title(f"Probe Suite Accuracy for {plot_titles[name]}")
+    # plt.title(f"Probe Suite Accuracy for {plot_titles[name]}", fontsize="large")
     for i, suite in enumerate(suites):
         if "Train" in suite:
             plt.plot(
@@ -95,16 +95,25 @@ def probe_accuracy_plot(
                 markersize=3,
                 color=marker_colors[i % len(marker_colors)],
             )
-    plt.legend(loc="lower right", fontsize="small")
-    plt.xlabel("Epoch")
-    plt.ylabel("Accuracy (%)")
+    plt.xticks(fontsize=14)
+    plt.yticks(fontsize=14)
+    plt.legend(loc="lower right", fontsize=12, fancybox=True, framealpha=0.4)
+    plt.xlabel("Epoch", fontsize=16)
+    plt.ylabel("Accuracy (%)", fontsize=16)
 
     figure_path = os.path.join(output_path, name)
 
     if not os.path.exists(figure_path):
         os.makedirs(figure_path)
 
-    plt.savefig(os.path.join(figure_path, f"{name}_probe_suite_accuracy.png"))
+    plt.savefig(
+        os.path.join(
+            figure_path,
+            f"{name}_probe_suite_accuracy.png"
+        ),
+        bbox_inches='tight',
+        dpi=300
+    )
 
 
 def main(name, probe_suite_path, loss_dataset_path, output_filepath):

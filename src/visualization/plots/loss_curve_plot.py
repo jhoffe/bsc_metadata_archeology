@@ -58,9 +58,6 @@ def loss_curve_plot(
 
     plt.figure(figsize=(10, 6))
     plt.tight_layout()
-    plt.title(f"Loss curves for {plot_titles[name]}") if not rio else plt.title(
-        f"Loss curves for {plot_titles[name]} w. RIO"
-    )
     i = 0
 
     for suite_attr, suite_name in suite_names.items():
@@ -95,14 +92,30 @@ def loss_curve_plot(
     plt.ylim(0, 10) if name == "cifar10" else plt.ylim(0, 14)
     plt.xlim(0, max_epoch)
 
-    plt.legend(loc="upper right", fontsize="small")
-    plt.xlabel("Epoch")
-    plt.ylabel("Loss")
+    plt.legend(loc="upper right", fontsize=16, fancybox=True, framealpha=0.4)
+    plt.xlabel("Epoch", fontsize=16)
+    plt.ylabel("Loss", fontsize=16)
+    plt.xticks(fontsize=14)
+    plt.yticks(fontsize=14)
 
     if rio:
-        plt.savefig(os.path.join(output_path, name, f"{name}_loss_curve_rio.png"))
+        plt.savefig(
+            os.path.join(
+                output_path,
+                name,
+                f"{name}_loss_curve_rio.png"
+            ),
+            bbox_inches="tight"
+        )
     else:
-        plt.savefig(os.path.join(output_path, name, f"{name}_loss_curve.png"))
+        plt.savefig(
+            os.path.join(
+                output_path,
+                name,
+                f"{name}_loss_curve.png"
+            ),
+            bbox_inches="tight"
+        )
 
 
 def main(name, probe_suite_path, loss_dataset_path, output_path, rio=False):

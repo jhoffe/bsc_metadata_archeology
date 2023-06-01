@@ -5,7 +5,6 @@ import click
 import matplotlib.pyplot as plt
 
 from src.visualization.utils.plot_utils import (
-    load_loss_dataset,
     load_probe_suite,
     plot_dicts,
     plot_styles, load_loss_by_epoch,
@@ -39,7 +38,8 @@ def consistently_learned_plot(
 
     consistently_learned, learned, suite_names = plot_dicts()
 
-    max_epoch = (load_loss_by_epoch(loss_dataset_path, stage="val")["epoch"]).astype(int).max()
+    epochs = load_loss_by_epoch(loss_dataset_path, stage="val")["epoch"]
+    max_epoch = (epochs).astype(int).max()
 
     train_df = load_loss_by_epoch(loss_dataset_path, epoch=max_epoch, stage="train")
     train_df["prediction"] = (train_df["y"] == train_df["y_hat"]).astype(int)
@@ -48,7 +48,8 @@ def consistently_learned_plot(
     val_df = load_loss_by_epoch(loss_dataset_path, epoch=max_epoch, stage="val")
     val_df["prediction"] = (val_df["y"] == val_df["y_hat"]).astype(int)
     for suite, indices in suite_to_indices.items():
-        samples = val_df[(val_df["sample_index"].isin(indices)) & (val_df["prediction"] == 1)]
+        samples = val_df[(val_df["sample_index"].isin(indices))
+                         & (val_df["prediction"] == 1)]
         learned[suite].update(samples["sample_index"].values)
 
     suite_size = len(probe_suite.index_to_suite) / len(suite_names)
@@ -62,7 +63,10 @@ def consistently_learned_plot(
         learned["Train"] = set(
             train_df["sample_index"][train_df["prediction"] == 1].values
         )
-        consistently_learned["Train"].insert(0, 100 * len(learned["Train"]) / train_size)
+        consistently_learned["Train"].insert(
+            0,
+            100 * len(learned["Train"]) / train_size
+        )
 
         val_df = load_loss_by_epoch(loss_dataset_path, epoch=epoch, stage="val")
         val_df["prediction"] = (val_df["y"] == val_df["y_hat"]).astype(int)
@@ -73,14 +77,16 @@ def consistently_learned_plot(
             learned[suite] = set(
                 suite_group["sample_index"][suite_group["prediction"] == 1].values
             )
-            consistently_learned[suite].insert(0, 100 * len(learned[suite]) / suite_size)
+            consistently_learned[suite].insert(
+                0,
+                100 * len(learned[suite]) / suite_size
+            )
 
     suites = consistently_learned.keys()
 
     line_styles, marker_list, marker_colors, plot_titles = plot_styles()
 
     plt.figure(figsize=(10, 6))
-    plt.title(f"Percent Consistently Learned for {plot_titles[name]}")
     for i, suite in enumerate(suites):
         plt.plot(
             consistently_learned[suite],
@@ -92,16 +98,24 @@ def consistently_learned_plot(
             markersize=3,
             color=marker_colors[i % len(marker_colors)],
         )
-    plt.legend(loc="lower right", fontsize="small")
-    plt.xlabel("Epoch")
-    plt.ylabel("Percent Samples Learned (%)")
+    plt.legend(loc="upper left", fontsize=12, fancybox=True, framealpha=0.4)
+    plt.xlabel("Epoch", fontsize=16)
+    plt.xticks(fontsize=14)
+    plt.yticks(fontsize=14)
+    plt.ylabel("Percent Samples Learned (%)", fontsize=16)
 
     figure_path = os.path.join(output_path, name)
 
     if not os.path.exists(figure_path):
         os.makedirs(figure_path)
 
-    plt.savefig(os.path.join(figure_path, f"{name}_consistently_learned_accuracy.png"))
+    plt.savefig(
+        os.path.join(
+            figure_path,
+            f"{name}_consistently_learned_accuracy.png"
+        ),
+        bbox_inches="tight"
+    )
 
 
 def main(name, probe_suite_path, loss_dataset_path, output_filepath):

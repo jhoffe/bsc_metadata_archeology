@@ -54,7 +54,9 @@ def get_datasets():
     return train_dataset, val_dataset
 
 
-def get_dataloaders(train_dataset, val_dataset, batch_size, num_workers, prefetch_factor):
+def get_dataloaders(
+    train_dataset, val_dataset, batch_size, num_workers, prefetch_factor
+):
     train_dataloader = DataLoader(
         train_dataset,
         batch_size=batch_size,
@@ -73,15 +75,24 @@ def get_dataloaders(train_dataset, val_dataset, batch_size, num_workers, prefetc
     return train_dataloader, val_dataloader
 
 
-def run_proxies(train_dataloader, val_dataloader, epochs: int, should_compile: bool, wandb_logger: WandbLogger = None,
-                barebones=False, proxy_output_path="models/proxies_e2e"):
+def run_proxies(
+    train_dataloader,
+    val_dataloader,
+    epochs: int,
+    should_compile: bool,
+    wandb_logger: WandbLogger = None,
+    barebones=False,
+    proxy_output_path="models/proxies_e2e",
+):
     logger = logging.getLogger(__name__)
 
     torch.set_float32_matmul_precision("high")
     logger.info("loading datasets")
 
     proxy_module = ResNet50MAPD(
-        max_epochs=epochs, should_compile=should_compile, proxies_output_path=proxy_output_path
+        max_epochs=epochs,
+        should_compile=should_compile,
+        proxies_output_path=proxy_output_path,
     ).as_proxies()
     proxy_trainer = L.Trainer(
         accelerator="gpu",
@@ -100,13 +111,22 @@ def run_proxies(train_dataloader, val_dataloader, epochs: int, should_compile: b
     )
 
 
-def run_probes(train_dataloader, validation_dataloaders, epochs: int, should_compile: bool,
-               train_suite: bool, wandb_logger: WandbLogger = None, barebones=False,
-               probe_output_path: str = "models/probes_e2e"):
+def run_probes(
+    train_dataloader,
+    validation_dataloaders,
+    epochs: int,
+    should_compile: bool,
+    train_suite: bool,
+    wandb_logger: WandbLogger = None,
+    barebones=False,
+    probe_output_path: str = "models/probes_e2e",
+):
     logger = logging.getLogger(__name__)
 
     probes_module = ResNet50MAPD(
-        max_epochs=epochs, should_compile=should_compile, probes_output_path=probe_output_path
+        max_epochs=epochs,
+        should_compile=should_compile,
+        probes_output_path=probe_output_path,
     ).as_probes()
     probes_trainer = L.Trainer(
         accelerator="gpu",
@@ -126,14 +146,9 @@ def run_probes(train_dataloader, validation_dataloaders, epochs: int, should_com
 
 
 def run_without(train_dataloader, val_dataloader, epochs):
-    probes_module = ResNet50MAPD(
-        max_epochs=epochs, should_compile=False
-    ).disable_mapd()
+    probes_module = ResNet50MAPD(max_epochs=epochs, should_compile=False).disable_mapd()
     probes_trainer = L.Trainer(
-        accelerator="gpu",
-        max_epochs=epochs,
-        precision="16-mixed",
-        barebones=True
+        accelerator="gpu", max_epochs=epochs, precision="16-mixed", barebones=True
     )
 
     probes_trainer.fit(
@@ -166,11 +181,15 @@ def plot(train_probes_dataset, train_suite):
     )
 
     logger.info("training mapd classifier")
-    mapd_clf, label_encoder = make_mapd_classifier("models/probes_e2e", train_probes_dataset)
+    mapd_clf, label_encoder = make_mapd_classifier(
+        "models/probes_e2e", train_probes_dataset
+    )
 
     logger.info("saving mapd classifier")
     # Now we can surface some examples
-    probe_predictions = make_predictions("models/probes_e2e", mapd_clf, label_encoder, n_jobs=16)
+    probe_predictions = make_predictions(
+        "models/probes_e2e", mapd_clf, label_encoder, n_jobs=16
+    )
 
     # Define the possible labels (for plotting)
     index_to_labels = get_idx_to_label_names_imagenet()
@@ -254,23 +273,36 @@ def main(train_suite, compile):
     TIME_STR = strftime("%Y%m%d_%H%M", gmtime())
 
     run_name_proxy = (
-            "imagenet-proxy-e2e" + ("-with-train" if train_suite else "") + "-" + TIME_STR
+        "imagenet-proxy-e2e" + ("-with-train" if train_suite else "") + "-" + TIME_STR
     )
-    wandb_logger = WandbLogger(name=run_name_proxy, project="bsc", log_model=False, save_dir="models/")
+    wandb_logger = WandbLogger(
+        name=run_name_proxy, project="bsc", log_model=False, save_dir="models/"
+    )
 
-    proxy_train_dataloader, validation_dataloader = get_dataloaders(idx_train_dataset, idx_val_dataset, BATCH_SIZE,
-                                                                    NUM_WORKERS, PREFETCH_FACTOR)
-    run_proxies(proxy_train_dataloader, validation_dataloader, PROXY_EPOCHS, compile, wandb_logger=wandb_logger)
+    proxy_train_dataloader, validation_dataloader = get_dataloaders(
+        idx_train_dataset, idx_val_dataset, BATCH_SIZE, NUM_WORKERS, PREFETCH_FACTOR
+    )
+    run_proxies(
+        proxy_train_dataloader,
+        validation_dataloader,
+        PROXY_EPOCHS,
+        compile,
+        wandb_logger=wandb_logger,
+    )
 
     gc.collect()
 
     logger.info("creating probes")
     train_probes_dataset = make_probe_suites(
-        idx_train_dataset, proxy_calculator="models/proxies_e2e", label_count=1000, add_train_suite=train_suite
+        idx_train_dataset,
+        proxy_calculator="models/proxies_e2e",
+        label_count=1000,
+        add_train_suite=train_suite,
     )
 
-    probe_train_dataloader, validation_dataloader = get_dataloaders(train_probes_dataset, idx_val_dataset, BATCH_SIZE,
-                                                                    NUM_WORKERS, PREFETCH_FACTOR)
+    probe_train_dataloader, validation_dataloader = get_dataloaders(
+        train_probes_dataset, idx_val_dataset, BATCH_SIZE, NUM_WORKERS, PREFETCH_FACTOR
+    )
 
     mapd_validation_dataloaders = make_dataloaders(
         [validation_dataloader],
@@ -283,7 +315,11 @@ def main(train_suite, compile):
     )
 
     run_probes(
-        probe_train_dataloader, mapd_validation_dataloaders, PROBE_EPOCHS, compile, train_suite
+        probe_train_dataloader,
+        mapd_validation_dataloaders,
+        PROBE_EPOCHS,
+        compile,
+        train_suite,
     )
 
     logger.info("plotting")

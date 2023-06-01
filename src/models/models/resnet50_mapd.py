@@ -11,17 +11,17 @@ from mapd.mapd_module import MAPDModule
 
 class ResNet50MAPD(MAPDModule):
     def __init__(
-        self,
-        max_epochs: int = 100,
-        lr: float = 0.1,
-        momentum: float = 0.9,
-        weight_decay: float = 0.0005,
-        num_classes=1000,
-        resize_conv1=False,
-        should_compile: bool = True,
-        use_proxy_logger: bool = False,
-        proxies_output_path: str = "models/proxies_e2e",
-        probes_output_path: str = "models/probes_e2e",
+            self,
+            max_epochs: int = 100,
+            lr: float = 0.1,
+            momentum: float = 0.9,
+            weight_decay: float = 0.0005,
+            num_classes=1000,
+            resize_conv1=False,
+            should_compile: bool = True,
+            use_proxy_logger: bool = False,
+            proxies_output_path: str = "models/proxies_e2e",
+            probes_output_path: str = "models/probes_e2e",
     ):
         super().__init__()
         self.model = create_resnet50_model(
@@ -36,11 +36,14 @@ class ResNet50MAPD(MAPDModule):
         self.proxies_output_path = proxies_output_path
         self.probes_output_path = probes_output_path
 
-        self.save_hyperparameters(ignore=["model", "proxies_output_path", "probes_output_path"])
+        self.save_hyperparameters(ignore=[
+            "model",
+            "proxies_output_path",
+            "probes_output_path"
+        ])
 
         self.val_accuracy = Accuracy(task="multiclass", num_classes=num_classes)
         self.test_accuracy = Accuracy(task="multiclass", num_classes=num_classes)
-
 
     def mapd_settings(cls) -> Dict[str, Any]:
         return {

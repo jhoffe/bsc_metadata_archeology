@@ -27,7 +27,9 @@ def main(surfaced_examples_path, name):
 
     plt.legend(labels)
     plt.tight_layout()
-    plt.savefig(f"reports/figures/surfacing/{name}-suite_distribution.png", bbox_inches="tight")
+    plt.savefig(
+        f"reports/figures/surfacing/{name}-suite_distribution.png", bbox_inches="tight"
+    )
 
 
 if __name__ == "__main__":

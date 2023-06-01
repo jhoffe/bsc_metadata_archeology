@@ -96,9 +96,13 @@ def main(loss_dataset_path, probe_suite_path, results_dir, seed, name):
     print(results_table)
 
     os.makedirs(results_dir, exist_ok=True)
-    results_table.to_csv(os.path.join(results_dir, f"results_table_{name}.csv"), index=False)
+    results_table.to_csv(
+        os.path.join(results_dir, f"results_table_{name}.csv"), index=False
+    )
     results_table.to_latex(
-        os.path.join(results_dir, f"results_table_{name}.tex"), index=False, float_format="%.3f"
+        os.path.join(results_dir, f"results_table_{name}.tex"),
+        index=False,
+        float_format="%.3f",
     )
 
 

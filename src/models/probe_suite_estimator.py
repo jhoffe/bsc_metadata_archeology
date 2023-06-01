@@ -35,7 +35,9 @@ def main(loss_dataset_path, probe_suite_path, output_path):
     loss_dataset.load_probe_suite(probe_suite_path)
 
     print("Creating train matrix...")
-    X_train, y_train, label_encoder = loss_dataset.to_sklearn_train_matrix(with_label_encoder=True)
+    X_train, y_train, label_encoder = loss_dataset.to_sklearn_train_matrix(
+        with_label_encoder=True
+    )
     print("Creating predict matrix...")
     (
         X_predict,

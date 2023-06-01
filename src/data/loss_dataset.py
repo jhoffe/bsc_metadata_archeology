@@ -1,4 +1,4 @@
-from typing import Optional, Union, Tuple
+from typing import Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -29,8 +29,9 @@ class LossDataset:
 
         return self
 
-    def to_sklearn_train_matrix(self, with_label_encoder: bool = False) -> Union[
-        Tuple[np.array, np.array], Tuple[np.array, np.array, np.array]]:
+    def to_sklearn_train_matrix(
+        self, with_label_encoder: bool = False
+    ) -> Union[Tuple[np.array, np.array], Tuple[np.array, np.array, np.array]]:
         assert self.df is not None
         assert self.probe_suite is not None
 
@@ -59,9 +60,7 @@ class LossDataset:
 
         label_encoder = LabelEncoder()
 
-        y = np.array(
-            [probe_suite_indices[idx] for idx in losses_indices]
-        )
+        y = np.array([probe_suite_indices[idx] for idx in losses_indices])
 
         y = label_encoder.fit_transform(y)
 
